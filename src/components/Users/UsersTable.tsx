@@ -1,0 +1,180 @@
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
+import { Mail, Phone, Building2, User as UserIcon } from 'lucide-react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+import UsersTableSkeleton from './UsersTableSkeleton';
+import CustomTablePagination from '../CustomTablePagination';
+
+import roles from '@/constants/roles';
+
+import type { RootState } from '@/store/store';
+
+const getUserTypeColor = (type: string) => {
+  const typeLower = type.toLowerCase();
+  if (typeLower === 'admin' || typeLower === 'superadmin')
+    return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800';
+  if (typeLower === 'manager')
+    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+  if (typeLower === 'user')
+    return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800';
+  return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800';
+};
+
+const UsersTable = () => {
+  const navigate = useNavigate();
+
+  const {
+    users,
+    lusers: loading,
+    eusers: error,
+    total,
+  } = useSelector((state: RootState) => state.users);
+
+  const handleRowClick = (userId: string) => {
+    navigate(`/users/${userId}`);
+  };
+
+  if (error) {
+    return (
+      <div className='rounded-lg border bg-card shadow-sm p-8'>
+        <div className='text-center text-destructive'>Error: {error}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className='rounded-lg border bg-card shadow-sm flex flex-col overflow-hidden'>
+      {/* Scrollable table area - responsive height based on viewport */}
+      <ScrollArea className='h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] [&>div]:rounded-t-lg'>
+        <Table className='w-full min-w-[700px]'>
+          <TableHeader className='[&_tr:first-child>th:first-child]:rounded-tl-lg [&_tr:first-child>th:last-child]:rounded-tr-lg'>
+            <TableRow className='hover:bg-transparent border-b'>
+              <TableHead className='bg-card/95 backdrop-blur sticky top-0 z-10 font-semibold border-b'>
+                User
+              </TableHead>
+              <TableHead className='bg-card/95 backdrop-blur sticky top-0 z-10 font-semibold border-b'>
+                Contact
+              </TableHead>
+              <TableHead className='bg-card/95 backdrop-blur sticky top-0 z-10 font-semibold border-b'>
+                Role
+              </TableHead>
+              <TableHead className='bg-card/95 backdrop-blur sticky top-0 z-10 font-semibold border-b'>
+                Location
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <UsersTableSkeleton key={`skeleton-${index}`} />
+                ))
+              : users.map((user, index) => {
+                  const fullName = `${user.firstName} ${user.lastName}`;
+                  const userRole = roles[user.role];
+                  // Generate initials for fallback
+                  const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase();
+                  // Use profileImageUrl or src (backward compatibility)
+                  const avatarSrc = user.profileImageUrl || user.src;
+
+                  return (
+                    <TableRow
+                      key={`${user?._id}-${index}`}
+                      className='hover:bg-muted/50 transition-colors cursor-pointer'
+                      onClick={() => handleRowClick(user?._id)}
+                    >
+                      {/* User Info with Avatar */}
+                      <TableCell className='font-medium'>
+                        <div className='flex items-center gap-3'>
+                          <Avatar className='h-10 w-10 border-2 border-background shadow-sm'>
+                            <AvatarImage
+                              src={avatarSrc}
+                              alt={fullName}
+                              onError={(e) => {
+                                // Hide broken images gracefully
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                            <AvatarFallback className='text-xs font-semibold bg-primary/10 text-primary flex items-center justify-center'>
+                              {initials || user.fallback || (
+                                <UserIcon className='h-5 w-5 text-muted-foreground' />
+                              )}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className='flex flex-col'>
+                            <span className='font-semibold text-sm'>
+                              {fullName}
+                            </span>
+                            <span className='text-xs text-muted-foreground'>
+                              ID: {user?._id}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      {/* Contact Information */}
+                      <TableCell>
+                        <div className='flex flex-col gap-1.5 min-w-[200px]'>
+                          <div className='flex items-center gap-2 text-sm'>
+                            <Mail className='size-3.5 text-muted-foreground' />
+                            <span className='text-xs'>{user.email}</span>
+                          </div>
+                          <div className='flex items-center gap-2 text-sm'>
+                            <Phone className='size-3.5 text-muted-foreground' />
+                            <span className='text-xs font-medium'>
+                              {user.phoneNumber}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      {/* User Type/Role */}
+                      <TableCell>
+                        <Badge
+                          variant='outline'
+                          className={`${getUserTypeColor(
+                            userRole
+                          )} font-semibold text-xs`}
+                        >
+                          {userRole}
+                        </Badge>
+                      </TableCell>
+                      {/* Building/Location */}
+                      <TableCell>
+                        <div className='flex items-center gap-2 min-w-[150px]'>
+                          <Building2 className='size-4 text-muted-foreground' />
+                          <span className='text-sm font-medium'>
+                            {user.buildingName}
+                          </span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+          </TableBody>
+        </Table>
+        <ScrollBar orientation='horizontal' />
+      </ScrollArea>
+
+      {/* Pagination */}
+      <div className='border-t px-4 py-3 bg-muted/30'>
+        <CustomTablePagination
+          total={total}
+          suggestions={[10, 20, 40, 50, 100]}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default UsersTable;
