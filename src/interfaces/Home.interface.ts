@@ -4,7 +4,7 @@ export interface HomeCardsProps {
     value: number;
     badge: {
       text: string;
-      trendingUp?: boolean;
+      trendingUp?: boolean | null;
     };
     footer: string;
   }>;
