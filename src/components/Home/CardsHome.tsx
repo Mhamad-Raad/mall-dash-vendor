@@ -29,7 +29,7 @@ const cardIconColors = {
 const HomeCards = ({ cards }: HomeCardsProps) => {
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full'>
-      {cards.map((card, index) => {
+      {cards.map((card, index: number) => {
         const Icon = cardIcons[card.title as keyof typeof cardIcons] || FileText;
         const iconColorClass = cardIconColors[card.title as keyof typeof cardIconColors] || cardIconColors.Requests;
         

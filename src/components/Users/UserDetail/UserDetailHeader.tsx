@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 
 interface UserDetailHeaderProps {
   onBack: () => void;
+  onSave: () => void;
+  onDelete: () => void;
   hasChanges: boolean;
 }
 
