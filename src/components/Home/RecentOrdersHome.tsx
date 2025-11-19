@@ -44,7 +44,7 @@ const RecentOrdersHome = ({ items }: RecentOrdersHomeProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((item, index) => (
+              {items.map((item, index: number) => (
                 <TableRow key={`${item.id}-${item.vendor}-${index}`} className='hover:bg-muted/50'>
                   <TableCell>
                     <div className='flex items-center gap-2 sm:gap-3 min-w-[150px]'>
