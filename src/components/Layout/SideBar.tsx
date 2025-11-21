@@ -55,7 +55,7 @@ const mainNavItems = [
   },
   {
     title: 'Products',
-    url: '#',
+    url: '/products',
     icon: Package,
   },
   {

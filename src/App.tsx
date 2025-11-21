@@ -7,6 +7,7 @@ import Login from '@/pages/Login';
 import Users from './pages/users/Users';
 import CreateUser from './pages/users/CreateUser';
 import UserDetail from './pages/users/UserDetail';
+import Products from './pages/products/Products';
 
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: '/users/:id',
         element: <UserDetail />,
+      },
+      {
+        path: '/products',
+        element: <Products />,
       },
       {
         path: '/settings',
