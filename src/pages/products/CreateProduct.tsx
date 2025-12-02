@@ -22,7 +22,6 @@ export default function CreateProduct() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    vendorId: '',
     categoryId: '',
     name: '',
     description: '',
@@ -92,20 +91,16 @@ export default function CreateProduct() {
       toast.error('Please select a category');
       return;
     }
-    if (!formData.vendorId) {
-      toast.error('Please enter Vendor ID');
-      return;
-    }
-
     setLoading(true);
 
     const payload = {
-      VendorId: parseInt(formData.vendorId, 10),
       CategoryId: parseInt(formData.categoryId, 10),
       Name: formData.name,
       Description: formData.description,
       Price: parseFloat(formData.price),
-      ...(formData.discountPrice ? { DiscountPrice: parseFloat(formData.discountPrice) } : {}),
+      ...(formData.discountPrice
+        ? { DiscountPrice: parseFloat(formData.discountPrice) }
+        : {}),
       InStock: Boolean(formData.inStock),
       IsWeightable: Boolean(formData.isWeightable),
       ...(formData.photo
@@ -121,7 +116,8 @@ export default function CreateProduct() {
 
     if ((res as any)?.error) {
       toast.error('Failed to Create Product', {
-        description: (res as any).error || 'An error occurred while creating the product.',
+        description:
+          (res as any).error || 'An error occurred while creating the product.',
       });
     } else {
       toast.success('Product Created Successfully!', {
@@ -174,7 +170,10 @@ export default function CreateProduct() {
               <Label>Product Photo</Label>
               <div className='flex items-center gap-4'>
                 <Avatar className='h-24 w-24 rounded-lg'>
-                  <AvatarImage src={previewUrl || ''} className='object-cover' />
+                  <AvatarImage
+                    src={previewUrl || ''}
+                    className='object-cover'
+                  />
                   <AvatarFallback className='rounded-lg bg-muted'>
                     <Package className='h-10 w-10 text-muted-foreground' />
                   </AvatarFallback>
@@ -185,7 +184,9 @@ export default function CreateProduct() {
                     variant='outline'
                     size='sm'
                     className='gap-2'
-                    onClick={() => document.getElementById('photo-upload')?.click()}
+                    onClick={() =>
+                      document.getElementById('photo-upload')?.click()
+                    }
                   >
                     <Upload className='size-4' />
                     Upload Photo
@@ -217,7 +218,9 @@ export default function CreateProduct() {
                   id='imageUrl'
                   placeholder='https://...'
                   value={formData.imageUrl}
-                  onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('imageUrl', e.target.value)
+                  }
                 />
               </div>
             </div>
@@ -240,7 +243,9 @@ export default function CreateProduct() {
                 id='description'
                 placeholder='Enter product description'
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('description', e.target.value)
+                }
                 rows={4}
               />
             </div>
@@ -252,7 +257,9 @@ export default function CreateProduct() {
                 id='category'
                 className='h-11 w-full border rounded px-3 bg-background'
                 value={formData.categoryId}
-                onChange={(e) => handleInputChange('categoryId', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('categoryId', e.target.value)
+                }
               >
                 <option value=''>Select category</option>
                 {categories.map((c) => (
@@ -261,19 +268,6 @@ export default function CreateProduct() {
                   </option>
                 ))}
               </select>
-            </div>
-
-            {/* Vendor ID */}
-            <div className='space-y-2'>
-              <Label htmlFor='vendorId'>Vendor ID *</Label>
-              <Input
-                id='vendorId'
-                type='number'
-                min='1'
-                placeholder='Enter vendor ID'
-                value={formData.vendorId}
-                onChange={(e) => handleInputChange('vendorId', e.target.value)}
-              />
             </div>
 
             {/* Price */}
@@ -300,7 +294,9 @@ export default function CreateProduct() {
                 min='0'
                 placeholder='0.00'
                 value={formData.discountPrice}
-                onChange={(e) => handleInputChange('discountPrice', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('discountPrice', e.target.value)
+                }
               />
             </div>
 
@@ -309,25 +305,33 @@ export default function CreateProduct() {
               <div className='flex items-center justify-between rounded-lg border p-3'>
                 <div className='space-y-0.5'>
                   <Label>In Stock</Label>
-                  <p className='text-xs text-muted-foreground'>Is this product currently in stock?</p>
+                  <p className='text-xs text-muted-foreground'>
+                    Is this product currently in stock?
+                  </p>
                 </div>
                 <input
                   type='checkbox'
                   className='size-5'
                   checked={formData.inStock}
-                  onChange={(e) => handleInputChange('inStock', e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange('inStock', e.target.checked)
+                  }
                 />
               </div>
               <div className='flex items-center justify-between rounded-lg border p-3'>
                 <div className='space-y-0.5'>
                   <Label>Weightable</Label>
-                  <p className='text-xs text-muted-foreground'>Sold by weight (e.g., kg)?</p>
+                  <p className='text-xs text-muted-foreground'>
+                    Sold by weight (e.g., kg)?
+                  </p>
                 </div>
                 <input
                   type='checkbox'
                   className='size-5'
                   checked={formData.isWeightable}
-                  onChange={(e) => handleInputChange('isWeightable', e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange('isWeightable', e.target.checked)
+                  }
                 />
               </div>
             </div>
@@ -354,3 +358,4 @@ export default function CreateProduct() {
     </div>
   );
 }
+

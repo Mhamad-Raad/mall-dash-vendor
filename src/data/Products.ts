@@ -87,7 +87,6 @@ export const deleteProduct = async (id: number) => {
 };
 
 export const createProduct = async (productData: {
-  VendorId: number;
   CategoryId: number;
   Name: string;
   Description: string;
