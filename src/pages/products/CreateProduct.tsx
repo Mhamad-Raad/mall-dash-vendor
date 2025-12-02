@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -16,21 +16,41 @@ import { Package, ArrowLeft, Save, Upload, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import { createProduct } from '@/data/Products';
+import { fetchCategories, type CategoryDTO } from '@/data/Categories';
 
 export default function CreateProduct() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    vendorId: '',
+    categoryId: '',
     name: '',
     description: '',
     price: '',
+    discountPrice: '',
+    inStock: true,
+    isWeightable: false,
     photo: null as File | null,
+    imageUrl: '',
   });
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
 
-  const handleInputChange = (field: string, value: string) => {
+  useEffect(() => {
+    const run = async () => {
+      const res = await fetchCategories();
+      if ((res as any)?.error) {
+        toast.error('Failed to load categories');
+      } else {
+        setCategories(res as CategoryDTO[]);
+      }
+    };
+    run();
+  }, []);
+
+  const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -56,7 +76,6 @@ export default function CreateProduct() {
   };
 
   const handleCreateProduct = async () => {
-    // Validation
     if (!formData.name.trim()) {
       toast.error('Product name is required');
       return;
@@ -69,23 +88,40 @@ export default function CreateProduct() {
       toast.error('Please enter a valid price');
       return;
     }
+    if (!formData.categoryId) {
+      toast.error('Please select a category');
+      return;
+    }
+    if (!formData.vendorId) {
+      toast.error('Please enter Vendor ID');
+      return;
+    }
 
     setLoading(true);
 
-    const data = {
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      ...(formData.photo ? { imageUrl: formData.photo } : {}),
+    const payload = {
+      VendorId: parseInt(formData.vendorId, 10),
+      CategoryId: parseInt(formData.categoryId, 10),
+      Name: formData.name,
+      Description: formData.description,
+      Price: parseFloat(formData.price),
+      ...(formData.discountPrice ? { DiscountPrice: parseFloat(formData.discountPrice) } : {}),
+      InStock: Boolean(formData.inStock),
+      IsWeightable: Boolean(formData.isWeightable),
+      ...(formData.photo
+        ? { ProductImageUrl: formData.photo }
+        : formData.imageUrl
+        ? { ProductImageUrl: formData.imageUrl }
+        : {}),
     };
 
-    const res = await createProduct(data as any);
+    const res = await createProduct(payload);
 
     setLoading(false);
 
-    if (res.error) {
+    if ((res as any)?.error) {
       toast.error('Failed to Create Product', {
-        description: res.error || 'An error occurred while creating the product.',
+        description: (res as any).error || 'An error occurred while creating the product.',
       });
     } else {
       toast.success('Product Created Successfully!', {
@@ -175,6 +211,15 @@ export default function CreateProduct() {
                   />
                 </div>
               </div>
+              <div className='space-y-2'>
+                <Label htmlFor='imageUrl'>Image URL (optional)</Label>
+                <Input
+                  id='imageUrl'
+                  placeholder='https://...'
+                  value={formData.imageUrl}
+                  onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+                />
+              </div>
             </div>
 
             {/* Product Name */}
@@ -200,6 +245,37 @@ export default function CreateProduct() {
               />
             </div>
 
+            {/* Category */}
+            <div className='space-y-2'>
+              <Label htmlFor='category'>Category *</Label>
+              <select
+                id='category'
+                className='h-11 w-full border rounded px-3 bg-background'
+                value={formData.categoryId}
+                onChange={(e) => handleInputChange('categoryId', e.target.value)}
+              >
+                <option value=''>Select category</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Vendor ID */}
+            <div className='space-y-2'>
+              <Label htmlFor='vendorId'>Vendor ID *</Label>
+              <Input
+                id='vendorId'
+                type='number'
+                min='1'
+                placeholder='Enter vendor ID'
+                value={formData.vendorId}
+                onChange={(e) => handleInputChange('vendorId', e.target.value)}
+              />
+            </div>
+
             {/* Price */}
             <div className='space-y-2'>
               <Label htmlFor='price'>Price (USD) *</Label>
@@ -212,6 +288,48 @@ export default function CreateProduct() {
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
               />
+            </div>
+
+            {/* Discount Price */}
+            <div className='space-y-2'>
+              <Label htmlFor='discountPrice'>Discount Price (USD)</Label>
+              <Input
+                id='discountPrice'
+                type='number'
+                step='0.01'
+                min='0'
+                placeholder='0.00'
+                value={formData.discountPrice}
+                onChange={(e) => handleInputChange('discountPrice', e.target.value)}
+              />
+            </div>
+
+            {/* Flags */}
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div className='flex items-center justify-between rounded-lg border p-3'>
+                <div className='space-y-0.5'>
+                  <Label>In Stock</Label>
+                  <p className='text-xs text-muted-foreground'>Is this product currently in stock?</p>
+                </div>
+                <input
+                  type='checkbox'
+                  className='size-5'
+                  checked={formData.inStock}
+                  onChange={(e) => handleInputChange('inStock', e.target.checked)}
+                />
+              </div>
+              <div className='flex items-center justify-between rounded-lg border p-3'>
+                <div className='space-y-0.5'>
+                  <Label>Weightable</Label>
+                  <p className='text-xs text-muted-foreground'>Sold by weight (e.g., kg)?</p>
+                </div>
+                <input
+                  type='checkbox'
+                  className='size-5'
+                  checked={formData.isWeightable}
+                  onChange={(e) => handleInputChange('isWeightable', e.target.checked)}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

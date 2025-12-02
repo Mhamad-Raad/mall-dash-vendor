@@ -65,14 +65,34 @@ const productsSlice = createSlice({
         (
           state,
           action: PayloadAction<{
-            data: ProductType[];
+            data: any[];
             limit: number;
             page: number;
             total: number;
           }>
         ) => {
           state.lproducts = false;
-          state.products = action.payload.data;
+          state.products = (action.payload.data || []).map(
+            (p: any) =>
+              ({
+                _id:
+                  p?._id !== undefined && p?._id !== null
+                    ? String(p._id)
+                    : String(p?.id ?? ''),
+                name: p?.name ?? '',
+                description: p?.description ?? '',
+                price:
+                  typeof p?.price === 'number'
+                    ? p.price
+                    : Number(p?.price ?? 0),
+                imageUrl: p?.imageUrl ?? p?.productImageUrl ?? '',
+                vendorId:
+                  p?.vendorId !== undefined && p?.vendorId !== null
+                    ? String(p.vendorId)
+                    : String(p?.vendorId ?? ''),
+                src: p?.productImageUrl ?? p?.imageUrl ?? '',
+              } as ProductType)
+          );
           state.limit = action.payload.limit;
           state.page = action.payload.page;
           state.total = action.payload.total;
