@@ -13,7 +13,7 @@ const ProductsFilters = ({ viewMode, onViewModeChange }: ProductsFiltersProps) =
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const [search, setSearch] = useState(() => searchParams.get('search') || '');
+  const [search, setSearch] = useState(() => searchParams.get('searchName') || '');
   const [typedSearch, setTypedSearch] = useState(search);
 
   const debounceRef = useRef<any>(null);
@@ -31,9 +31,9 @@ const ProductsFilters = ({ viewMode, onViewModeChange }: ProductsFiltersProps) =
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     if (search) {
-      params.set('search', search);
+      params.set('searchName', search);
     } else {
-      params.delete('search');
+      params.delete('searchName');
     }
     params.set('page', '1');
     navigate(`${window.location.pathname}?${params.toString()}`, {
@@ -43,7 +43,7 @@ const ProductsFilters = ({ viewMode, onViewModeChange }: ProductsFiltersProps) =
   }, [search]);
 
   useEffect(() => {
-    const urlSearch = searchParams.get('search') || '';
+    const urlSearch = searchParams.get('searchName') || '';
     setSearch(urlSearch);
     setTypedSearch(urlSearch);
     // eslint-disable-next-line

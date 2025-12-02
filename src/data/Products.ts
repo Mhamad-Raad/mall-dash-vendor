@@ -6,14 +6,22 @@ const API_VALUE = import.meta.env.VITE_API_VALUE;
 export const fetchProducts = async (params?: {
   page?: number;
   limit?: number;
-  searchTerm?: string;
-  category?: string;
+  searchName?: string;
+  inStock?: boolean;
 }) => {
   try {
-    const response = await axiosInstance.get('/products', {
-      headers: { key: API_KEY, value: API_VALUE },
-      params,
-    });
+    const response = await axiosInstance.get(
+      '/Product/my-products',
+      {
+        headers: { key: API_KEY, value: API_VALUE },
+        params: {
+          page: params?.page,
+          limit: params?.limit,
+          searchName: params?.searchName ?? undefined,
+          inStock: params?.inStock ?? undefined,
+        },
+      }
+    );
 
     return response.data;
   } catch (error: any) {

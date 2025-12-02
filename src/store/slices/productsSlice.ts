@@ -27,8 +27,8 @@ export const fetchProducts = createAsyncThunk(
     params: {
       page?: number;
       limit?: number;
-      searchTerm?: string;
-      category?: string;
+      searchName?: string;
+      inStock?: boolean;
     } = {},
     { rejectWithValue }
   ) => {

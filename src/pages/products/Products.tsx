@@ -25,19 +25,22 @@ const Products = () => {
 
   const limit = parseInt(searchParams.get('limit') || '40', 10);
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const search = searchParams.get('search') || '';
+  const searchName = searchParams.get('searchName') || '';
+  const inStockParam = searchParams.get('inStock');
+  const inStock = inStockParam !== null ? inStockParam === 'true' : null;
 
   useEffect(() => {
     const params: Record<string, any> = {
       limit,
       page,
     };
-    if (search) params.searchTerm = search;
+    if (searchName) params.searchName = searchName;
+    if (typeof inStock === 'boolean') params.inStock = inStock;
 
     if (limit && page) {
       dispatch(fetchProducts(params));
     }
-  }, [dispatch, limit, page, search]);
+  }, [dispatch, limit, page, searchName, inStock]);
 
   const hasNoProducts = !loading && products.length === 0 && !error;
 
