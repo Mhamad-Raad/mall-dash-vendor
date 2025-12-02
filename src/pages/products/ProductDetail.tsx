@@ -16,6 +16,7 @@ import {
   deleteProduct,
 } from '@/store/slices/productSlice';
 import { toast } from 'sonner';
+import { fetchCategories, type CategoryDTO } from '@/data/Categories';
 
 import type { ProductFormData } from '@/interfaces/Products.interface';
 
@@ -42,10 +43,17 @@ const ProductDetail = () => {
     name: '',
     description: '',
     price: 0,
+    discountPrice: null,
+    inStock: false,
+    isWeightable: false,
     imageUrl: '',
     vendorId: '',
+    vendorName: '',
+    categoryId: undefined,
+    categoryName: '',
     imageFile: undefined,
   });
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
 
   // Track if any changes have been made
   const hasChanges = useMemo(() => {
@@ -58,7 +66,17 @@ const ProductDetail = () => {
     return (
       product.name !== formData.name ||
       product.description !== formData.description ||
-      product.price !== formData.price
+      product.price !== formData.price ||
+      (typeof product.discountPrice === 'number'
+        ? product.discountPrice
+        : null) !==
+        (typeof formData.discountPrice === 'number'
+          ? formData.discountPrice
+          : null) ||
+      Boolean(product.inStock) !== Boolean(formData.inStock) ||
+      Boolean(product.isWeightable) !== Boolean(formData.isWeightable) ||
+      (product.categoryId ?? null) !== (formData.categoryId ?? null) ||
+      (product.imageUrl ?? '') !== (formData.imageUrl ?? '')
     );
   }, [product, formData]);
 
@@ -69,6 +87,11 @@ const ProductDetail = () => {
       name: 'Product Name',
       description: 'Description',
       price: 'Price',
+      discountPrice: 'Discount Price',
+      inStock: 'In Stock',
+      isWeightable: 'Weightable',
+      categoryId: 'Category',
+      imageUrl: 'Image URL',
     };
 
     // Check for image change
@@ -81,13 +104,49 @@ const ProductDetail = () => {
     }
 
     // Check other fields
-    (['name', 'description', 'price'] as const).forEach((key) => {
+    (
+      [
+        'name',
+        'description',
+        'price',
+        'discountPrice',
+        'inStock',
+        'isWeightable',
+        'categoryId',
+        'imageUrl',
+      ] as const
+    ).forEach((key) => {
       if (product[key] !== formData[key]) {
         let oldVal = product[key];
         let newVal = formData[key];
         if (key === 'price') {
-          oldVal = `$${oldVal.toFixed(2)}`;
-          newVal = `$${(newVal as number).toFixed(2)}`;
+          const oldNum =
+            typeof oldVal === 'number' ? oldVal : Number(oldVal ?? 0);
+          const newNum =
+            typeof newVal === 'number' ? newVal : Number(newVal ?? 0);
+          oldVal = `$${oldNum.toFixed(2)}`;
+          newVal = `$${newNum.toFixed(2)}`;
+        } else if (key === 'discountPrice') {
+          const oldNum =
+            oldVal == null
+              ? null
+              : typeof oldVal === 'number'
+              ? oldVal
+              : Number(oldVal);
+          const newNum =
+            newVal == null
+              ? null
+              : typeof newVal === 'number'
+              ? newVal
+              : Number(newVal);
+          oldVal = oldNum == null ? '—' : `$${oldNum.toFixed(2)}`;
+          newVal = newNum == null ? '—' : `$${newNum.toFixed(2)}`;
+        } else if (key === 'inStock' || key === 'isWeightable') {
+          oldVal = Boolean(oldVal) ? 'Yes' : 'No';
+          newVal = Boolean(newVal) ? 'Yes' : 'No';
+        } else if (key === 'categoryId') {
+          oldVal = product.categoryName ?? String(oldVal ?? '');
+          newVal = String(newVal ?? '');
         }
         changesList.push({
           field: fieldLabels[key],
@@ -99,9 +158,49 @@ const ProductDetail = () => {
     return changesList;
   }, [product, formData]);
 
+  const deleteSummary = useMemo((): ChangeDetail[] => {
+    if (!product || !product._id) return [];
+    return [
+      { field: 'Product Name', oldValue: product.name ?? '', newValue: '—' },
+      {
+        field: 'Description',
+        oldValue: product.description ?? '',
+        newValue: '—',
+      },
+      {
+        field: 'Price',
+        oldValue: `$${(product.price ?? 0).toFixed(2)}`,
+        newValue: '—',
+      },
+      {
+        field: 'Discount Price',
+        oldValue:
+          product.discountPrice == null
+            ? '—'
+            : `$${product.discountPrice.toFixed(2)}`,
+        newValue: '—',
+      },
+      {
+        field: 'Category',
+        oldValue: product.categoryName ?? String(product.categoryId ?? ''),
+        newValue: '—',
+      },
+      {
+        field: 'In Stock',
+        oldValue: product.inStock ? 'Yes' : 'No',
+        newValue: '—',
+      },
+      {
+        field: 'Weightable',
+        oldValue: product.isWeightable ? 'Yes' : 'No',
+        newValue: '—',
+      },
+    ];
+  }, [product]);
+
   const handleInputChange = (
     field: keyof ProductFormData,
-    value: string | number | File
+    value: string | number | File | boolean
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -119,14 +218,32 @@ const ProductDetail = () => {
   }, [id, dispatch]);
 
   useEffect(() => {
+    const run = async () => {
+      const res = await fetchCategories();
+      if ((res as any)?.error) {
+        toast.error('Failed to load categories');
+      } else {
+        setCategories(res as CategoryDTO[]);
+      }
+    };
+    run();
+  }, []);
+
+  useEffect(() => {
     if (product && product._id) {
       setFormData({
         ...product,
         name: product.name ?? '',
         description: product.description ?? '',
         price: product.price ?? 0,
+        discountPrice: product.discountPrice ?? null,
+        inStock: Boolean(product.inStock),
+        isWeightable: Boolean(product.isWeightable),
         imageUrl: product.imageUrl ?? '',
         vendorId: product.vendorId ?? '',
+        vendorName: product.vendorName ?? '',
+        categoryId: product.categoryId,
+        categoryName: product.categoryName ?? '',
         imageFile: undefined,
       });
     }
@@ -135,13 +252,8 @@ const ProductDetail = () => {
   useEffect(() => {
     if (updatingError) {
       toast.error(updatingError);
-      setShowUpdateModal(false);
     }
-    if (!updating && showUpdateModal && !updatingError) {
-      setShowUpdateModal(false);
-      toast.success('Product updated successfully!');
-    }
-  }, [updating, updatingError, showUpdateModal]);
+  }, [updatingError]);
 
   useEffect(() => {
     if (deletingError) {
@@ -152,7 +264,7 @@ const ProductDetail = () => {
       toast.success('Product deleted!');
       navigate('/products');
     }
-  }, [deleting, deletingError, navigate, showDeleteModal]);
+  }, [deleting, deletingError, navigate]);
 
   const handletoggleUpdateModal = () => {
     if (!hasChanges) return;
@@ -161,7 +273,34 @@ const ProductDetail = () => {
   const handletoggleDeleteModal = () => setShowDeleteModal((v) => !v);
 
   const handleUpdateProduct = async () => {
-    await dispatch(updateProduct({ id: id || product._id, update: formData }));
+    if (!hasChanges) return;
+    const updatePayload = {
+      CategoryId: formData.categoryId ?? 0,
+      Name: formData.name,
+      Description: formData.description,
+      Price: Number(formData.price),
+      DiscountPrice:
+        typeof formData.discountPrice === 'number'
+          ? formData.discountPrice
+          : undefined,
+      InStock: Boolean(formData.inStock),
+      IsWeightable: Boolean(formData.isWeightable),
+      imageFile: formData.imageFile,
+      ProductImageUrl:
+        !formData.imageFile && formData.imageUrl
+          ? formData.imageUrl
+          : undefined,
+    };
+    try {
+      await dispatch(
+        updateProduct({ id: id || product._id, update: updatePayload })
+      ).unwrap();
+      setShowUpdateModal(false);
+      toast.success('Product updated successfully!');
+      navigate('/products');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update product');
+    }
   };
 
   const handleDeleteProduct = async () => {
@@ -179,7 +318,11 @@ const ProductDetail = () => {
         onDelete={handletoggleDeleteModal}
         hasChanges={hasChanges}
       />
-      <ProductInfoCard formData={formData} onInputChange={handleInputChange} />
+      <ProductInfoCard
+        formData={formData}
+        categories={categories}
+        onInputChange={handleInputChange}
+      />
       <ConfirmModal
         open={showUpdateModal}
         title='Update Product'
@@ -209,3 +352,4 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+

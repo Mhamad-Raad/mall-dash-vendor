@@ -26,9 +26,9 @@ export const fetchProducts = async (params?: {
   }
 };
 
-export const fetchProductById = async (id: string) => {
+export const fetchProductById = async (id: number) => {
   try {
-    const response = await axiosInstance.get(`/products/${id}`, {
+    const response = await axiosInstance.get(`/Product/${id}`, {
       headers: { key: API_KEY, value: API_VALUE },
     });
     return response.data;
@@ -38,25 +38,30 @@ export const fetchProductById = async (id: string) => {
 };
 
 export const updateProduct = async (
-  id: string,
+  id: number,
   productData: {
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-    stock: number;
-    imageUrl?: File;
+    CategoryId: number;
+    Name: string;
+    Description: string;
+    Price: number;
+    DiscountPrice?: number;
+    InStock: boolean;
+    IsWeightable: boolean;
+    ProductImageUrl?: File | string;
   }
 ) => {
   try {
     const formData = new FormData();
     Object.entries(productData).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value === undefined || value === null) return;
+      if (typeof value === 'boolean') {
+        formData.append(key, value ? 'true' : 'false');
+      } else {
         formData.append(key, value as any);
       }
     });
 
-    const response = await axiosInstance.put(`/products/${id}`, formData, {
+    const response = await axiosInstance.put(`/Product/${id}`, formData, {
       headers: {
         key: API_KEY,
         value: API_VALUE,
@@ -70,9 +75,9 @@ export const updateProduct = async (
   }
 };
 
-export const deleteProduct = async (id: string) => {
+export const deleteProduct = async (id: number) => {
   try {
-    const response = await axiosInstance.delete(`/products/${id}`, {
+    const response = await axiosInstance.delete(`/Product/${id}`, {
       headers: { key: API_KEY, value: API_VALUE },
     });
     return response.data;

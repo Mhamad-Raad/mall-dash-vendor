@@ -39,8 +39,9 @@ const initialState: ProductState = {
 export const fetchProductById = createAsyncThunk(
   'product/fetchProductById',
   async (productId: string, { rejectWithValue }) => {
-    const data = await fetchProductByIdAPI(productId);
-    if (data.error) return rejectWithValue(data.error);
+    const id = parseInt(productId, 10);
+    const data = await fetchProductByIdAPI(id);
+    if ((data as any)?.error) return rejectWithValue((data as any).error);
     return data;
   }
 );
@@ -54,26 +55,37 @@ export const updateProduct = createAsyncThunk(
     }: {
       id: string;
       update: {
-        name: string;
-        description: string;
-        price: number;
+        CategoryId: number;
+        Name: string;
+        Description: string;
+        Price: number;
+        DiscountPrice?: number;
+        InStock: boolean;
+        IsWeightable: boolean;
         imageFile?: File;
+        ProductImageUrl?: string;
       };
     },
     { rejectWithValue }
   ) => {
     const apiPayload: any = {
-      name: update.name,
-      description: update.description,
-      price: update.price,
+      CategoryId: update.CategoryId,
+      Name: update.Name,
+      Description: update.Description,
+      Price: update.Price,
+      InStock: update.InStock,
+      IsWeightable: update.IsWeightable,
     };
-
+    if (typeof update.DiscountPrice === 'number')
+      apiPayload.DiscountPrice = update.DiscountPrice;
     if (update.imageFile instanceof File) {
-      apiPayload.imageUrl = update.imageFile;
+      apiPayload.ProductImageUrl = update.imageFile;
+    } else if (update.ProductImageUrl) {
+      apiPayload.ProductImageUrl = update.ProductImageUrl;
     }
 
-    const data = await updateProductAPI(id, apiPayload);
-    if (data.error) return rejectWithValue(data.error);
+    const data = await updateProductAPI(parseInt(id, 10), apiPayload);
+    if ((data as any)?.error) return rejectWithValue((data as any).error);
     return data;
   }
 );
@@ -81,8 +93,8 @@ export const updateProduct = createAsyncThunk(
 export const deleteProduct = createAsyncThunk(
   'product/deleteProduct',
   async (id: string, { rejectWithValue }) => {
-    const data = await deleteProductAPI(id);
-    if (data.error) return rejectWithValue(data.error);
+    const data = await deleteProductAPI(parseInt(id, 10));
+    if ((data as any)?.error) return rejectWithValue((data as any).error);
     return data;
   }
 );
@@ -114,9 +126,27 @@ const productSlice = createSlice({
       })
       .addCase(
         fetchProductById.fulfilled,
-        (state, action: PayloadAction<ProductType>) => {
+        (state, action: PayloadAction<any>) => {
           state.lproduct = false;
-          state.product = action.payload;
+          const p = action.payload;
+          state.product = {
+            _id: String(p?.id ?? ''),
+            name: p?.name ?? '',
+            description: p?.description ?? '',
+            price:
+              typeof p?.price === 'number' ? p.price : Number(p?.price ?? 0),
+            imageUrl: p?.imageUrl ?? p?.productImageUrl ?? '',
+            vendorId: String(p?.vendorId ?? ''),
+            discountPrice:
+              typeof p?.discountPrice === 'number' ? p.discountPrice : null,
+            inStock: Boolean(p?.inStock),
+            isWeightable: Boolean(p?.isWeightable),
+            categoryId: p?.categoryId,
+            categoryName: p?.categoryName,
+            vendorName: p?.vendorName,
+            productImageUrl: p?.productImageUrl,
+            src: p?.productImageUrl ?? p?.imageUrl ?? '',
+          };
           state.eproduct = null;
         }
       )

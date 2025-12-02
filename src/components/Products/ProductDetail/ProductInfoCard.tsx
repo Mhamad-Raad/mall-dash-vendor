@@ -12,14 +12,20 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Package, Upload, X } from 'lucide-react';
 import type { ProductFormData } from '@/interfaces/Products.interface';
+import type { CategoryDTO } from '@/data/Categories';
 
 interface ProductInfoCardProps {
   formData: ProductFormData;
-  onInputChange: (field: keyof ProductFormData, value: string | number | File) => void;
+  categories?: CategoryDTO[];
+  onInputChange: (
+    field: keyof ProductFormData,
+    value: string | number | File | boolean
+  ) => void;
 }
 
 export default function ProductInfoCard({
   formData,
+  categories = [],
   onInputChange,
 }: ProductInfoCardProps) {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +69,9 @@ export default function ProductInfoCard({
                 variant='outline'
                 size='sm'
                 className='gap-2'
-                onClick={() => document.getElementById('photo-upload-edit')?.click()}
+                onClick={() =>
+                  document.getElementById('photo-upload-edit')?.click()
+                }
               >
                 <Upload className='size-4' />
                 Upload Photo
@@ -88,6 +96,16 @@ export default function ProductInfoCard({
                 onChange={handlePhotoChange}
               />
             </div>
+          </div>
+          {/* Optional Image URL */}
+          <div className='space-y-2'>
+            <Label htmlFor='imageUrl'>Image URL (optional)</Label>
+            <Input
+              id='imageUrl'
+              placeholder='https://...'
+              value={formData.imageUrl}
+              onChange={(e) => onInputChange('imageUrl', e.target.value)}
+            />
           </div>
         </div>
 
@@ -123,11 +141,97 @@ export default function ProductInfoCard({
             step='0.01'
             min='0'
             value={formData.price}
-            onChange={(e) => onInputChange('price', parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              onInputChange('price', parseFloat(e.target.value) || 0)
+            }
             placeholder='0.00'
           />
         </div>
+
+        {/* Discount Price */}
+        <div className='space-y-2'>
+          <Label htmlFor='discountPrice'>Discount Price (USD)</Label>
+          <Input
+            id='discountPrice'
+            type='number'
+            step='0.01'
+            min='0'
+            value={formData.discountPrice ?? 0}
+            onChange={(e) =>
+              onInputChange('discountPrice', parseFloat(e.target.value) || 0)
+            }
+            placeholder='0.00'
+          />
+        </div>
+
+        {/* Category */}
+        <div className='space-y-2'>
+          <Label htmlFor='category'>Category</Label>
+          <select
+            id='category'
+            className='h-11 w-full border rounded px-3 bg-background'
+            value={String(formData.categoryId ?? '')}
+            onChange={(e) =>
+              onInputChange('categoryId', parseInt(e.target.value, 10))
+            }
+          >
+            <option value=''>Select category</option>
+            {categories.map((c) => (
+              <option key={c.id} value={String(c.id)}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          {formData.categoryName && (
+            <p className='text-xs text-muted-foreground'>
+              Current: {formData.categoryName}
+            </p>
+          )}
+        </div>
+
+        {/* Flags */}
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+          <div className='flex items-center justify-between rounded-lg border p-3'>
+            <div className='space-y-0.5'>
+              <Label>In Stock</Label>
+              <p className='text-xs text-muted-foreground'>
+                Is this product currently in stock?
+              </p>
+            </div>
+            <input
+              type='checkbox'
+              className='size-5'
+              checked={Boolean(formData.inStock)}
+              onChange={(e) => onInputChange('inStock', e.target.checked)}
+            />
+          </div>
+          <div className='flex items-center justify-between rounded-lg border p-3'>
+            <div className='space-y-0.5'>
+              <Label>Weightable</Label>
+              <p className='text-xs text-muted-foreground'>
+                Sold by weight (e.g., kg)?
+              </p>
+            </div>
+            <input
+              type='checkbox'
+              className='size-5'
+              checked={Boolean(formData.isWeightable)}
+              onChange={(e) => onInputChange('isWeightable', e.target.checked)}
+            />
+          </div>
+        </div>
+
+        {/* Vendor name (read-only) */}
+        {formData.vendorName && (
+          <div className='space-y-1'>
+            <Label>Vendor</Label>
+            <p className='text-sm text-muted-foreground'>
+              {formData.vendorName}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
+

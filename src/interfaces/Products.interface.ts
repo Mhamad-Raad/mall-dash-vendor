@@ -5,6 +5,13 @@ export interface ProductType {
   price: number;
   imageUrl: string;
   vendorId: string;
+  discountPrice?: number | null;
+  inStock?: boolean;
+  isWeightable?: boolean;
+  categoryId?: number;
+  categoryName?: string;
+  vendorName?: string;
+  productImageUrl?: string;
   // Helper fields for UI
   src?: string; // Alias for imageUrl (for backward compatibility)
 }
