@@ -1,19 +1,34 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Package, ArrowLeft, Save, Upload, X } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Package,
+  ArrowLeft,
+  Save,
+  Upload,
+  X,
+  ImageIcon,
+  Tag,
+  DollarSign,
+  FolderOpen,
+  Store,
+  PackageCheck,
+  Scale,
+} from 'lucide-react';
 
 import { createProduct } from '@/data/Products';
 import { fetchCategories, type CategoryDTO } from '@/data/Categories';
@@ -127,93 +142,96 @@ export default function CreateProduct() {
     }
   };
 
+  const displayPreview = previewUrl || formData.imageUrl;
+
   return (
-    <div className='w-[calc(100%+2rem)] md:w-[calc(100%+3rem)] h-full flex flex-col -m-4 md:-m-6'>
-      {/* Scrollable Content */}
-      <div className='flex-1 overflow-y-auto p-4 md:p-6 space-y-6 pb-24'>
-        {/* Header */}
-        <div className='flex items-center gap-3 sm:gap-4'>
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={handleBack}
-            className='h-10 w-10 shrink-0'
-          >
-            <ArrowLeft className='size-4' />
-          </Button>
-          <div className='flex items-center gap-2 sm:gap-3'>
-            <div className='p-2 rounded-lg bg-primary/10 text-primary shrink-0'>
-              <Package className='size-5' />
-            </div>
-            <div className='min-w-0'>
-              <h1 className='text-xl sm:text-2xl font-bold tracking-tight'>
-                Create New Product
-              </h1>
-              <p className='text-xs sm:text-sm text-muted-foreground'>
-                Add a new product to your inventory
-              </p>
-            </div>
+    <div className='flex flex-col gap-4'>
+      {/* Header */}
+      <div className='flex items-center gap-3'>
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={handleBack}
+          className='size-9 shrink-0'
+        >
+          <ArrowLeft className='size-4' />
+        </Button>
+        <div className='flex items-center gap-3'>
+          <div className='flex size-10 items-center justify-center rounded-lg bg-primary/10'>
+            <Package className='size-5 text-primary' />
+          </div>
+          <div>
+            <h1 className='text-xl font-semibold'>Create New Product</h1>
+            <p className='text-sm text-muted-foreground'>
+              Add a new product to your inventory
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Main Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-lg'>Product Information</CardTitle>
-            <CardDescription>
-              Fill in the details for the new product
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-6'>
-            {/* Product Photo */}
-            <div className='space-y-2'>
-              <Label>Product Photo</Label>
-              <div className='flex items-center gap-4'>
-                <Avatar className='h-24 w-24 rounded-lg'>
-                  <AvatarImage
-                    src={previewUrl || ''}
-                    className='object-cover'
-                  />
-                  <AvatarFallback className='rounded-lg bg-muted'>
-                    <Package className='h-10 w-10 text-muted-foreground' />
-                  </AvatarFallback>
-                </Avatar>
-                <div className='flex gap-2'>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='sm'
-                    className='gap-2'
-                    onClick={() =>
-                      document.getElementById('photo-upload')?.click()
-                    }
-                  >
-                    <Upload className='size-4' />
-                    Upload Photo
-                  </Button>
-                  {previewUrl && (
+      {/* Main Content - 2 Column Grid */}
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+        {/* Left Column - Image */}
+        <Card className='lg:col-span-1'>
+          <CardContent className='p-4'>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+                <ImageIcon className='size-4' />
+                Product Image
+              </div>
+
+              {/* Image Preview */}
+              <div className='relative aspect-square w-full overflow-hidden rounded-lg border bg-muted'>
+                {displayPreview ? (
+                  <>
+                    <img
+                      src={displayPreview}
+                      alt={formData.name || 'Product'}
+                      className='size-full object-cover'
+                    />
                     <Button
                       type='button'
-                      variant='outline'
-                      size='sm'
-                      className='gap-2'
+                      variant='secondary'
+                      size='icon'
+                      className='absolute top-2 right-2 size-8'
                       onClick={handleRemovePhoto}
                     >
                       <X className='size-4' />
-                      Remove
                     </Button>
-                  )}
-                  <input
-                    id='photo-upload'
-                    type='file'
-                    accept='image/*'
-                    className='hidden'
-                    onChange={handlePhotoChange}
-                  />
-                </div>
+                  </>
+                ) : (
+                  <div className='flex size-full flex-col items-center justify-center gap-2 text-muted-foreground'>
+                    <Package className='size-12' />
+                    <span className='text-sm'>No image</span>
+                  </div>
+                )}
               </div>
+
+              {/* Upload Button */}
+              <Button
+                type='button'
+                variant='outline'
+                className='w-full'
+                onClick={() =>
+                  document.getElementById('photo-upload')?.click()
+                }
+              >
+                <Upload className='size-4 mr-2' />
+                Upload Image
+              </Button>
+              <input
+                id='photo-upload'
+                type='file'
+                accept='image/*'
+                className='hidden'
+                onChange={handlePhotoChange}
+              />
+
+              {/* Image URL */}
               <div className='space-y-2'>
-                <Label htmlFor='imageUrl'>Image URL (optional)</Label>
+                <Label htmlFor='imageUrl' className='text-xs'>
+                  Or paste image URL
+                </Label>
                 <Input
                   id='imageUrl'
                   placeholder='https://...'
@@ -221,136 +239,215 @@ export default function CreateProduct() {
                   onChange={(e) =>
                     handleInputChange('imageUrl', e.target.value)
                   }
+                  className='text-sm'
                 />
+              </div>
+
+              {/* Quick Stats Preview */}
+              <div className='pt-4 border-t space-y-3'>
+                <div className='flex items-center justify-between text-sm'>
+                  <span className='text-muted-foreground'>Status</span>
+                  <Badge
+                    variant={formData.inStock ? 'default' : 'secondary'}
+                    className={
+                      formData.inStock
+                        ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'
+                        : ''
+                    }
+                  >
+                    {formData.inStock ? 'In Stock' : 'Out of Stock'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Right Column - Form Fields */}
+        <Card className='lg:col-span-2'>
+          <CardContent className='p-4 space-y-6'>
+            {/* Basic Info Section */}
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+                <Tag className='size-4' />
+                Basic Information
+              </div>
+
+              <div className='grid gap-4'>
+                {/* Product Name */}
+                <div className='space-y-2'>
+                  <Label htmlFor='name'>Product Name *</Label>
+                  <Input
+                    id='name'
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder='Enter product name'
+                  />
+                </div>
+
+                {/* Description */}
+                <div className='space-y-2'>
+                  <Label htmlFor='description'>Description *</Label>
+                  <Textarea
+                    id='description'
+                    value={formData.description}
+                    onChange={(e) =>
+                      handleInputChange('description', e.target.value)
+                    }
+                    placeholder='Enter product description'
+                    rows={4}
+                    className='resize-none'
+                  />
+                </div>
+
+                {/* Category */}
+                <div className='space-y-2'>
+                  <Label className='flex items-center gap-2'>
+                    <FolderOpen className='size-3.5' />
+                    Category *
+                  </Label>
+                  <Select
+                    value={formData.categoryId}
+                    onValueChange={(value) =>
+                      handleInputChange('categoryId', value)
+                    }
+                  >
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='Select category' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={String(c.id)}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            {/* Product Name */}
-            <div className='space-y-2'>
-              <Label htmlFor='name'>Product Name *</Label>
-              <Input
-                id='name'
-                placeholder='Enter product name'
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-              />
-            </div>
-
-            {/* Description */}
-            <div className='space-y-2'>
-              <Label htmlFor='description'>Description *</Label>
-              <Textarea
-                id='description'
-                placeholder='Enter product description'
-                value={formData.description}
-                onChange={(e) =>
-                  handleInputChange('description', e.target.value)
-                }
-                rows={4}
-              />
-            </div>
-
-            {/* Category */}
-            <div className='space-y-2'>
-              <Label htmlFor='category'>Category *</Label>
-              <select
-                id='category'
-                className='h-11 w-full border rounded px-3 bg-background'
-                value={formData.categoryId}
-                onChange={(e) =>
-                  handleInputChange('categoryId', e.target.value)
-                }
-              >
-                <option value=''>Select category</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={String(c.id)}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Price */}
-            <div className='space-y-2'>
-              <Label htmlFor='price'>Price (USD) *</Label>
-              <Input
-                id='price'
-                type='number'
-                step='0.01'
-                min='0'
-                placeholder='0.00'
-                value={formData.price}
-                onChange={(e) => handleInputChange('price', e.target.value)}
-              />
-            </div>
-
-            {/* Discount Price */}
-            <div className='space-y-2'>
-              <Label htmlFor='discountPrice'>Discount Price (USD)</Label>
-              <Input
-                id='discountPrice'
-                type='number'
-                step='0.01'
-                min='0'
-                placeholder='0.00'
-                value={formData.discountPrice}
-                onChange={(e) =>
-                  handleInputChange('discountPrice', e.target.value)
-                }
-              />
-            </div>
-
-            {/* Flags */}
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-              <div className='flex items-center justify-between rounded-lg border p-3'>
-                <div className='space-y-0.5'>
-                  <Label>In Stock</Label>
-                  <p className='text-xs text-muted-foreground'>
-                    Is this product currently in stock?
-                  </p>
-                </div>
-                <input
-                  type='checkbox'
-                  className='size-5'
-                  checked={formData.inStock}
-                  onChange={(e) =>
-                    handleInputChange('inStock', e.target.checked)
-                  }
-                />
+            {/* Pricing Section */}
+            <div className='space-y-4 pt-4 border-t'>
+              <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+                <DollarSign className='size-4' />
+                Pricing
               </div>
-              <div className='flex items-center justify-between rounded-lg border p-3'>
-                <div className='space-y-0.5'>
-                  <Label>Weightable</Label>
-                  <p className='text-xs text-muted-foreground'>
-                    Sold by weight (e.g., kg)?
-                  </p>
+
+              <div className='grid sm:grid-cols-2 gap-4'>
+                {/* Price */}
+                <div className='space-y-2'>
+                  <Label htmlFor='price'>Regular Price *</Label>
+                  <div className='relative'>
+                    <span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
+                      $
+                    </span>
+                    <Input
+                      id='price'
+                      type='number'
+                      step='0.01'
+                      min='0'
+                      value={formData.price}
+                      onChange={(e) =>
+                        handleInputChange('price', e.target.value)
+                      }
+                      placeholder='0.00'
+                      className='pl-7'
+                    />
+                  </div>
                 </div>
-                <input
-                  type='checkbox'
-                  className='size-5'
-                  checked={formData.isWeightable}
-                  onChange={(e) =>
-                    handleInputChange('isWeightable', e.target.checked)
-                  }
-                />
+
+                {/* Discount Price */}
+                <div className='space-y-2'>
+                  <Label htmlFor='discountPrice'>Discount Price</Label>
+                  <div className='relative'>
+                    <span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
+                      $
+                    </span>
+                    <Input
+                      id='discountPrice'
+                      type='number'
+                      step='0.01'
+                      min='0'
+                      value={formData.discountPrice}
+                      onChange={(e) =>
+                        handleInputChange('discountPrice', e.target.value)
+                      }
+                      placeholder='0.00'
+                      className='pl-7'
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Product Options Section */}
+            <div className='space-y-4 pt-4 border-t'>
+              <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+                <Store className='size-4' />
+                Product Options
+              </div>
+
+              <div className='grid sm:grid-cols-2 gap-4'>
+                {/* In Stock Toggle */}
+                <div className='flex items-center justify-between rounded-lg border p-4'>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex size-9 items-center justify-center rounded-md bg-emerald-500/10'>
+                      <PackageCheck className='size-4 text-emerald-600' />
+                    </div>
+                    <div>
+                      <Label className='text-sm font-medium'>In Stock</Label>
+                      <p className='text-xs text-muted-foreground'>
+                        Product is available
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.inStock}
+                    onCheckedChange={(checked) =>
+                      handleInputChange('inStock', checked)
+                    }
+                  />
+                </div>
+
+                {/* Weightable Toggle */}
+                <div className='flex items-center justify-between rounded-lg border p-4'>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex size-9 items-center justify-center rounded-md bg-blue-500/10'>
+                      <Scale className='size-4 text-blue-600' />
+                    </div>
+                    <div>
+                      <Label className='text-sm font-medium'>Weightable</Label>
+                      <p className='text-xs text-muted-foreground'>
+                        Sold by weight
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.isWeightable}
+                    onCheckedChange={(checked) =>
+                      handleInputChange('isWeightable', checked)
+                    }
+                  />
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Sticky Footer with Action Buttons */}
-      <div className='sticky bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 px-4 md:px-6'>
-        <div className='flex gap-2 justify-end'>
-          <Button variant='outline' onClick={handleBack} className='gap-2'>
+      {/* Footer */}
+      <div className='sticky bottom-0 z-10 -mx-6 px-6 py-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t'>
+        <div className='flex items-center justify-end gap-2'>
+          <Button variant='outline' size='sm' onClick={handleBack}>
             Cancel
           </Button>
           <Button
-            className='gap-2'
+            size='sm'
             onClick={handleCreateProduct}
             disabled={loading}
           >
-            <Save className='size-4' />
+            <Save className='size-4 mr-1.5' />
             {loading ? 'Creating...' : 'Create Product'}
           </Button>
         </div>
