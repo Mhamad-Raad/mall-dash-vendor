@@ -39,15 +39,15 @@ const ProductDetail = () => {
   } = useSelector((state: RootState) => state.product);
 
   const [formData, setFormData] = useState<ProductFormData>({
-    _id: '',
+    id: 0,
     name: '',
     description: '',
     price: 0,
     discountPrice: null,
     inStock: false,
     isWeightable: false,
-    imageUrl: '',
-    vendorId: '',
+    productImageUrl: '',
+    vendorId: 0,
     vendorName: '',
     categoryId: undefined,
     categoryName: '',
@@ -57,7 +57,7 @@ const ProductDetail = () => {
 
   // Track if any changes have been made
   const hasChanges = useMemo(() => {
-    if (!product || !product._id) return false;
+    if (!product || !product.id) return false;
 
     // Check if image file was added
     if (formData.imageFile instanceof File) return true;
@@ -76,12 +76,12 @@ const ProductDetail = () => {
       Boolean(product.inStock) !== Boolean(formData.inStock) ||
       Boolean(product.isWeightable) !== Boolean(formData.isWeightable) ||
       (product.categoryId ?? null) !== (formData.categoryId ?? null) ||
-      (product.imageUrl ?? '') !== (formData.imageUrl ?? '')
+      (product.productImageUrl ?? '') !== (formData.productImageUrl ?? '')
     );
   }, [product, formData]);
 
   const changes = useMemo((): ChangeDetail[] => {
-    if (!product || !product._id) return [];
+    if (!product || !product.id) return [];
     const changesList: ChangeDetail[] = [];
     const fieldLabels: Record<string, string> = {
       name: 'Product Name',
@@ -91,14 +91,14 @@ const ProductDetail = () => {
       inStock: 'In Stock',
       isWeightable: 'Weightable',
       categoryId: 'Category',
-      imageUrl: 'Image URL',
+      productImageUrl: 'Image URL',
     };
 
     // Check for image change
     if (formData.imageFile instanceof File) {
       changesList.push({
         field: 'Product Image',
-        oldValue: product.imageUrl ? 'Current image' : 'No image',
+        oldValue: product.productImageUrl ? 'Current image' : 'No image',
         newValue: formData.imageFile.name,
       });
     }
@@ -113,7 +113,7 @@ const ProductDetail = () => {
         'inStock',
         'isWeightable',
         'categoryId',
-        'imageUrl',
+        'productImageUrl',
       ] as const
     ).forEach((key) => {
       if (product[key] !== formData[key]) {
@@ -159,7 +159,7 @@ const ProductDetail = () => {
   }, [product, formData]);
 
   const deleteSummary = useMemo((): ChangeDetail[] => {
-    if (!product || !product._id) return [];
+    if (!product || !product.id) return [];
     return [
       { field: 'Product Name', oldValue: product.name ?? '', newValue: '—' },
       {
@@ -230,7 +230,7 @@ const ProductDetail = () => {
   }, []);
 
   useEffect(() => {
-    if (product && product._id) {
+    if (product && product.id) {
       setFormData({
         ...product,
         name: product.name ?? '',
@@ -239,8 +239,8 @@ const ProductDetail = () => {
         discountPrice: product.discountPrice ?? null,
         inStock: Boolean(product.inStock),
         isWeightable: Boolean(product.isWeightable),
-        imageUrl: product.imageUrl ?? '',
-        vendorId: product.vendorId ?? '',
+        productImageUrl: product.productImageUrl ?? '',
+        vendorId: product.vendorId ?? 0,
         vendorName: product.vendorName ?? '',
         categoryId: product.categoryId,
         categoryName: product.categoryName ?? '',
@@ -277,7 +277,7 @@ const ProductDetail = () => {
     const updatePayload = {
       CategoryId: formData.categoryId ?? 0,
       Name: formData.name,
-      Description: formData.description,
+      Description: formData.description ?? '',
       Price: Number(formData.price),
       DiscountPrice:
         typeof formData.discountPrice === 'number'
@@ -287,13 +287,13 @@ const ProductDetail = () => {
       IsWeightable: Boolean(formData.isWeightable),
       imageFile: formData.imageFile,
       ProductImageUrl:
-        !formData.imageFile && formData.imageUrl
-          ? formData.imageUrl
+        !formData.imageFile && formData.productImageUrl
+          ? formData.productImageUrl
           : undefined,
     };
     try {
       await dispatch(
-        updateProduct({ id: id || product._id, update: updatePayload })
+        updateProduct({ id: id || String(product.id), update: updatePayload })
       ).unwrap();
       setShowUpdateModal(false);
       toast.success('Product updated successfully!');
@@ -304,7 +304,7 @@ const ProductDetail = () => {
   };
 
   const handleDeleteProduct = async () => {
-    await dispatch(deleteProduct(id || product._id));
+    await dispatch(deleteProduct(id || String(product.id)));
   };
 
   if (error) return <ProductErrorCard error={error} />;

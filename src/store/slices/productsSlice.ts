@@ -75,22 +75,21 @@ const productsSlice = createSlice({
           state.products = (action.payload.data || []).map(
             (p: any) =>
               ({
-                _id:
-                  p?._id !== undefined && p?._id !== null
-                    ? String(p._id)
-                    : String(p?.id ?? ''),
+                id: p?.id ?? 0,
                 name: p?.name ?? '',
-                description: p?.description ?? '',
                 price:
                   typeof p?.price === 'number'
                     ? p.price
                     : Number(p?.price ?? 0),
-                imageUrl: p?.imageUrl ?? p?.productImageUrl ?? '',
-                vendorId:
-                  p?.vendorId !== undefined && p?.vendorId !== null
-                    ? String(p.vendorId)
-                    : String(p?.vendorId ?? ''),
-                src: p?.productImageUrl ?? p?.imageUrl ?? '',
+                discountPrice:
+                  typeof p?.discountPrice === 'number' ? p.discountPrice : null,
+                inStock: Boolean(p?.inStock),
+                isWeightable: Boolean(p?.isWeightable),
+                productImageUrl: p?.productImageUrl ?? null,
+                vendorId: p?.vendorId ?? 0,
+                vendorName: p?.vendorName ?? '',
+                categoryId: p?.categoryId ?? null,
+                categoryName: p?.categoryName ?? null,
               } as ProductType)
           );
           state.limit = action.payload.limit;

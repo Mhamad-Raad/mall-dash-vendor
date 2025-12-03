@@ -2,19 +2,44 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Filter, Package, LayoutGrid, Table } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import {
+  Search,
+  Plus,
+  Package,
+  LayoutGrid,
+  Table,
+  X,
+  Sparkles,
+  SlidersHorizontal,
+} from 'lucide-react';
 
 interface ProductsFiltersProps {
   viewMode: 'table' | 'cards';
   onViewModeChange: (mode: 'table' | 'cards') => void;
 }
 
-const ProductsFilters = ({ viewMode, onViewModeChange }: ProductsFiltersProps) => {
+const ProductsFilters = ({
+  viewMode,
+  onViewModeChange,
+}: ProductsFiltersProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const [search, setSearch] = useState(() => searchParams.get('searchName') || '');
+  const [search, setSearch] = useState(
+    () => searchParams.get('searchName') || ''
+  );
   const [typedSearch, setTypedSearch] = useState(search);
+  const [stockFilter, setStockFilter] = useState<string>(
+    searchParams.get('inStock') || 'all'
+  );
 
   const debounceRef = useRef<any>(null);
 
@@ -43,9 +68,24 @@ const ProductsFilters = ({ viewMode, onViewModeChange }: ProductsFiltersProps) =
   }, [search]);
 
   useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (stockFilter && stockFilter !== 'all') {
+      params.set('inStock', stockFilter);
+    } else {
+      params.delete('inStock');
+    }
+    params.set('page', '1');
+    navigate(`${window.location.pathname}?${params.toString()}`, {
+      replace: true,
+    });
+    // eslint-disable-next-line
+  }, [stockFilter]);
+
+  useEffect(() => {
     const urlSearch = searchParams.get('searchName') || '';
     setSearch(urlSearch);
     setTypedSearch(urlSearch);
+    setStockFilter(searchParams.get('inStock') || 'all');
     // eslint-disable-next-line
   }, [searchParams]);
 
@@ -53,84 +93,130 @@ const ProductsFilters = ({ viewMode, onViewModeChange }: ProductsFiltersProps) =
     navigate('/products/create');
   };
 
+  const clearSearch = () => {
+    setTypedSearch('');
+    setSearch('');
+  };
+
+  const hasActiveFilters = search || stockFilter !== 'all';
+
   return (
-    <div className='flex flex-col gap-6'>
-      {/* Header with Title and Create Button */}
-      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-        <div className='flex items-center gap-4 flex-1'>
-          <div className='p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary shadow-sm'>
-            <Package className='size-6' />
+    <div className='flex flex-col gap-5'>
+      {/* Header Section */}
+      <div className='flex flex-col lg:flex-row lg:items-center justify-between gap-4'>
+        <div className='flex items-center gap-4'>
+          <div className='relative'>
+            <div className='absolute inset-0 bg-gradient-to-br from-primary to-primary/50 rounded-2xl blur-lg opacity-40' />
+            <div className='relative p-3.5 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg'>
+              <Package className='size-7' />
+            </div>
           </div>
           <div>
-            <h2 className='text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text'>
-              Products Management
-            </h2>
-            <p className='text-sm text-muted-foreground mt-0.5'>
-              Manage and monitor all your products
+            <div className='flex items-center gap-2'>
+              <h1 className='text-3xl font-bold tracking-tight'>Products</h1>
+              <Sparkles className='size-5 text-amber-500' />
+            </div>
+            <p className='text-muted-foreground mt-0.5'>
+              Manage your product catalog with ease
             </p>
           </div>
         </div>
-        <div className='flex items-center gap-2'>
+
+        <Button
+          type='button'
+          onClick={handleOnCreate}
+          className='gap-2'
+          size='default'
+        >
+          <Plus className='size-4' />
+          Add Product
+        </Button>
+      </div>
+
+      {/* Filters Bar */}
+      <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-2xl border bg-card/50 backdrop-blur-sm shadow-sm'>
+        <div className='flex items-center gap-2 text-muted-foreground'>
+          <SlidersHorizontal className='size-4' />
+          <span className='text-sm font-medium'>Filters</span>
+        </div>
+
+        <div className='flex flex-col sm:flex-row flex-1 items-start sm:items-center gap-3 w-full'>
+          {/* Search Input */}
+          <div className='relative flex-1 w-full max-w-md'>
+            <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
+            <Input
+              type='text'
+              placeholder='Search by name...'
+              className='pl-10 pr-10 h-10 bg-background/80 border-border/50 focus-visible:border-primary/50 focus-visible:ring-primary/20 transition-all rounded-xl'
+              value={typedSearch}
+              onChange={(e) => setTypedSearch(e.target.value)}
+            />
+            {typedSearch && (
+              <button
+                onClick={clearSearch}
+                className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors'
+              >
+                <X className='size-4' />
+              </button>
+            )}
+          </div>
+
+          {/* Stock Filter */}
+          <Select value={stockFilter} onValueChange={setStockFilter}>
+            <SelectTrigger className='w-full sm:w-[160px] h-10 bg-background/80 border-border/50 rounded-xl'>
+              <SelectValue placeholder='Stock Status' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='all'>All Products</SelectItem>
+              <SelectItem value='true'>In Stock</SelectItem>
+              <SelectItem value='false'>Out of Stock</SelectItem>
+            </SelectContent>
+          </Select>
+
           {/* View Mode Toggle */}
-          <div className='flex items-center gap-1 bg-muted rounded-lg p-1'>
+          <div className='flex items-center gap-1 p-1 bg-muted/80 rounded-xl'>
             <Button
               type='button'
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
               size='sm'
-              className='h-9 px-3'
+              className={`h-8 px-3 rounded-lg transition-all ${
+                viewMode === 'table'
+                  ? 'shadow-sm bg-background'
+                  : 'hover:bg-transparent'
+              }`}
               onClick={() => onViewModeChange('table')}
             >
               <Table className='size-4' />
+              <span className='ml-1.5 hidden sm:inline text-xs font-medium'>
+                Table
+              </span>
             </Button>
             <Button
               type='button'
-              variant={viewMode === 'cards' ? 'default' : 'ghost'}
+              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
               size='sm'
-              className='h-9 px-3'
+              className={`h-8 px-3 rounded-lg transition-all ${
+                viewMode === 'cards'
+                  ? 'shadow-sm bg-background'
+                  : 'hover:bg-transparent'
+              }`}
               onClick={() => onViewModeChange('cards')}
             >
               <LayoutGrid className='size-4' />
+              <span className='ml-1.5 hidden sm:inline text-xs font-medium'>
+                Grid
+              </span>
             </Button>
           </div>
-          <Button
-            type='button'
-            className='gap-2 w-full sm:w-auto shadow-md hover:shadow-lg transition-shadow'
-            size='lg'
-            onClick={handleOnCreate}
-          >
-            <Plus className='size-4' />
-            <span className='font-semibold'>Add Product</span>
-          </Button>
         </div>
-      </div>
 
-      {/* Filters Section */}
-      <div className='bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl border shadow-sm p-5'>
-        <div className='flex flex-col gap-4'>
-          <div className='flex items-center gap-2.5 pb-3 border-b'>
-            <div className='p-1.5 rounded-md bg-primary/10'>
-              <Filter className='size-4 text-primary' />
-            </div>
-            <span className='text-sm font-semibold text-foreground'>
-              Filter Products
-            </span>
-          </div>
-          <div className='w-full'>
-            {/* Search Input */}
-            <div className='relative w-full max-w-md'>
-              <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3.5'>
-                <Search className='size-4' />
-              </div>
-              <Input
-                type='text'
-                placeholder='Search products...'
-                className='pl-10 bg-background w-full shadow-sm border-muted-foreground/20 focus-visible:border-primary/50 transition-colors h-11'
-                value={typedSearch}
-                onChange={(e) => setTypedSearch(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Active Filters Badge */}
+        {hasActiveFilters && (
+          <Badge variant='secondary' className='gap-1.5 py-1'>
+            <span className='size-1.5 rounded-full bg-primary animate-pulse' />
+            Filtered
+          </Badge>
+        )}
       </div>
     </div>
   );

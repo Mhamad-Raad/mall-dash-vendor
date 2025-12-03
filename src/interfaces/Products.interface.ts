@@ -1,19 +1,21 @@
 export interface ProductType {
-  _id: string;
+  id: number;
   name: string;
-  description: string;
   price: number;
-  imageUrl: string;
-  vendorId: string;
   discountPrice?: number | null;
-  inStock?: boolean;
-  isWeightable?: boolean;
-  categoryId?: number;
-  categoryName?: string;
-  vendorName?: string;
-  productImageUrl?: string;
-  // Helper fields for UI
-  src?: string; // Alias for imageUrl (for backward compatibility)
+  inStock: boolean;
+  isWeightable: boolean;
+  productImageUrl?: string | null;
+  vendorId: number;
+  vendorName: string;
+  categoryId?: number | null;
+  categoryName?: string | null;
+  // Only available in ProductDetailResponse
+  description?: string;
+  // Legacy fields for backward compatibility
+  _id?: string;
+  imageUrl?: string;
+  src?: string;
 }
 
 // Extended type for form data with optional image file

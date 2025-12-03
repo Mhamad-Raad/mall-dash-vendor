@@ -8,12 +8,13 @@ import {
 } from '@/data/Products';
 
 const initialProduct: ProductType = {
-  _id: '',
+  id: 0,
   name: '',
-  description: '',
   price: 0,
-  imageUrl: '',
-  vendorId: '',
+  inStock: false,
+  isWeightable: false,
+  vendorId: 0,
+  vendorName: '',
 };
 
 interface ProductState {
@@ -130,22 +131,20 @@ const productSlice = createSlice({
           state.lproduct = false;
           const p = action.payload;
           state.product = {
-            _id: String(p?.id ?? ''),
+            id: p?.id ?? 0,
             name: p?.name ?? '',
             description: p?.description ?? '',
             price:
               typeof p?.price === 'number' ? p.price : Number(p?.price ?? 0),
-            imageUrl: p?.imageUrl ?? p?.productImageUrl ?? '',
-            vendorId: String(p?.vendorId ?? ''),
             discountPrice:
               typeof p?.discountPrice === 'number' ? p.discountPrice : null,
             inStock: Boolean(p?.inStock),
             isWeightable: Boolean(p?.isWeightable),
-            categoryId: p?.categoryId,
-            categoryName: p?.categoryName,
-            vendorName: p?.vendorName,
-            productImageUrl: p?.productImageUrl,
-            src: p?.productImageUrl ?? p?.imageUrl ?? '',
+            productImageUrl: p?.productImageUrl ?? null,
+            vendorId: p?.vendorId ?? 0,
+            vendorName: p?.vendorName ?? '',
+            categoryId: p?.categoryId ?? null,
+            categoryName: p?.categoryName ?? null,
           };
           state.eproduct = null;
         }
