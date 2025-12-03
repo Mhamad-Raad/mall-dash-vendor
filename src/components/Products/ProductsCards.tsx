@@ -98,7 +98,7 @@ const ProductsCards = () => {
                         ) : (
                           <div className='flex items-center gap-1 bg-destructive/90 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-md shadow-sm'>
                             <XCircle className='size-2.5' />
-                            <span className='hidden sm:inline'>Out</span>
+                            <span className='hidden sm:inline'>Out of Stock</span>
                           </div>
                         )}
                       </div>
