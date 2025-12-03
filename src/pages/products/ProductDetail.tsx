@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ProductDetailHeader from '@/components/Products/ProductDetail/ProductDetailHeader';
+import ProductDetailFooter from '@/components/Products/ProductDetail/ProductDetailFooter';
 import ProductInfoCard from '@/components/Products/ProductDetail/ProductInfoCard';
 import ProductDetailSkeleton from '@/components/Products/ProductDetail/ProductDetailSkeleton';
 import ProductErrorCard from '@/components/Products/ProductDetail/ProductErrorCard';
@@ -311,17 +312,20 @@ const ProductDetail = () => {
   if (loading) return <ProductDetailSkeleton />;
 
   return (
-    <div className='flex flex-col gap-6 p-4 md:p-6'>
+    <div className='flex flex-col min-h-full gap-3'>
       <ProductDetailHeader
         onBack={() => navigate(-1)}
-        onSave={handletoggleUpdateModal}
-        onDelete={handletoggleDeleteModal}
-        hasChanges={hasChanges}
+        productName={product?.name}
       />
       <ProductInfoCard
         formData={formData}
         categories={categories}
         onInputChange={handleInputChange}
+      />
+      <ProductDetailFooter
+        onSave={handletoggleUpdateModal}
+        onDelete={handletoggleDeleteModal}
+        hasChanges={hasChanges}
       />
       <ConfirmModal
         open={showUpdateModal}
