@@ -151,19 +151,37 @@ export default function ProductInfoCard({
                   {formData.inStock ? 'In Stock' : 'Out of Stock'}
                 </Badge>
               </div>
-              {hasDiscount && (
-                <div className='flex items-center justify-between text-sm'>
-                  <span className='text-muted-foreground'>Discount</span>
-                  <Badge className='bg-amber-500/10 text-amber-600 hover:bg-amber-500/20'>
-                    {Math.round(
-                      ((formData.price - (formData.discountPrice || 0)) /
-                        formData.price) *
-                        100
-                    )}
-                    % OFF
-                  </Badge>
-                </div>
-              )}
+              <div className='flex items-center justify-between text-sm'>
+                <span className='text-muted-foreground'>Weightable</span>
+                <Badge
+                  variant={formData.isWeightable ? 'default' : 'secondary'}
+                  className={
+                    formData.isWeightable
+                      ? 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20'
+                      : ''
+                  }
+                >
+                  {formData.isWeightable ? 'Yes' : 'No'}
+                </Badge>
+              </div>
+              <div className='flex items-center justify-between text-sm'>
+                <span className='text-muted-foreground'>Discount</span>
+                <Badge
+                  className={
+                    hasDiscount
+                      ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20'
+                      : 'bg-muted text-muted-foreground'
+                  }
+                >
+                  {hasDiscount
+                    ? `${Math.round(
+                        ((formData.price - (formData.discountPrice || 0)) /
+                          formData.price) *
+                          100
+                      )}% OFF`
+                    : 'No Discount'}
+                </Badge>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -259,6 +277,9 @@ export default function ProductInfoCard({
                     className='pl-7'
                   />
                 </div>
+                <p className='text-xs text-muted-foreground'>
+                  The original price of your product before any discount. When a discount is active, this price will appear crossed out next to the discounted price.
+                </p>
               </div>
 
               {/* Discount Price */}
@@ -284,6 +305,9 @@ export default function ProductInfoCard({
                     className='pl-7'
                   />
                 </div>
+                <p className='text-xs text-muted-foreground'>
+                  The actual price customers will pay when on sale. This is NOT a deduction — enter the final sale price directly (e.g., if regular price is $100 and you want to sell at $80, enter $80 here). A "SALE" badge will appear on the product.
+                </p>
               </div>
             </div>
           </div>
