@@ -30,6 +30,8 @@ import { NavUser } from '@/components/ui/nav-user';
 import { logoutUser } from '@/data/Authorization';
 
 import Logo from '@/assets/Logo.jpg';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store/store';
 
 // Main navigation items
 const mainNavItems = [
@@ -91,11 +93,14 @@ const settingsItems = [
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user: currentUser } = useSelector((state: RootState) => state.me);
 
   const user = {
-    name: 'Mohammed Raad',
-    email: 'hamaraad883@gmail.com',
-    avatar: 'https://i.pravatar.cc/150?img=3',
+    name: currentUser
+      ? `${currentUser.firstName} ${currentUser.lastName}`
+      : 'User',
+    email: currentUser?.email || '',
+    avatar: currentUser?.profileImageUrl || '',
   };
 
   const isActive = (url: string) => {

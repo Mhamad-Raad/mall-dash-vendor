@@ -28,12 +28,9 @@ export const fetchProducts = async (params?: {
 
 export const fetchProductById = async (id: number) => {
   try {
-    const response = await axiosInstance.get(
-      `/Product/vendor/${id}`,
-      {
-        headers: { key: API_KEY, value: API_VALUE },
-      }
-    );
+    const response = await axiosInstance.get(`/Product/my-products/${id}`, {
+      headers: { key: API_KEY, value: API_VALUE },
+    });
     return response.data;
   } catch (error: any) {
     return { error: error.response?.data?.message || error.message };
