@@ -18,19 +18,15 @@ import {
 import UsersTableSkeleton from './UsersTableSkeleton';
 import CustomTablePagination from '../CustomTablePagination';
 
-import roles from '@/constants/roles';
-
 import type { RootState } from '@/store/store';
+
+const staffRoles = ['Staff', 'Driver'];
 
 const getUserTypeColor = (type: string) => {
   const typeLower = type.toLowerCase();
-  if (typeLower === 'superadmin')
-    return 'bg-red-500/10 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-500/30 dark:border-red-500/40';
-  if (typeLower === 'admin')
-    return 'bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 border-purple-500/30 dark:border-purple-500/40';
-  if (typeLower === 'vendor')
+  if (typeLower === 'staff')
     return 'bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/30 dark:border-blue-500/40';
-  if (typeLower === 'tenant')
+  if (typeLower === 'driver')
     return 'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/30 dark:border-emerald-500/40';
   return 'bg-gray-500/10 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400 border-gray-500/30 dark:border-gray-500/40';
 };
@@ -65,7 +61,7 @@ const UsersTable = () => {
           <TableHeader>
             <TableRow className='hover:bg-transparent border-b bg-muted/50'>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                User
+                Staff Member
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
                 Contact
@@ -86,7 +82,7 @@ const UsersTable = () => {
                 ))
               : users.map((user, index) => {
                   const fullName = `${user.firstName} ${user.lastName}`;
-                  const userRole = roles[user.role];
+                  const userRole = staffRoles[user.role] || 'Unknown';
                   // Generate initials for fallback
                   const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase();
                   // Use profileImageUrl or src (backward compatibility)

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { UserType } from '@/interfaces/Users.interface';
-import { fetchUsers as fetchUsersAPI } from '@/data/Users';
+import { fetchStaff } from '@/data/Users';
 
 interface UsersState {
   users: UserType[];
@@ -28,13 +28,12 @@ export const fetchUsers = createAsyncThunk(
       page?: number;
       limit?: number;
       searchTerm?: string;
-      role?: number;
-      buildingNameSearch?: string;
+      isActive?: boolean;
     } = {},
     { rejectWithValue }
   ) => {
     try {
-      const data = await fetchUsersAPI(params);
+      const data = await fetchStaff(params);
 
       if (data.error) {
         return rejectWithValue(data.error);
