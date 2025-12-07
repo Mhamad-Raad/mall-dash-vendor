@@ -59,7 +59,54 @@ export const logoutUser = async () => {
   } finally {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('me');
+    localStorage.removeItem('vendorProfile');
 
     window.dispatchEvent(new Event('force-logout'));
+  }
+};
+
+export const fetchMe = async () => {
+  try {
+    const response = await axiosInstance.get('/Account/me', {
+      headers: { key: API_KEY, value: API_VALUE },
+    });
+
+    const data = response.data;
+
+    // Map the response to MeType
+    // Current API response: { id, firstName, lastName, email, phoneNumber, roles: ["Vendor"] }
+    // Expected MeType: { _id, firstName, lastName, email, phoneNumber, profileImageUrl, role }
+
+    const roleMapping: Record<string, number> = {
+      Admin: 0,
+      Vendor: 1,
+      User: 2,
+    };
+
+    // Safely handle roles array
+    const userRoleStr =
+      Array.isArray(data.roles) && data.roles.length > 0
+        ? data.roles[0]
+        : 'User';
+    const userRole =
+      roleMapping[userRoleStr] !== undefined ? roleMapping[userRoleStr] : 2;
+
+    const mappedUser = {
+      _id: data.id || data._id, // Handle both just in case
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      profileImageUrl: data.profileImageUrl || null,
+      role: userRole,
+    };
+
+    return {
+      user: mappedUser,
+      vendorProfile: null, // Not provided in current 'me' endpoint response
+    };
+  } catch (error: any) {
+    return { error: error.response?.data?.message || error.message };
   }
 };

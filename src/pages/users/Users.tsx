@@ -23,25 +23,26 @@ const Users = () => {
   const limit = parseInt(searchParams.get('limit') || '40', 10);
   const page = parseInt(searchParams.get('page') || '1', 10);
 
-  const roleParam = searchParams.get('role');
-  const role = roleParam !== null ? Number(roleParam) : null;
-  const search = searchParams.get('search') || '';
-  const buildingNameSearch = searchParams.get('buildingNameSearch') || '';
+  const search = searchParams.get('searchTerm') || '';
+  const isActiveParam = searchParams.get('isActive');
 
   useEffect(() => {
     const params: Record<string, any> = {
       limit,
       page,
       searchTerm: search,
-      buildingNameSearch,
     };
-    if (role !== -1) params.role = role;
-    if (search) params.search = search;
-    if (buildingNameSearch) params.buildingNameSearch = buildingNameSearch;
+    
+    if (isActiveParam === 'true') {
+      params.isActive = true;
+    } else if (isActiveParam === 'false') {
+      params.isActive = false;
+    }
+
     if (limit && page) {
       dispatch(fetchUsers(params));
     }
-  }, [dispatch, limit, page, role, search, buildingNameSearch]);
+  }, [dispatch, limit, page, search, isActiveParam]);
 
   const hasNoUsers = !loading && users.length === 0 && !error;
   return (
