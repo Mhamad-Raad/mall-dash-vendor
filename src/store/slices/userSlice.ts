@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { UserType } from '@/interfaces/Users.interface';
 import {
   fetchUserById as fetchUserByIdAPI,
-  updateUser as updateUserAPI,
+  updateVendorStaff as updateVendorStaffAPI,
   deleteUser as deleteUserAPI,
 } from '@/data/Users';
 import { initialUser } from '@/constants/Users';
@@ -44,34 +44,32 @@ export const updateUser = createAsyncThunk(
       id,
       update,
     }: {
-      id: string;
+      id: string | number;
       update: {
         firstName: string;
         lastName: string;
         email: string;
         phoneNumber: string;
-        role: number;
+        role: number | string;
         imageFile?: File;
         buildingName?: string;
+        isActive?: boolean;
       };
     },
     { rejectWithValue }
   ) => {
-    // Transform imageFile to ProfileImageUrl for API compatibility
-    const apiPayload: any = {
-      firstName: update.firstName,
-      lastName: update.lastName,
-      email: update.email,
-      phoneNumber: update.phoneNumber,
-      role: update.role,
+    // Transform parameters to match API requirements
+    const apiPayload = {
+      FirstName: update.firstName,
+      LastName: update.lastName,
+      Email: update.email,
+      PhoneNumber: update.phoneNumber,
+      Role: update.role.toString(),
+      IsActive: update.isActive ?? true, // Default to true if undefined
+      ProfileImageUrl: update.imageFile,
     };
 
-    // Only include ProfileImageUrl if a new file was provided
-    if (update.imageFile instanceof File) {
-      apiPayload.ProfileImageUrl = update.imageFile;
-    }
-
-    const data = await updateUserAPI(id, apiPayload);
+    const data = await updateVendorStaffAPI(id, apiPayload);
     if (data.error) return rejectWithValue(data.error);
     return data;
   }

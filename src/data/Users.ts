@@ -56,6 +56,49 @@ export const fetchUserById = async (id: string) => {
   }
 };
 
+export const updateVendorStaff = async (
+  id: string | number,
+  staffData: {
+    FirstName: string;
+    LastName: string;
+    Email: string;
+    PhoneNumber: string;
+    Role: string; // Updated to match API (string)
+    IsActive: boolean;
+    ProfileImageUrl?: File | string;
+  }
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('FirstName', staffData.FirstName);
+    formData.append('LastName', staffData.LastName);
+    formData.append('Email', staffData.Email);
+    formData.append('PhoneNumber', staffData.PhoneNumber);
+    formData.append('Role', staffData.Role);
+    formData.append('IsActive', String(staffData.IsActive));
+
+    if (staffData.ProfileImageUrl instanceof File) {
+      formData.append('ProfileImageUrl', staffData.ProfileImageUrl);
+    }
+
+    const response = await axiosInstance.put(`/VendorStaff/${id}`, formData, {
+      headers: {
+        key: API_KEY,
+        value: API_VALUE,
+      },
+      transformRequest: [(data) => data],
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      'Update vendor staff failed:',
+      error.response?.data || error.message
+    );
+    return { error: error.response?.data?.message || error.message };
+  }
+};
+
 export const updateUser = async (
   id: string,
   userData: {
@@ -72,30 +115,20 @@ export const updateUser = async (
     Object.entries(userData).forEach(([key, value]) => {
       if (value !== undefined) {
         formData.append(key, value as any);
-        console.log(
-          `FormData appended: ${key} =`,
-          value instanceof File ? `File: ${value.name}` : value
-        );
       }
     });
-
-    console.log('Sending update request to:', `/Account/${id}`);
 
     // Create a custom config to override the default Content-Type
     const response = await axiosInstance.put(`/Account/${id}`, formData, {
       headers: {
         key: API_KEY,
         value: API_VALUE,
-        // Don't set Content-Type - let the browser set it with boundary for multipart/form-data
       },
-      // This transformer prevents axios from setting the default Content-Type
       transformRequest: [(data) => data],
     });
 
-    console.log('Update successful:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Update failed:', error.response?.data || error.message);
     return { error: error.response?.data?.message || error.message };
   }
 };

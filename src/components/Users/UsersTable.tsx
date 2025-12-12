@@ -129,7 +129,7 @@ const UsersTable = () => {
                               {fullName}
                             </span>
                             <span className='text-[11px] text-muted-foreground font-mono leading-tight'>
-                              {user?.userId?.slice(-8)}
+                              {String(user?.userId ?? '').slice(-8)}
                             </span>
                           </div>
                         </div>
