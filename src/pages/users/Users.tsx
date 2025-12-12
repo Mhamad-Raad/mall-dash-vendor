@@ -20,6 +20,8 @@ const Users = () => {
     eusers: error,
   } = useSelector((state: RootState) => state.users);
 
+  console.log(users);
+
   const limit = parseInt(searchParams.get('limit') || '40', 10);
   const page = parseInt(searchParams.get('page') || '1', 10);
 
@@ -32,7 +34,7 @@ const Users = () => {
       page,
       searchTerm: search,
     };
-    
+
     if (isActiveParam === 'true') {
       params.isActive = true;
     } else if (isActiveParam === 'false') {

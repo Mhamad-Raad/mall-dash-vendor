@@ -10,7 +10,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Mail, Lock, Image as ImageIcon, X } from 'lucide-react';
-import roles from '@/constants/roles';
+import { StaffRole } from '@/data/Users';
+
+const staffRoles = [
+  { label: 'Staff', value: StaffRole.Staff },
+  { label: 'Driver', value: StaffRole.Driver },
+];
 
 type StaffFormProps = {
   formData: {
@@ -122,9 +127,9 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
                 <SelectValue placeholder='Select a role' />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((role, index) => (
-                  <SelectItem key={index} value={index.toString()}>
-                    {role}
+                {staffRoles.map((role) => (
+                  <SelectItem key={role.value} value={role.value.toString()}>
+                    {role.label}
                   </SelectItem>
                 ))}
               </SelectContent>

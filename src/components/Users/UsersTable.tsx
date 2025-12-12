@@ -1,7 +1,13 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { Mail, Phone, Building2, User as UserIcon, ChevronRight } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Building2,
+  User as UserIcon,
+  ChevronRight,
+} from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -82,17 +88,22 @@ const UsersTable = () => {
                 ))
               : users.map((user, index) => {
                   const fullName = `${user.firstName} ${user.lastName}`;
-                  const userRole = staffRoles[user.role] || 'Unknown';
+                  const userRole =
+                    typeof user.role === 'number'
+                      ? staffRoles[user.role]
+                      : user.role || 'Unknown';
                   // Generate initials for fallback
-                  const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase();
+                  const initials = `${user.firstName?.[0] || ''}${
+                    user.lastName?.[0] || ''
+                  }`.toUpperCase();
                   // Use profileImageUrl or src (backward compatibility)
                   const avatarSrc = user.profileImageUrl || user.src;
 
                   return (
                     <TableRow
-                      key={`${user?._id}-${index}`}
+                      key={`${user?.userId}-${index}`}
                       className='group hover:bg-muted/50 transition-all cursor-pointer border-b last:border-0'
-                      onClick={() => handleRowClick(user?._id)}
+                      onClick={() => handleRowClick(user?.id as string)}
                     >
                       {/* User Info with Avatar */}
                       <TableCell className='font-medium py-4'>
@@ -103,7 +114,8 @@ const UsersTable = () => {
                               alt={fullName}
                               onError={(e) => {
                                 // Hide broken images gracefully
-                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).style.display =
+                                  'none';
                               }}
                             />
                             <AvatarFallback className='text-sm font-semibold bg-gradient-to-br from-primary/20 to-primary/10 text-primary'>
@@ -117,7 +129,7 @@ const UsersTable = () => {
                               {fullName}
                             </span>
                             <span className='text-[11px] text-muted-foreground font-mono leading-tight'>
-                              {user?._id.slice(-8)}
+                              {user?.userId?.slice(-8)}
                             </span>
                           </div>
                         </div>
@@ -129,14 +141,16 @@ const UsersTable = () => {
                             <div className='flex items-center justify-center w-6 h-6 rounded-md bg-muted group-hover:bg-primary/10 transition-colors'>
                               <Mail className='h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors' />
                             </div>
-                            <span className='text-xs text-foreground/80'>{user.email}</span>
+                            <span className='text-xs text-foreground/80'>
+                              {user.email}
+                            </span>
                           </div>
                           <div className='flex items-center gap-2.5'>
                             <div className='flex items-center justify-center w-6 h-6 rounded-md bg-muted group-hover:bg-primary/10 transition-colors'>
                               <Phone className='h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors' />
                             </div>
                             <span className='text-xs font-medium text-foreground/80'>
-                              {user.phoneNumber}
+                              {user.phone || user.phoneNumber}
                             </span>
                           </div>
                         </div>
@@ -145,7 +159,9 @@ const UsersTable = () => {
                       <TableCell className='py-4'>
                         <Badge
                           variant='outline'
-                          className={`${getUserTypeColor(userRole)} font-semibold text-xs px-3 py-1`}
+                          className={`${getUserTypeColor(
+                            userRole
+                          )} font-semibold text-xs px-3 py-1`}
                         >
                           {userRole}
                         </Badge>

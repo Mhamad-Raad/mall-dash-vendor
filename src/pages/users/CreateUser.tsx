@@ -10,16 +10,13 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UserPlus, ArrowLeft, Save } from 'lucide-react';
-import UserTypeSelector from '@/components/Users/UserTypeSelector';
 import StaffForm from '@/components/Users/forms/StaffForm';
-import CustomerForm from '@/components/Users/forms/CustomerForm';
 
-import { createUser } from '@/data/Users';
+import { createVendorStaff, StaffRole } from '@/data/Users';
 
 export default function CreateUser() {
   const navigate = useNavigate();
 
-  const [type, setType] = useState('Staff');
   const [staffFormData, setStaffFormData] = useState({
     firstName: '',
     lastName: '',
@@ -27,20 +24,7 @@ export default function CreateUser() {
     password: '',
     confirmPassword: '',
     phoneNumber: '',
-    role: 1,
-    photo: null,
-  });
-
-  const [customerFormData, setCustomerFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    phoneNumber: '',
-    buildingId: '',
-    floorId: '',
-    apartmentId: '',
+    role: StaffRole.Staff,
     photo: null,
   });
 
@@ -51,11 +35,6 @@ export default function CreateUser() {
     setStaffFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handler to update customer form data
-  const handleCustomerInputChange = (field: string, value: unknown) => {
-    setCustomerFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleBack = () => {
     navigate('/users');
   };
@@ -63,48 +42,54 @@ export default function CreateUser() {
   const handleCreateUser = async () => {
     setLoading(true);
 
-    let data = {};
+    let res: any = {};
     let userName = '';
 
-    if (type === 'Staff') {
-      const { confirmPassword, photo, ...userData } = staffFormData;
+    const { confirmPassword, photo, ...userData } = staffFormData;
 
-      if (staffFormData.password !== staffFormData.confirmPassword) {
-        toast.error('Passwords do not match', {
-          description: 'Please make sure both password fields are identical.',
-        });
-        setLoading(false);
-        return;
-      }
-
-      userName = `${staffFormData.firstName} ${staffFormData.lastName}`;
-      data = {
-        ...userData,
-        ...(photo ? { ProfileImageUrl: photo } : {}),
-      };
-    } else if (type === 'Customer') {
-      const { confirmPassword, photo, buildingId, floorId, apartmentId, ...userData } = customerFormData;
-
-      if (customerFormData.password !== customerFormData.confirmPassword) {
-        toast.error('Passwords do not match', {
-          description: 'Please make sure both password fields are identical.',
-        });
-        setLoading(false);
-        return;
-      }
-
-      userName = `${customerFormData.firstName} ${customerFormData.lastName}`;
-      data = {
-        ...userData,
-        role: 3, // Tenant role index
-        ...(photo ? { ProfileImageUrl: photo } : {}),
-        ...(buildingId ? { buildingId: parseInt(buildingId) } : {}),
-        ...(floorId ? { floorId: parseInt(floorId) } : {}),
-        ...(apartmentId ? { apartmentId: parseInt(apartmentId) } : {}),
-      };
+    if (
+      !userData.firstName ||
+      !userData.lastName ||
+      !userData.email ||
+      !userData.password ||
+      !userData.phoneNumber
+    ) {
+      toast.error('Missing Required Fields', {
+        description: 'Please fill in all required fields.',
+      });
+      setLoading(false);
+      return;
     }
 
-    const res = await createUser(data as any);
+    if (userData.password.length < 6) {
+      toast.error('Password too short', {
+        description: 'Password must be at least 6 characters long.',
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (staffFormData.password !== staffFormData.confirmPassword) {
+      toast.error('Passwords do not match', {
+        description: 'Please make sure both password fields are identical.',
+      });
+      setLoading(false);
+      return;
+    }
+
+    userName = `${staffFormData.firstName} ${staffFormData.lastName}`;
+
+    const apiData = {
+      FirstName: userData.firstName,
+      LastName: userData.lastName,
+      Email: userData.email,
+      PhoneNumber: userData.phoneNumber,
+      Password: userData.password,
+      Role: userData.role,
+      ...(photo ? { ProfileImageUrl: photo } : {}),
+    };
+
+    res = await createVendorStaff(apiData);
 
     setLoading(false);
 
@@ -140,10 +125,10 @@ export default function CreateUser() {
             </div>
             <div className='min-w-0'>
               <h1 className='text-xl sm:text-2xl font-bold tracking-tight'>
-                Create New User
+                Create New Staff
               </h1>
               <p className='text-xs sm:text-sm text-muted-foreground'>
-                Add a new user to the system
+                Add a new staff member to the system
               </p>
             </div>
           </div>
@@ -151,50 +136,47 @@ export default function CreateUser() {
 
         {/* Main Content */}
         <div className='space-y-6'>
-          {/* User Type Selection */}
-          <UserTypeSelector selectedType={type} onTypeChange={setType} />
-
           {/* Form Fields */}
           <Card>
             <CardHeader>
-              <CardTitle className='text-lg'>User Information</CardTitle>
+              <CardTitle className='text-lg'>Staff Information</CardTitle>
               <CardDescription>
-                Fill in the details for the new {type.toLowerCase()}
+                Fill in the details for the new staff member
               </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-6'>
-              {type === 'Staff' && (
-                <StaffForm
-                  formData={staffFormData}
-                  onInputChange={handleStaffInputChange}
-                />
-              )}
-              {type === 'Customer' && (
-                <CustomerForm
-                  formData={customerFormData}
-                  onInputChange={handleCustomerInputChange}
-                />
-              )}
+            <CardContent>
+              <StaffForm
+                formData={staffFormData}
+                onInputChange={handleStaffInputChange}
+              />
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Sticky Footer with Action Buttons */}
-      <div className='sticky bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 px-4 md:px-6'>
-        <div className='flex gap-2 justify-end'>
-          <Button variant='outline' onClick={handleBack} className='gap-2'>
-            Cancel
-          </Button>
-          <Button
-            className='gap-2'
-            onClick={handleCreateUser}
-            disabled={loading}
-          >
-            <Save className='size-4' />
-            {loading ? 'Creating...' : 'Create User'}
-          </Button>
-        </div>
+      {/* Footer Actions */}
+      <div className='absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-background/80 backdrop-blur-sm border-t flex items-center justify-end gap-3 md:gap-4 z-10'>
+        <Button
+          variant='outline'
+          onClick={handleBack}
+          className='min-w-[100px]'
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={handleCreateUser}
+          className='min-w-[140px] shadow-lg shadow-primary/20'
+          disabled={loading}
+        >
+          {loading ? (
+            'Creating...'
+          ) : (
+            <>
+              <Save className='size-4 mr-2' />
+              Create User
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );
