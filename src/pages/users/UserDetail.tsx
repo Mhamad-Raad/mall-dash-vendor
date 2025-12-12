@@ -239,7 +239,7 @@ const UserDetail = () => {
   };
 
   const handleDeleteUser = async () => {
-    const deleteId = id || user.userId;
+    const deleteId = id || user.id || user.userId || user._id;
     if (!deleteId) {
       toast.error('User ID not found');
       return;

@@ -133,6 +133,23 @@ export const updateUser = async (
   }
 };
 
+// Delete vendor staff by ID (DELETE request)
+export const deleteVendorStaff = async (id: string | number) => {
+  try {
+    const response = await axiosInstance.delete(`/VendorStaff/${id}`, {
+      headers: { key: API_KEY, value: API_VALUE },
+    });
+    console.log(`Vendor staff ${id} deleted successfully`);
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      `Delete vendor staff ${id} failed:`,
+      error.response?.data || error.message
+    );
+    return { error: error.response?.data?.message || error.message };
+  }
+};
+
 // Delete user by ID (DELETE request)
 export const deleteUser = async (id: string) => {
   try {

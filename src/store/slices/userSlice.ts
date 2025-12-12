@@ -4,7 +4,7 @@ import type { UserType } from '@/interfaces/Users.interface';
 import {
   fetchUserById as fetchUserByIdAPI,
   updateVendorStaff as updateVendorStaffAPI,
-  deleteUser as deleteUserAPI,
+  deleteVendorStaff as deleteVendorStaffAPI,
 } from '@/data/Users';
 import { initialUser } from '@/constants/Users';
 
@@ -77,8 +77,8 @@ export const updateUser = createAsyncThunk(
 
 export const deleteUser = createAsyncThunk(
   'user/deleteUser',
-  async (id: string, { rejectWithValue }) => {
-    const data = await deleteUserAPI(id);
+  async (id: string | number, { rejectWithValue }) => {
+    const data = await deleteVendorStaffAPI(id);
     if (data.error) return rejectWithValue(data.error);
     return data;
   }
