@@ -38,59 +38,25 @@ const LoadingPage = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { refreshToken } = getStoredTokens();
-      if (!refreshToken) {
+      // Check session validity using HTTP-only cookie
+      const isValid = await validateRefreshToken();
+
+      if (!isValid) {
+        dispatch(clearMe());
+        dispatch(clearVendorProfile());
         setIsAuthorized(false);
         return;
       }
-      const refreshTokenIsValid = await validateRefreshToken(refreshToken);
-      if (!refreshTokenIsValid) {
-        clearTokens();
-        setIsAuthorized(false);
-        return;
-      }
-
-      // Check only token validity for now
-
-      // Always fetch user and vendor profile to ensure data freshness
-      // Removed per user request for now
-      /*
-      try {
-        const response = await fetchMe();
-        if (response.error || !response.user) {
-          // Failed to fetch me data or data is incomplete
-          toast.error(
-            'Session expired or invalid data. Please log in again.'
-          );
-          await logoutUser();
-          return;
-        }
-
-        // Populate reducers
-        dispatch(setMe(response.user));
-        if (response.vendorProfile) {
-          dispatch(setVendorProfile(response.vendorProfile));
-        } else {
-          dispatch(clearVendorProfile());
-        }
-      } catch (error) {
-        console.error('Error fetching me data:', error);
-        toast.error('An error occurred. Please log in again.');
-        await logoutUser();
-        return;
-      }
-      */
 
       setIsAuthorized(true);
     };
 
-    // Give time for localStorage update after login
+    // Give time for cookie to be set/checked
     const timer = setTimeout(() => {
       checkAuth();
     }, 50);
 
     return () => clearTimeout(timer);
-    // Removed user and profile from dependencies to prevent infinite loop
   }, [dispatch]);
 
   useEffect(() => {
