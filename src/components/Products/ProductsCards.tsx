@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 
 import ProductsCardsSkeleton from './ProductsCardsSkeleton';
 import CustomTablePagination from '../CustomTablePagination';

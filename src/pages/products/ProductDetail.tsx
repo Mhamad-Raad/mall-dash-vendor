@@ -33,7 +33,6 @@ const ProductDetail = () => {
     product,
     lproduct: loading,
     eproduct: error,
-    updating,
     updatingError,
     deleting,
     deletingError,
@@ -76,13 +75,12 @@ const ProductDetail = () => {
           : null) ||
       Boolean(product.inStock) !== Boolean(formData.inStock) ||
       Boolean(product.isWeightable) !== Boolean(formData.isWeightable) ||
-      (product.categoryId ?? null) !== (formData.categoryId ?? null) ||
-      (product.productImageUrl ?? '') !== (formData.productImageUrl ?? '')
+      (product.categoryId ?? undefined) !== formData.categoryId
     );
   }, [product, formData]);
 
-  const changes = useMemo((): ChangeDetail[] => {
-    if (!product || !product.id) return [];
+  const changes = useMemo<ChangeDetail[]>(() => {
+    if (!product) return [];
     const changesList: ChangeDetail[] = [];
     const fieldLabels: Record<string, string> = {
       name: 'Product Name',
@@ -158,46 +156,6 @@ const ProductDetail = () => {
     });
     return changesList;
   }, [product, formData]);
-
-  const deleteSummary = useMemo((): ChangeDetail[] => {
-    if (!product || !product.id) return [];
-    return [
-      { field: 'Product Name', oldValue: product.name ?? '', newValue: '—' },
-      {
-        field: 'Description',
-        oldValue: product.description ?? '',
-        newValue: '—',
-      },
-      {
-        field: 'Price',
-        oldValue: `$${(product.price ?? 0).toFixed(2)}`,
-        newValue: '—',
-      },
-      {
-        field: 'Discount Price',
-        oldValue:
-          product.discountPrice == null
-            ? '—'
-            : `$${product.discountPrice.toFixed(2)}`,
-        newValue: '—',
-      },
-      {
-        field: 'Category',
-        oldValue: product.categoryName ?? String(product.categoryId ?? ''),
-        newValue: '—',
-      },
-      {
-        field: 'In Stock',
-        oldValue: product.inStock ? 'Yes' : 'No',
-        newValue: '—',
-      },
-      {
-        field: 'Weightable',
-        oldValue: product.isWeightable ? 'Yes' : 'No',
-        newValue: '—',
-      },
-    ];
-  }, [product]);
 
   const handleInputChange = (
     field: keyof ProductFormData,
@@ -356,4 +314,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-

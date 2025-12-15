@@ -1,20 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { toast } from 'sonner';
+import { useDispatch } from 'react-redux';
 import Layout from '@/components/Layout/DashboardLayout';
 import {
-  getStoredTokens,
   validateRefreshToken,
-  clearTokens,
 } from '@/utils/authUtils';
-import { logoutUser, fetchMe } from '@/data/Authorization';
 import Logo from '@/assets/Logo.jpg';
 import { Loader2 } from 'lucide-react';
-import type { RootState } from '@/store/store';
-import { setMe, clearMe } from '@/store/slices/meSlice';
+import { clearMe } from '@/store/slices/meSlice';
 import {
-  setVendorProfile,
   clearVendorProfile,
 } from '@/store/slices/vendorSlice';
 
@@ -22,9 +16,6 @@ const LoadingPage = () => {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const { user } = useSelector((state: RootState) => state.me);
-  const { profile } = useSelector((state: RootState) => state.vendor);
 
   useEffect(() => {
     const handler = () => {

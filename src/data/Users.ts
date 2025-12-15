@@ -3,10 +3,12 @@ import { axiosInstance } from '@/data/axiosInstance';
 const API_KEY = import.meta.env.VITE_API_KEY;
 const API_VALUE = import.meta.env.VITE_API_VALUE;
 
-export enum StaffRole {
-  Staff = 0,
-  Driver = 1,
-}
+export const StaffRole = {
+  Staff: 0,
+  Driver: 1,
+} as const;
+
+export type StaffRole = (typeof StaffRole)[keyof typeof StaffRole];
 
 export const fetchStaff = async (params?: {
   page?: number;

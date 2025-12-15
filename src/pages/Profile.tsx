@@ -1,15 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { RootState } from '@/store/store';
 import { updateUser } from '@/data/Users';
-import { fetchMe, logoutUser } from '@/data/Authorization';
-import { setMe, clearMe } from '@/store/slices/meSlice';
-import {
-  setVendorProfile,
-  clearVendorProfile,
-} from '@/store/slices/vendorSlice';
+import { setMe } from '@/store/slices/meSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,11 +15,10 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Camera, Save, User } from 'lucide-react';
+import { Loader2, Camera, Save } from 'lucide-react';
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.me);
 
   const [loading, setLoading] = useState(false);

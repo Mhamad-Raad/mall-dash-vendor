@@ -9,15 +9,22 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, Users as UsersIcon, CheckCircle2 } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Filter,
+  Users as UsersIcon,
+  CheckCircle2,
+} from 'lucide-react';
 
 const UsersFilters = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   // Use index, -1 means "All"
-  const [search, setSearch] = useState(() => searchParams.get('searchTerm') || '');
+  const [search, setSearch] = useState(
+    () => searchParams.get('searchTerm') || ''
+  );
   // typedSearch is what user is typing, search is debounced value synced to URL
   const [typedSearch, setTypedSearch] = useState(search);
 

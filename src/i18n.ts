@@ -6,7 +6,7 @@ import ar from './locales/ar.json';
 import ku from './locales/ku.json';
 
 import sidebarEn from './locales/Sidebar/en.json';
-import navbarEn from './locales/Navbar/en.json';
+import navbarEn from './locales/navbar/en.json';
 
 import themesEn from './locales/Themes/en.json';
 import themesAr from './locales/Themes/ar.json';
