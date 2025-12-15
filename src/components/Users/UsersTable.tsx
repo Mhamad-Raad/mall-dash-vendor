@@ -1,7 +1,13 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { Mail, Phone, Building2, User as UserIcon, ChevronRight } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Building2,
+  User as UserIcon,
+  ChevronRight,
+} from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -18,19 +24,15 @@ import {
 import UsersTableSkeleton from './UsersTableSkeleton';
 import CustomTablePagination from '../CustomTablePagination';
 
-import roles from '@/constants/roles';
-
 import type { RootState } from '@/store/store';
+
+const staffRoles = ['Staff', 'Driver'];
 
 const getUserTypeColor = (type: string) => {
   const typeLower = type.toLowerCase();
-  if (typeLower === 'superadmin')
-    return 'bg-red-500/10 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-500/30 dark:border-red-500/40';
-  if (typeLower === 'admin')
-    return 'bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 border-purple-500/30 dark:border-purple-500/40';
-  if (typeLower === 'vendor')
+  if (typeLower === 'staff')
     return 'bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/30 dark:border-blue-500/40';
-  if (typeLower === 'tenant')
+  if (typeLower === 'driver')
     return 'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/30 dark:border-emerald-500/40';
   return 'bg-gray-500/10 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400 border-gray-500/30 dark:border-gray-500/40';
 };
@@ -65,7 +67,7 @@ const UsersTable = () => {
           <TableHeader>
             <TableRow className='hover:bg-transparent border-b bg-muted/50'>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                User
+                Staff Member
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
                 Contact
@@ -86,17 +88,22 @@ const UsersTable = () => {
                 ))
               : users.map((user, index) => {
                   const fullName = `${user.firstName} ${user.lastName}`;
-                  const userRole = roles[user.role];
+                  const userRole =
+                    typeof user.role === 'number'
+                      ? staffRoles[user.role]
+                      : user.role || 'Unknown';
                   // Generate initials for fallback
-                  const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase();
+                  const initials = `${user.firstName?.[0] || ''}${
+                    user.lastName?.[0] || ''
+                  }`.toUpperCase();
                   // Use profileImageUrl or src (backward compatibility)
                   const avatarSrc = user.profileImageUrl || user.src;
 
                   return (
                     <TableRow
-                      key={`${user?._id}-${index}`}
+                      key={`${user?.userId}-${index}`}
                       className='group hover:bg-muted/50 transition-all cursor-pointer border-b last:border-0'
-                      onClick={() => handleRowClick(user?._id)}
+                      onClick={() => handleRowClick(user?.id as string)}
                     >
                       {/* User Info with Avatar */}
                       <TableCell className='font-medium py-4'>
@@ -107,7 +114,8 @@ const UsersTable = () => {
                               alt={fullName}
                               onError={(e) => {
                                 // Hide broken images gracefully
-                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).style.display =
+                                  'none';
                               }}
                             />
                             <AvatarFallback className='text-sm font-semibold bg-gradient-to-br from-primary/20 to-primary/10 text-primary'>
@@ -121,7 +129,7 @@ const UsersTable = () => {
                               {fullName}
                             </span>
                             <span className='text-[11px] text-muted-foreground font-mono leading-tight'>
-                              {user?._id.slice(-8)}
+                              {String(user?.userId ?? '').slice(-8)}
                             </span>
                           </div>
                         </div>
@@ -133,14 +141,16 @@ const UsersTable = () => {
                             <div className='flex items-center justify-center w-6 h-6 rounded-md bg-muted group-hover:bg-primary/10 transition-colors'>
                               <Mail className='h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors' />
                             </div>
-                            <span className='text-xs text-foreground/80'>{user.email}</span>
+                            <span className='text-xs text-foreground/80'>
+                              {user.email}
+                            </span>
                           </div>
                           <div className='flex items-center gap-2.5'>
                             <div className='flex items-center justify-center w-6 h-6 rounded-md bg-muted group-hover:bg-primary/10 transition-colors'>
                               <Phone className='h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors' />
                             </div>
                             <span className='text-xs font-medium text-foreground/80'>
-                              {user.phoneNumber}
+                              {user.phone || user.phoneNumber}
                             </span>
                           </div>
                         </div>
@@ -149,7 +159,9 @@ const UsersTable = () => {
                       <TableCell className='py-4'>
                         <Badge
                           variant='outline'
-                          className={`${getUserTypeColor(userRole)} font-semibold text-xs px-3 py-1`}
+                          className={`${getUserTypeColor(
+                            userRole
+                          )} font-semibold text-xs px-3 py-1`}
                         >
                           {userRole}
                         </Badge>

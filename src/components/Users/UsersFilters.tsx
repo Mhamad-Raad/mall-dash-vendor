@@ -9,25 +9,29 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, Users as UsersIcon, Shield } from 'lucide-react';
-
-const roles = ['SuperAdmin', 'Admin', 'Vendor', 'Tenant'];
+import {
+  Search,
+  Plus,
+  Filter,
+  Users as UsersIcon,
+  CheckCircle2,
+} from 'lucide-react';
 
 const UsersFilters = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   // Use index, -1 means "All"
-  const [search, setSearch] = useState(() => searchParams.get('search') || '');
+  const [search, setSearch] = useState(
+    () => searchParams.get('searchTerm') || ''
+  );
   // typedSearch is what user is typing, search is debounced value synced to URL
   const [typedSearch, setTypedSearch] = useState(search);
 
-  const [byBuildingName, setByBuildingName] = useState<string>('');
-
-  const [role, setRole] = useState(() =>
-    searchParams.get('role') !== null ? Number(searchParams.get('role')) : -1
-  );
+  const [isActive, setIsActive] = useState<string>(() => {
+    const param = searchParams.get('isActive');
+    return param === null ? 'all' : param;
+  });
 
   // Debounce for search input
   const debounceRef = useRef<any>(null);
@@ -46,36 +50,32 @@ const UsersFilters = () => {
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     if (search) {
-      params.set('search', search);
+      params.set('searchTerm', search);
     } else {
-      params.delete('search');
+      params.delete('searchTerm');
     }
-    if (byBuildingName) {
-      params.set('buildingNameSearch', byBuildingName);
+
+    if (isActive !== 'all') {
+      params.set('isActive', isActive);
     } else {
-      params.delete('buildingNameSearch');
+      params.delete('isActive');
     }
-    if (role !== -1) {
-      params.set('role', String(role));
-    } else {
-      params.delete('role');
-    }
+
     params.set('page', '1');
     navigate(`${window.location.pathname}?${params.toString()}`, {
       replace: true,
     });
     // eslint-disable-next-line
-  }, [search, byBuildingName, role]);
+  }, [search, isActive]);
 
   // Sync state if URL changes externally (browser nav)
   useEffect(() => {
-    const urlSearch = searchParams.get('search') || '';
+    const urlSearch = searchParams.get('searchTerm') || '';
     setSearch(urlSearch);
     setTypedSearch(urlSearch);
-    setRole(
-      searchParams.get('role') !== null ? Number(searchParams.get('role')) : -1
-    );
-    setByBuildingName(searchParams.get('buildingNameSearch') || '');
+
+    const activeParam = searchParams.get('isActive');
+    setIsActive(activeParam === null ? 'all' : activeParam);
     // eslint-disable-next-line
   }, [searchParams]);
 
@@ -93,10 +93,10 @@ const UsersFilters = () => {
           </div>
           <div>
             <h2 className='text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text'>
-              Users Management
+              Staff Management
             </h2>
             <p className='text-sm text-muted-foreground mt-0.5'>
-              Manage and monitor all users across your platform
+              Manage your vendor staff and drivers
             </p>
           </div>
         </div>
@@ -107,7 +107,7 @@ const UsersFilters = () => {
           onClick={handleOnCreate}
         >
           <Plus className='size-4' />
-          <span className='font-semibold'>Add User</span>
+          <span className='font-semibold'>Add Staff</span>
         </Button>
       </div>
 
@@ -119,7 +119,7 @@ const UsersFilters = () => {
               <Filter className='size-4 text-primary' />
             </div>
             <span className='text-sm font-semibold text-foreground'>
-              Filter Users
+              Filter Staff
             </span>
           </div>
           <div className='w-full grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
@@ -130,46 +130,29 @@ const UsersFilters = () => {
               </div>
               <Input
                 type='text'
-                placeholder='Name or email...'
+                placeholder='Search staff...'
                 className='pl-10 bg-background w-full shadow-sm border-muted-foreground/20 focus-visible:border-primary/50 transition-colors h-11'
                 value={typedSearch}
                 onChange={(e) => setTypedSearch(e.target.value)}
               />
             </div>
 
-            {/* Role Filter */}
+            {/* Status Filter */}
             <div className='relative w-full'>
               <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3.5 z-10'>
-                <Shield className='size-4' />
+                <CheckCircle2 className='size-4' />
               </div>
               <Select
-                value={String(role)}
-                onValueChange={(val) => setRole(Number(val))}
+                value={isActive}
+                onValueChange={(val) => setIsActive(val)}
               >
                 <SelectTrigger className='w-full bg-background shadow-sm border-muted-foreground/20 focus:border-primary/50 transition-colors pl-10 [&>span]:pl-0 !h-11'>
-                  <SelectValue
-                    placeholder='Select role'
-                    children={
-                      role === -1 ? 'All Roles' : roles[role] || 'Unknown'
-                    }
-                  />
+                  <SelectValue placeholder='Select status' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='-1'>
-                    <div className='flex items-center gap-2'>
-                      <span>All Roles</span>
-                      <Badge variant='secondary' className='ml-auto text-xs'>
-                        All
-                      </Badge>
-                    </div>
-                  </SelectItem>
-                  {roles.map((roleName, idx) => (
-                    <SelectItem key={roleName} value={String(idx)}>
-                      <div className='flex items-center gap-2'>
-                        <span>{roleName}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  <SelectItem value='all'>All Status</SelectItem>
+                  <SelectItem value='true'>Active</SelectItem>
+                  <SelectItem value='false'>Inactive</SelectItem>
                 </SelectContent>
               </Select>
             </div>

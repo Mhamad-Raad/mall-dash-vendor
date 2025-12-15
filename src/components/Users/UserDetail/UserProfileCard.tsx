@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -9,14 +15,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import roles from '@/constants/roles';
+import { StaffRole } from '@/data/Users';
 import { Image as ImageIcon, X } from 'lucide-react';
 import type { UserFormData } from '@/interfaces/Users.interface';
 
 interface UserProfileCardProps {
   formData: UserFormData;
-  onInputChange: (field: keyof UserFormData, value: string | number | File) => void;
+  onInputChange: (
+    field: keyof UserFormData,
+    value: string | number | File
+  ) => void;
 }
+
+const staffRoles = [
+  { label: 'Staff', value: StaffRole.Staff },
+  { label: 'Driver', value: StaffRole.Driver },
+];
 
 const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
   const [preview, setPreview] = useState<string>('');
@@ -48,9 +62,7 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
     <Card>
       <CardHeader>
         <CardTitle className='text-lg'>User Information</CardTitle>
-        <CardDescription>
-          View and update user profile details
-        </CardDescription>
+        <CardDescription>View and update user profile details</CardDescription>
       </CardHeader>
       <CardContent className='space-y-8'>
         {/* Profile Picture & Name Section */}
@@ -68,11 +80,17 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
               className='w-full h-full rounded-full bg-background flex items-center justify-center border-2 border-dashed border-muted-foreground/25 overflow-hidden cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-all group'
             >
               {preview ? (
-                <img src={preview} alt='Preview' className='w-full h-full object-cover' />
+                <img
+                  src={preview}
+                  alt='Preview'
+                  className='w-full h-full object-cover'
+                />
               ) : (
                 <div className='flex flex-col items-center gap-2'>
                   <ImageIcon className='size-12 text-muted-foreground/50 group-hover:text-primary/70 transition-colors' />
-                  <span className='text-xs text-muted-foreground'>Upload Photo</span>
+                  <span className='text-xs text-muted-foreground'>
+                    Upload Photo
+                  </span>
                 </div>
               )}
             </label>
@@ -126,17 +144,17 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
                   <SelectValue placeholder='Select a role' />
                 </SelectTrigger>
                 <SelectContent>
-                  {roles.map((role, index) => (
-                    <SelectItem key={index} value={String(index)}>
-                      {role}
+                  {staffRoles.map((role) => (
+                    <SelectItem key={role.value} value={String(role.value)}>
+                      {role.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            {formData._id && (
+            {(formData.userId || formData.id || formData._id) && (
               <p className='text-xs text-muted-foreground'>
-                User ID: {formData._id}
+                User ID: {formData.userId || formData.id || formData._id}
               </p>
             )}
           </div>

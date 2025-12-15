@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,11 +8,14 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { loginUser } from '@/data/Authorization';
-import { getStoredTokens, validateRefreshToken } from '@/utils/authUtils';
+import { validateRefreshToken } from '@/utils/authUtils';
 import Logo from '@/assets/Logo.jpg';
+import { setMe } from '@/store/slices/meSlice';
+import { setVendorProfile } from '@/store/slices/vendorSlice';
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -22,13 +26,11 @@ const Login = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { refreshToken } = getStoredTokens();
-      if (refreshToken) {
-        const refreshTokenIsValid = await validateRefreshToken(refreshToken);
-        if (refreshTokenIsValid) {
-          navigate('/');
-          return;
-        }
+      // Try to validate session using HTTP-only cookie
+      const isValid = await validateRefreshToken();
+      if (isValid) {
+        navigate('/');
+        return;
       }
       setIsCheckingSession(false);
     };
@@ -46,6 +48,12 @@ const Login = () => {
         toast.error('Email or password is incorrect');
         setIsLocked(true);
       } else {
+        if (response.user) {
+          dispatch(setMe(response.user));
+        }
+        if (response.vendorProfile) {
+          dispatch(setVendorProfile(response.vendorProfile));
+        }
         toast.success('Login successful!');
         navigate('/');
       }

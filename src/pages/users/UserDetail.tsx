@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UserDetailHeader from '@/components/Users/UserDetail/UserDetailHeader';
+import UserDetailFooter from '@/components/Users/UserDetail/UserDetailFooter';
 import UserProfileCard from '@/components/Users/UserDetail/UserProfileCard';
 import ContactInfoCard from '@/components/Users/UserDetail/ContactInfoCard';
 import LocationRoleCard from '@/components/Users/UserDetail/LocationRoleCard';
@@ -19,7 +20,7 @@ import {
 } from '@/store/slices/userSlice';
 import { toast } from 'sonner';
 import { initialUser } from '@/constants/Users';
-import roles from '@/constants/roles';
+import { StaffRole } from '@/data/Users';
 
 import type { UserFormData } from '@/interfaces/Users.interface';
 
@@ -27,6 +28,8 @@ const UserDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+
+  console.log(id);
 
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -48,23 +51,31 @@ const UserDetail = () => {
 
   // Track if any changes have been made
   const hasChanges = useMemo(() => {
-    if (!user || !user._id) return false;
+    if (!user || (!user.userId && !user.id)) return false;
 
     // Check if image file was added
     if (formData.imageFile instanceof File) return true;
 
     // Check other fields for changes
+    // Normalize user role for comparison
+    let userRole = user.role;
+    if (typeof user.role === 'string') {
+      if (user.role.toLowerCase() === 'staff') userRole = StaffRole.Staff;
+      else if (user.role.toLowerCase() === 'driver')
+        userRole = StaffRole.Driver;
+    }
+
     return (
       user.firstName !== formData.firstName ||
       user.lastName !== formData.lastName ||
       user.email !== formData.email ||
-      user.phoneNumber !== formData.phoneNumber ||
-      user.role !== formData.role
+      (user.phone || user.phoneNumber) !== formData.phoneNumber ||
+      userRole !== formData.role
     );
   }, [user, formData]);
 
   const changes = useMemo((): ChangeDetail[] => {
-    if (!user || !user._id) return [];
+    if (!user || (!user.userId && !user.id)) return [];
     const changesList: ChangeDetail[] = [];
     const fieldLabels: Record<string, string> = {
       firstName: 'First Name',
@@ -87,17 +98,36 @@ const UserDetail = () => {
     (
       ['firstName', 'lastName', 'email', 'phoneNumber', 'role'] as const
     ).forEach((key) => {
-      if (user[key] !== formData[key]) {
-        let oldVal = user[key];
+      let userValue = user[key];
+      if (key === 'phoneNumber') userValue = user.phone || user.phoneNumber;
+
+      // Normalize role for comparison
+      if (key === 'role' && typeof userValue === 'string') {
+        if (userValue.toLowerCase() === 'staff') userValue = StaffRole.Staff;
+        else if (userValue.toLowerCase() === 'driver')
+          userValue = StaffRole.Driver;
+      }
+
+      if (userValue !== formData[key]) {
+        let oldVal = userValue;
         let newVal = formData[key];
-        if (
-          key === 'role' &&
-          typeof oldVal === 'number' &&
-          typeof newVal === 'number'
-        ) {
-          oldVal = roles[oldVal] || `Role ${oldVal}`;
-          newVal = roles[newVal] || `Role ${newVal}`;
+
+        // For display purposes, convert role back to string if needed or keep as is
+        if (key === 'role') {
+          oldVal =
+            oldVal === StaffRole.Staff
+              ? 'Staff'
+              : oldVal === StaffRole.Driver
+              ? 'Driver'
+              : oldVal;
+          newVal =
+            newVal === StaffRole.Staff
+              ? 'Staff'
+              : newVal === StaffRole.Driver
+              ? 'Driver'
+              : newVal;
         }
+
         changesList.push({
           field: fieldLabels[key],
           oldValue: String(oldVal ?? ''),
@@ -129,14 +159,23 @@ const UserDetail = () => {
 
   useEffect(() => {
     if (user) {
+      let roleValue = user.role;
+      // If role is string, try to map it to number if your form expects number
+      if (typeof user.role === 'string') {
+        if (user.role.toLowerCase() === 'staff') roleValue = StaffRole.Staff;
+        else if (user.role.toLowerCase() === 'driver')
+          roleValue = StaffRole.Driver;
+      }
+
       setFormData({
         ...user,
         firstName: user.firstName ?? '',
         lastName: user.lastName ?? '',
         email: user.email ?? '',
-        phoneNumber: user.phoneNumber ?? '',
+        phoneNumber: user.phone || user.phoneNumber || '',
         buildingName: user.buildingName ?? '',
         profileImageUrl: user.profileImageUrl ?? '',
+        role: roleValue,
         imageFile: undefined, // Always clear file on user load
       });
     }
@@ -150,6 +189,9 @@ const UserDetail = () => {
     if (!updating && showUpdateModal && !updatingError) {
       setShowUpdateModal(false);
       toast.success('User updated successfully!');
+      setTimeout(() => {
+        navigate('/users');
+      }, 3000);
     }
   }, [updating, updatingError]);
 
@@ -171,11 +213,38 @@ const UserDetail = () => {
   const handletoggleDeleteModal = () => setShowDeleteModal((v) => !v);
 
   const handleUpdateUser = async () => {
-    await dispatch(updateUser({ id: id || user._id, update: formData }));
+    // Determine the ID to use - prioritize URL param 'id', then user.id/user.userId
+    const userIdToUpdate = id || user.id || user.userId;
+
+    if (!userIdToUpdate) {
+      toast.error('User ID not found');
+      return;
+    }
+
+    await dispatch(
+      updateUser({
+        id: userIdToUpdate,
+        update: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber || '',
+          role: formData.role,
+          imageFile: formData.imageFile,
+          buildingName: formData.buildingName,
+          isActive: formData.isActive,
+        },
+      })
+    );
   };
 
   const handleDeleteUser = async () => {
-    await dispatch(deleteUser(id || user._id));
+    const deleteId = id || user.id || user.userId || user._id;
+    if (!deleteId) {
+      toast.error('User ID not found');
+      return;
+    }
+    await dispatch(deleteUser(String(deleteId)));
   };
 
   if (error) return <UserErrorCard error={error} />;
@@ -183,12 +252,7 @@ const UserDetail = () => {
 
   return (
     <div className='flex flex-col gap-6 p-4 md:p-6'>
-      <UserDetailHeader
-        onBack={() => navigate(-1)}
-        onSave={handletoggleUpdateModal}
-        onDelete={handletoggleDeleteModal}
-        hasChanges={hasChanges}
-      />
+      <UserDetailHeader onBack={() => navigate(-1)} hasChanges={hasChanges} />
       <UserProfileCard formData={formData} onInputChange={handleInputChange} />
       <div className='grid gap-6 lg:grid-cols-2'>
         <ContactInfoCard
@@ -200,6 +264,11 @@ const UserDetail = () => {
           onInputChange={handleInputChange}
         />
       </div>
+      <UserDetailFooter
+        onSave={handletoggleUpdateModal}
+        onDelete={handletoggleDeleteModal}
+        hasChanges={hasChanges}
+      />
       <ConfirmModal
         open={showUpdateModal}
         title='Update User'

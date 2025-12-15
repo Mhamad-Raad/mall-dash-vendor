@@ -1,12 +1,16 @@
 export interface UserType {
-  _id: string;
+  id?: number | string;
+  userId?: string | number;
+  _id?: string; // Optional for backward compatibility
   firstName: string;
   lastName: string;
-  role: number;
+  role: string | number; // Support both string and number
   profileImageUrl: string;
-  phoneNumber: string;
+  phone?: string;
+  phoneNumber?: string; // Support both naming conventions
   email: string;
-  buildingName: string;
+  buildingName?: string;
+  isActive?: boolean;
   // Helper fields for UI
   src?: string; // Alias for profileImageUrl (for backward compatibility)
   fallback?: string; // Generated initials for avatar fallback
