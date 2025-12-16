@@ -1,4 +1,4 @@
-import { TrendingDownIcon, TrendingUpIcon, ShoppingCart, Users, Store, FileText } from 'lucide-react';
+import { TrendingDownIcon, TrendingUpIcon, Package, PackageCheck, PackageX, DollarSign, Users, UserCheck, Truck } from 'lucide-react';
 import {
   Card,
   CardDescription,
@@ -8,30 +8,37 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-import { formatCompact } from '@/lib/formatNumbers';
+import { formatCompact, formatPrice } from '@/lib/formatNumbers';
 
 import type { HomeCardsProps } from '@/interfaces/Home.interface';
 
 const cardIcons = {
-  Orders: ShoppingCart,
-  Users: Users,
-  Vendors: Store,
-  Requests: FileText,
+  'Total Products': Package,
+  'In Stock': PackageCheck,
+  'Out of Stock': PackageX,
+  'Order Revenue': DollarSign,
+  'Employees': Users,
+  'Staff': UserCheck,
+  'Drivers': Truck,
 };
 
 const cardIconColors = {
-  Orders: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
-  Users: 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
-  Vendors: 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400',
-  Requests: 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400',
+  'Total Products': 'bg-primary/10 text-primary dark:bg-primary/20',
+  'In Stock': 'bg-chart-2/10 text-chart-2 dark:bg-chart-2/20',
+  'Out of Stock': 'bg-destructive/10 text-destructive dark:bg-destructive/20',
+  'Order Revenue': 'bg-chart-1/10 text-chart-1 dark:bg-chart-1/20',
+  'Employees': 'bg-accent/10 text-accent-foreground dark:bg-accent/20',
+  'Staff': 'bg-chart-2/10 text-chart-2 dark:bg-chart-2/20',
+  'Drivers': 'bg-chart-1/10 text-chart-1 dark:bg-chart-1/20',
 };
 
 const HomeCards = ({ cards }: HomeCardsProps) => {
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full'>
       {cards.map((card, index: number) => {
-        const Icon = cardIcons[card.title as keyof typeof cardIcons] || FileText;
-        const iconColorClass = cardIconColors[card.title as keyof typeof cardIconColors] || cardIconColors.Requests;
+        const Icon = cardIcons[card.title as keyof typeof cardIcons] || Package;
+        const iconColorClass = cardIconColors[card.title as keyof typeof cardIconColors] || cardIconColors['Total Products'];
+        const isRevenue = card.title === 'Order Revenue';
         
         return (
           <Card key={index} className='@container/card flex flex-col transition-all hover:shadow-lg'>
@@ -42,7 +49,7 @@ const HomeCards = ({ cards }: HomeCardsProps) => {
                     {card.title}
                   </CardDescription>
                   <CardTitle className='text-3xl font-bold tabular-nums'>
-                    {formatCompact(card.value)}
+                    {isRevenue ? formatPrice(card.value) : formatCompact(card.value)}
                   </CardTitle>
                 </div>
                 <div className={`p-3 rounded-full ${iconColorClass}`}>

@@ -17,3 +17,9 @@ export function formatCompact(number: number): string {
   }
   return parseFloat(number.toFixed(2)).toString();
 }
+
+// Example: 1500 => "$1,500.00"
+export function formatPrice(number: number): string {
+  if (number === undefined || number === null) return '$0.00';
+  return '$' + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
