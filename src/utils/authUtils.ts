@@ -11,7 +11,7 @@ export const validateRefreshToken =
     try {
       // The refresh token is sent automatically via HTTP-only cookie
       const response = await axiosInstance.post<RefreshTokenResponse>(
-        '/Account/NewRefreshToken',
+        '/Account/Web/refresh',
         {}
       );
       // Return the response data which should contain the new access token
