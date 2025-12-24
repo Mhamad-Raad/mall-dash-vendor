@@ -1,199 +1,77 @@
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store/store';
 import CardsHome from '@/components/Home/CardsHome';
-import RecentOrdersHome from '@/components/Home/RecentOrdersHome';
-import TopSellingHome from '@/components/Home/TopSellingHome';
-import OrderStatusChart from '@/components/Home/OrderStatusChart';
-import CategoryPerformance from '@/components/Home/CategoryPerformance';
-import OccupancyChart from '@/components/Home/OccupancyChart';
+import OrdersProfitChart from '@/components/Home/OrdersProfitChart';
 
-const cardsInfo = [
-  {
-    title: 'Orders',
-    value: 1010,
-    badge: { text: '-20%', trendingUp: false },
-    footer: 'Down 20% this Month',
-  },
-  {
-    title: 'Users',
-    value: 253,
-    badge: { text: 'App', trendingUp: null },
-    footer: 'Application Wide',
-  },
-  {
-    title: 'Vendors',
-    value: 3,
-    badge: { text: 'Web', trendingUp: null },
-    footer: 'Web Based Vendors',
-  },
-  {
-    title: 'Requests',
-    value: 20,
-    badge: { text: '+5%', trendingUp: true },
-    footer: 'Customer Requests',
-  },
-];
+// Dummy data for demonstration
+const dummyStats = {
+  employees: 24,
+  staff: 18,
+  drivers: 6,
+};
 
-const recentItems = [
-  {
-    id: '1',
-    name: 'Philip George',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-1.png',
-    fallback: 'PG',
-    vendor: 'Mini-Markety barzyakan',
-    location: 'Mumbai, India',
-    status: 'On Going',
-  },
-  {
-    id: '2',
-    name: 'Tiana Curtis',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-2.png',
-    fallback: 'TC',
-    vendor: 'Aland StakeHouse',
-    location: 'New York, US',
-    status: 'Canceled',
-  },
-  {
-    id: '3',
-    name: 'Jaylon Donin',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-3.png',
-    fallback: 'JD',
-    vendor: 'Barzayakan Bakery',
-    location: 'Washington, US',
-    status: 'On the Way',
-  },
-  {
-    id: '4',
-    name: 'Kim Yim',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-4.png',
-    fallback: 'KY',
-    vendor: 'Mini-Markety barzyakany 2',
-    location: 'Busan, South Korea',
-    status: 'Delivered',
-  },
-  {
-    id: '3',
-    name: 'Jaylon Donin',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-3.png',
-    fallback: 'JD',
-    vendor: 'Barzayakan Bakery',
-    location: 'Washington, US',
-    status: 'On the Way',
-  },
-  {
-    id: '4',
-    name: 'Kim Yim',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-4.png',
-    fallback: 'KY',
-    vendor: 'Mini-Markety barzyakany 2',
-    location: 'Busan, South Korea',
-    status: 'Delivered',
-  },
-  {
-    id: '3',
-    name: 'Jaylon Donin',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-3.png',
-    fallback: 'JD',
-    vendor: 'Barzayakan Bakery',
-    location: 'Washington, US',
-    status: 'On the Way',
-  },
-  {
-    id: '4',
-    name: 'Kim Yim',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-4.png',
-    fallback: 'KY',
-    vendor: 'Mini-Markety barzyakany 2',
-    location: 'Busan, South Korea',
-    status: 'Delivered',
-  },
-  {
-    id: '3',
-    name: 'Jaylon Donin',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-3.png',
-    fallback: 'JD',
-    vendor: 'Barzayakan Bakery',
-    location: 'Washington, US',
-    status: 'On the Way',
-  },
-  {
-    id: '4',
-    name: 'Kim Yim',
-    src: 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-4.png',
-    fallback: 'KY',
-    vendor: 'Mini-Markety barzyakany 2',
-    location: 'Busan, South Korea',
-    status: 'Delivered',
-  },
-];
-
-const topSellingItems = [
-  {
-    id: '1',
-    type: 'Market',
-    vendor: 'Mini-Markety barzyakan',
-    sold: 10,
-  },
-  {
-    id: '2',
-    type: 'Restaurant',
-    vendor: 'Aland StakeHouse',
-    sold: 20,
-  },
-  {
-    id: '3',
-    type: 'Bakery',
-    vendor: 'Barzayakan Bakery',
-    sold: 12,
-  },
-  {
-    id: '4',
-    type: 'Market',
-    vendor: 'Mini-Markety barzyakany 2',
-    sold: 100,
-  },
-];
-
-// Order status data
-const orderStatusData = [
-  { status: 'Delivered', count: 156, color: '#22c55e' },
-  { status: 'On the Way', count: 45, color: '#3b82f6' },
-  { status: 'Processing', count: 28, color: '#f59e0b' },
-  { status: 'Cancelled', count: 12, color: '#ef4444' },
-];
-
-// Category performance data
-const categoryData = [
-  { category: 'Groceries', value: 12500, color: '#3b82f6' },
-  { category: 'Restaurants', value: 9800, color: '#f59e0b' },
-  { category: 'Bakery', value: 7200, color: '#ec4899' },
-  { category: 'Fast Food', value: 5400, color: '#8b5cf6' },
+// Dummy orders and profit data for the current month (December 2025)
+const ordersData = [
+  { day: 'Dec 1', orders: 8, profit: 1250.00 },
+  { day: 'Dec 2', orders: 23, profit: 420.50 },
+  { day: 'Dec 3', orders: 15, profit: 890.75 },
+  { day: 'Dec 4', orders: 28, profit: 1520.00 },
+  { day: 'Dec 5', orders: 12, profit: 340.25 },
+  { day: 'Dec 6', orders: 19, profit: 2100.00 },
+  { day: 'Dec 7', orders: 31, profit: 780.50 },
+  { day: 'Dec 8', orders: 9, profit: 1680.00 },
+  { day: 'Dec 9', orders: 25, profit: 950.25 },
+  { day: 'Dec 10', orders: 17, profit: 520.00 },
+  { day: 'Dec 11', orders: 22, profit: 1890.75 },
+  { day: 'Dec 12', orders: 14, profit: 670.50 },
+  { day: 'Dec 13', orders: 27, profit: 1150.00 },
+  { day: 'Dec 14', orders: 10, profit: 2340.25 },
+  { day: 'Dec 15', orders: 20, profit: 810.00 },
+  { day: 'Dec 16', orders: 36, profit: 1420.50 },
 ];
 
 const Home = () => {
+  const { profile } = useSelector((state: RootState) => state.vendor);
+
+  // Cards info based on dummy data
+  const cardsInfo = [
+    {
+      title: 'Employees',
+      value: dummyStats.employees,
+      badge: { text: 'Total', trendingUp: null },
+      footer: 'Total employees in your store',
+    },
+    {
+      title: 'Staff',
+      value: dummyStats.staff,
+      badge: { text: '+3 this month', trendingUp: true },
+      footer: 'Active staff members',
+    },
+    {
+      title: 'Drivers',
+      value: dummyStats.drivers,
+      badge: { text: 'Available', trendingUp: null },
+      footer: 'Delivery drivers',
+    },
+  ];
+
   return (
-    <div className='flex flex-col gap-6 p-4 md:p-6'>
+    <div className='flex flex-col gap-4 w-full p-2'>
+      {/* Welcome Message */}
+      {profile && (
+        <div className='flex flex-col gap-1 mb-4'>
+          <h1 className='text-3xl md:text-4xl font-bold'>Welcome back, {profile.name}!</h1>
+          <p className='text-muted-foreground text-lg'>
+            Here's an overview of your team.
+          </p>
+        </div>
+      )}
+
       {/* Stats Cards */}
       <CardsHome cards={cardsInfo} />
 
-      {/* Occupancy Chart */}
-      <OccupancyChart totalApartments={180} occupied={142} totalBuildings={3} />
-
-      {/* Recent Orders and Top Selling */}
-      <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
-        <div className='xl:col-span-2 bg-card border rounded-lg p-6 shadow-sm'>
-          <h3 className='text-lg font-semibold mb-4'>Recent Orders</h3>
-          <RecentOrdersHome items={recentItems} />
-        </div>
-        <div className='xl:col-span-1 bg-card border rounded-lg p-6 shadow-sm'>
-          <h3 className='text-lg font-semibold mb-4'>Top Selling</h3>
-          <TopSellingHome items={topSellingItems} />
-        </div>
-      </div>
-
-      {/* Performance Charts */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        <OrderStatusChart data={orderStatusData} />
-        <CategoryPerformance data={categoryData} />
-      </div>
+      {/* Orders & Profit Chart */}
+      <OrdersProfitChart data={ordersData} />
     </div>
   );
 };
