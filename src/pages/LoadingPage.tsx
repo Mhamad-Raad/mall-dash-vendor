@@ -10,12 +10,14 @@ import { Loader2 } from 'lucide-react';
 import { clearMe } from '@/store/slices/meSlice';
 import {
   clearVendorProfile,
+  getVendorProfile,
 } from '@/store/slices/vendorSlice';
+import type { AppDispatch } from '@/store/store';
 
 const LoadingPage = () => {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const handler = () => {
@@ -37,6 +39,20 @@ const LoadingPage = () => {
         dispatch(clearVendorProfile());
         setIsAuthorized(false);
         return;
+      }
+      
+      // Fetch fresh data
+      try {
+        await Promise.all([
+           // Re-fetch user data if needed, or if validateRefreshToken doesn't return user
+           // Assuming validateRefreshToken handles token logic, we still need store data
+           // We'll dispatch actions to populate store
+           dispatch(getVendorProfile()),
+           // We might need to fetch 'me' as well if it's not persisted or needs refresh
+           // dispatch(fetchMe()) // Assuming such action exists or similar
+        ]);
+      } catch (e) {
+         console.error("Failed to fetch initial data", e);
       }
 
       setIsAuthorized(true);

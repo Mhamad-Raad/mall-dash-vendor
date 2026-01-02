@@ -9,11 +9,10 @@ import {
   Settings,
   FileText,
   ShoppingCart,
-  Building2,
-  Store,
   ChevronRight,
   User,
   Palette,
+  Store,
 } from 'lucide-react';
 
 import { useSelector } from 'react-redux';
@@ -62,14 +61,9 @@ const mainNavItems = [
     icon: Users,
   },
   {
-    titleKey: 'buildings',
-    url: '/buildings',
-    icon: Building2,
-  },
-  {
-    titleKey: 'vendors',
-    url: '/vendors',
-    icon: Store,
+    titleKey: 'account',
+    url: '#',
+    icon: User,
   },
   {
     titleKey: 'products',
@@ -105,6 +99,11 @@ const settingsSubItems = [
     icon: User,
   },
   {
+    titleKey: 'Vendor Profile',
+    url: '/vendor-profile',
+    icon: Store,
+  },
+  {
     titleKey: 'themes',
     url: '/settings/themes',
     icon: Palette,
@@ -116,15 +115,25 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user: me } = useSelector((state: RootState) => state.me);
+  const { profile: vendorProfile } = useSelector(
+    (state: RootState) => state.vendor
+  );
   const [settingsOpen, setSettingsOpen] = useState(() => {
     // Open settings menu by default if we're on a settings page
-    return location.pathname.startsWith('/profile') || location.pathname.startsWith('/settings');
+    return (
+      location.pathname.startsWith('/profile') ||
+      location.pathname.startsWith('/vendor-profile') ||
+      location.pathname.startsWith('/settings')
+    );
   });
 
   const user = {
-    name: me ? `${me.firstName} ${me.lastName}` : 'Guest User',
+    name:
+      vendorProfile?.name || me
+        ? `${me?.firstName} ${me?.lastName}`
+        : 'Guest User',
     email: me?.email || '',
-    avatar: me?.profileImageUrl || '',
+    avatar: vendorProfile?.profileImageUrl || me?.profileImageUrl || '',
     initials: me
       ? `${me.firstName?.[0] || ''}${me.lastName?.[0] || ''}`.toUpperCase()
       : 'GU',
@@ -134,6 +143,10 @@ export function AppSidebar() {
     if (url === '/') {
       return location.pathname === '/';
     }
+    return location.pathname.startsWith(url);
+  };
+
+  const isSettingsActive = (url: string) => {
     return location.pathname.startsWith(url);
   };
 
@@ -156,14 +169,14 @@ export function AppSidebar() {
                 <div className='relative shrink-0'>
                   <div className='absolute inset-0 bg-primary/20 rounded-lg blur-sm group-hover/logo:bg-primary/30 transition-all duration-300' />
                   <img
-                    src={Logo}
-                    title='Akkooo Logo'
-                    className='size-8 rounded-lg relative z-10 shadow-md group-hover/logo:scale-110 transition-transform duration-300'
+                    src={vendorProfile?.profileImageUrl || Logo}
+                    title={vendorProfile?.name || 'Akkooo Logo'}
+                    className='size-8 rounded-lg relative z-10 shadow-md group-hover/logo:scale-110 transition-transform duration-300 object-cover'
                   />
                 </div>
                 <div className='flex flex-col min-w-0'>
                   <span className='text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent group-hover/logo:from-primary group-hover/logo:to-primary transition-all duration-300 truncate'>
-                    {t('appName')}
+                    {vendorProfile?.name || t('appName')}
                   </span>
                   <span className='text-[10px] text-muted-foreground font-medium tracking-wider uppercase truncate'>
                     {t('appSubtitle')}
@@ -183,13 +196,77 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className='mt-2'>
-              {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.titleKey}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={t(item.titleKey)}
-                    isActive={isActive(item.url)}
-                    className={`
+              {mainNavItems.map((item) => {
+                if (item.titleKey === 'account') {
+                  return (
+                    <Collapsible
+                      key={item.titleKey}
+                      asChild
+                      defaultOpen={settingsOpen}
+                      className='group/collapsible'
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton
+                            tooltip={t(item.titleKey)}
+                            isActive={settingsOpen}
+                            className={`
+                            transition-all duration-200
+                            ${
+                              settingsOpen
+                                ? 'bg-muted/50 font-semibold'
+                                : 'hover:bg-muted/50'
+                            }
+                          `}
+                          >
+                            <item.icon className='h-4 w-4' />
+                            <span>{t(item.titleKey)}</span>
+                            <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {settingsSubItems.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.titleKey}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={isSettingsActive(subItem.url)}
+                                  className={`
+                                  transition-all duration-200
+                                  ${
+                                    isSettingsActive(subItem.url)
+                                      ? 'bg-primary/10 text-primary font-medium'
+                                      : 'hover:bg-muted/50'
+                                  }
+                                `}
+                                >
+                                  <a
+                                    href={subItem.url}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      navigate(subItem.url);
+                                    }}
+                                  >
+                                    <subItem.icon className='h-3.5 w-3.5 mr-2 opacity-70' />
+                                    <span>{t(subItem.titleKey)}</span>
+                                  </a>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+
+                return (
+                  <SidebarMenuItem key={item.titleKey}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={t(item.titleKey)}
+                      isActive={isActive(item.url)}
+                      className={`
                       transition-all duration-200
                       ${
                         isActive(item.url)
@@ -197,23 +274,23 @@ export function AppSidebar() {
                           : 'hover:bg-muted/50'
                       }
                     `}
-                  >
-                    <a
-                      href={item.url}
-                      onClick={(e) => {
-                        if (item.url !== '#') {
-                          e.preventDefault();
-                          navigate(item.url);
-                        }
-                      }}
-                      className='cursor-pointer'
                     >
-                      <item.icon className='size-5 shrink-0' />
-                      <span>{t(item.titleKey)}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <a
+                        href={item.url}
+                        onClick={(e) => {
+                          if (item.url !== '#') {
+                            e.preventDefault();
+                            navigate(item.url);
+                          }
+                        }}
+                      >
+                        <item.icon className='h-4 w-4' />
+                        <span>{t(item.titleKey)}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -325,3 +402,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+

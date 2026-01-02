@@ -101,6 +101,38 @@ export const updateVendorStaff = async (
   }
 };
 
+export const updateMyProfile = async (userData: {
+  FirstName: string;
+  LastName: string;
+  Email: string;
+  PhoneNumber: string;
+  ProfileImageUrl?: File;
+}) => {
+  try {
+    const formData = new FormData();
+    formData.append('FirstName', userData.FirstName);
+    formData.append('LastName', userData.LastName);
+    formData.append('Email', userData.Email);
+    formData.append('PhoneNumber', userData.PhoneNumber);
+
+    if (userData.ProfileImageUrl) {
+      formData.append('ProfileImageUrl', userData.ProfileImageUrl);
+    }
+
+    const response = await axiosInstance.put('/Account/me', formData, {
+      headers: {
+        key: API_KEY,
+        value: API_VALUE,
+      },
+      transformRequest: [(data) => data],
+    });
+
+    return response.data;
+  } catch (error: any) {
+    return { error: error.response?.data?.message || error.message };
+  }
+};
+
 export const updateUser = async (
   id: string,
   userData: {

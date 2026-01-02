@@ -15,6 +15,7 @@ import Settings from './pages/Settings';
 import Themes from './pages/settings/Themes';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
+import VendorProfile from './pages/VendorProfile';
 
 import NotFound from './pages/NotFound';
 import ErrorPage from './pages/ErrorPage';
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: '/profile',
         element: <Profile />,
+      },
+      {
+        path: '/vendor-profile',
+        element: <VendorProfile />,
       },
       {
         path: '*',

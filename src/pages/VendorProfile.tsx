@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import type { RootState, AppDispatch } from '@/store/store';
-import { updateMe } from '@/store/slices/meSlice';
+import { updateVendor, getVendorProfile } from '@/store/slices/vendorSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Card,
   CardContent,
@@ -16,71 +17,45 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Camera, Save } from 'lucide-react';
 
-const Profile = () => {
+const VendorProfile = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state.me);
+  const { profile, loading: vendorLoading } = useSelector(
+    (state: RootState) => state.vendor
+  );
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    role: 0,
+    Name: '',
+    Description: '',
+    OpeningTime: '',
+    CloseTime: '',
+    Type: '',
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Removed ensureUserData per user request
-  /*
   useEffect(() => {
-    const ensureUserData = async () => {
-      if (!user) {
-        try {
-          const response = await fetchMe();
-          if (response.error || !response.user) {
-            toast.error('Session expired. Please log in again.');
-            dispatch(clearMe());
-            dispatch(clearVendorProfile());
-            await logoutUser();
-            navigate('/login');
-            return;
-          }
-
-          dispatch(setMe(response.user));
-          if (response.vendorProfile) {
-            dispatch(setVendorProfile(response.vendorProfile));
-          } else {
-            dispatch(clearVendorProfile());
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          toast.error('An error occurred. Please log in again.');
-          await logoutUser();
-          navigate('/login');
-        }
-      }
-    };
-
-    ensureUserData();
-  }, [user, dispatch, navigate]);
-  */
+    // Fetch latest vendor profile on mount
+    dispatch(getVendorProfile());
+  }, [dispatch]);
 
   useEffect(() => {
-    if (user) {
+    if (profile) {
       setFormData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        phoneNumber: user.phoneNumber || '',
-        role: user.role || 0,
+        Name: profile.name || '',
+        Description: profile.description || '',
+        OpeningTime: profile.openingTime || '',
+        CloseTime: profile.closeTime || '',
+        Type: profile.type || '',
       });
-      setPreviewImage(user.profileImageUrl);
+      setPreviewImage(profile.profileImageUrl);
     }
-  }, [user]);
+  }, [profile]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -99,39 +74,35 @@ const Profile = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?._id) return;
+    if (!profile?.id) return;
 
     setLoading(true);
     try {
       const updateData = {
-        FirstName: formData.firstName,
-        LastName: formData.lastName,
-        Email: formData.email,
-        PhoneNumber: formData.phoneNumber,
+        ...formData,
         ProfileImageUrl: profileImage || undefined,
       };
 
-      const resultAction = await dispatch(updateMe(updateData));
+      const resultAction = await dispatch(updateVendor(updateData));
 
-      if (updateMe.fulfilled.match(resultAction)) {
-        toast.success('Profile updated successfully');
-        // Redux state is updated by the reducer
+      if (updateVendor.fulfilled.match(resultAction)) {
+        toast.success('Vendor profile updated successfully');
       } else {
         if (resultAction.payload) {
           toast.error(resultAction.payload as string);
         } else {
-          toast.error('Failed to update profile');
+          toast.error('Failed to update vendor profile');
         }
       }
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error('Failed to update vendor profile');
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!user) {
+  if (!profile && vendorLoading) {
     return (
       <div className='flex justify-center items-center h-full'>
         <Loader2 className='h-8 w-8 animate-spin' />
@@ -143,9 +114,9 @@ const Profile = () => {
     <div className='container mx-auto py-8 max-w-3xl'>
       <Card className='mb-8'>
         <CardHeader>
-          <CardTitle className='text-2xl font-bold'>My Profile</CardTitle>
+          <CardTitle className='text-2xl font-bold'>Vendor Profile</CardTitle>
           <CardDescription>
-            Manage your account settings and preferences.
+            Manage your shop's information and settings.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -159,8 +130,7 @@ const Profile = () => {
                     className='object-cover'
                   />
                   <AvatarFallback className='text-4xl bg-muted'>
-                    {formData.firstName?.[0]?.toUpperCase()}
-                    {formData.lastName?.[0]?.toUpperCase()}
+                    {formData.Name?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div
@@ -178,90 +148,79 @@ const Profile = () => {
                 />
               </div>
               <p className='text-sm text-muted-foreground'>
-                Click to upload a new profile picture
+                Click to upload a new shop logo
               </p>
             </div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {/* First Name */}
+              {/* Name */}
               <div className='space-y-2'>
-                <Label htmlFor='firstName'>First Name</Label>
+                <Label htmlFor='Name'>Shop Name</Label>
                 <Input
-                  id='firstName'
-                  name='firstName'
-                  value={formData.firstName}
+                  id='Name'
+                  name='Name'
+                  value={formData.Name}
                   onChange={handleChange}
                   required
                 />
               </div>
 
-              {/* Last Name */}
+              {/* Type */}
               <div className='space-y-2'>
-                <Label htmlFor='lastName'>Last Name</Label>
+                <Label htmlFor='Type'>Shop Type</Label>
                 <Input
-                  id='lastName'
-                  name='lastName'
-                  value={formData.lastName}
+                  id='Type'
+                  name='Type'
+                  value={formData.Type}
                   onChange={handleChange}
                   required
                 />
               </div>
 
-              {/* Email */}
+              {/* Opening Time */}
               <div className='space-y-2'>
-                <Label htmlFor='email'>Email</Label>
+                <Label htmlFor='OpeningTime'>Opening Time</Label>
                 <Input
-                  id='email'
-                  name='email'
-                  type='email'
-                  value={formData.email}
+                  id='OpeningTime'
+                  name='OpeningTime'
+                  type='time'
+                  step='1'
+                  value={formData.OpeningTime}
                   onChange={handleChange}
                   required
                 />
               </div>
 
-              {/* Phone Number */}
+              {/* Close Time */}
               <div className='space-y-2'>
-                <Label htmlFor='phoneNumber'>Phone Number</Label>
+                <Label htmlFor='CloseTime'>Closing Time</Label>
                 <Input
-                  id='phoneNumber'
-                  name='phoneNumber'
-                  value={formData.phoneNumber}
+                  id='CloseTime'
+                  name='CloseTime'
+                  type='time'
+                  step='1'
+                  value={formData.CloseTime}
                   onChange={handleChange}
                   required
                 />
               </div>
 
-              {/* Role (Read Only) */}
-              <div className='space-y-2'>
-                <Label htmlFor='role'>Role</Label>
-                <div className='flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-muted-foreground'>
-                  {formData.role === 0
-                    ? 'Admin'
-                    : formData.role === 1
-                    ? 'Vendor'
-                    : 'User'}
-                  {/* Adjust role mapping as needed based on system constants */}
-                </div>
-              </div>
-
-              {/* ID (Hidden/Read Only) */}
+              {/* Description */}
               <div className='space-y-2 md:col-span-2'>
-                <Label htmlFor='id' className='text-xs text-muted-foreground'>
-                  User ID
-                </Label>
-                <div className='text-xs font-mono text-muted-foreground'>
-                  {user._id}
-                </div>
+                <Label htmlFor='Description'>Description</Label>
+                <Textarea
+                  id='Description'
+                  name='Description'
+                  value={formData.Description}
+                  onChange={handleChange}
+                  required
+                  className='min-h-[100px]'
+                />
               </div>
             </div>
 
             <div className='flex justify-end pt-4'>
-              <Button
-                type='submit'
-                disabled={loading}
-                className='min-w-[120px]'
-              >
+              <Button type='submit' disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
@@ -282,4 +241,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default VendorProfile;
