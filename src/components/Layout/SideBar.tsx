@@ -12,6 +12,7 @@ import {
   ChevronRight,
   User,
   Palette,
+  Store,
 } from 'lucide-react';
 
 import { useSelector } from 'react-redux';
@@ -94,6 +95,11 @@ const settingsSubItems = [
     icon: User,
   },
   {
+    titleKey: 'Vendor Profile',
+    url: '/vendor-profile',
+    icon: Store,
+  },
+  {
     titleKey: 'themes',
     url: '/settings/themes',
     icon: Palette,
@@ -109,6 +115,7 @@ export function AppSidebar() {
     // Open settings menu by default if we're on a settings page
     return (
       location.pathname.startsWith('/profile') ||
+      location.pathname.startsWith('/vendor-profile') ||
       location.pathname.startsWith('/settings')
     );
   });
