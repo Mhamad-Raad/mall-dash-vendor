@@ -9,8 +9,6 @@ import {
   Settings,
   FileText,
   ShoppingCart,
-  Building2,
-  Store,
   ChevronRight,
   User,
   Palette,
@@ -61,16 +59,7 @@ const mainNavItems = [
     url: '/users',
     icon: Users,
   },
-  {
-    titleKey: 'buildings',
-    url: '/buildings',
-    icon: Building2,
-  },
-  {
-    titleKey: 'vendors',
-    url: '/vendors',
-    icon: Store,
-  },
+
   {
     titleKey: 'products',
     url: '/products',
@@ -118,7 +107,10 @@ export function AppSidebar() {
   const { user: me } = useSelector((state: RootState) => state.me);
   const [settingsOpen, setSettingsOpen] = useState(() => {
     // Open settings menu by default if we're on a settings page
-    return location.pathname.startsWith('/profile') || location.pathname.startsWith('/settings');
+    return (
+      location.pathname.startsWith('/profile') ||
+      location.pathname.startsWith('/settings')
+    );
   });
 
   const user = {
@@ -325,3 +317,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
