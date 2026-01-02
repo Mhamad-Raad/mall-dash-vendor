@@ -7,7 +7,7 @@ import {
 } from '@/utils/authUtils';
 import Logo from '@/assets/Logo.jpg';
 import { Loader2 } from 'lucide-react';
-import { clearMe, fetchMe } from '@/store/slices/meSlice';
+import { clearMe } from '@/store/slices/meSlice';
 import {
   clearVendorProfile,
   getVendorProfile,
