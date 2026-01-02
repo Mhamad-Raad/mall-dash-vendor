@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { UserPlus, ArrowLeft, Save } from 'lucide-react';
 import StaffForm from '@/components/Users/forms/StaffForm';
 
-import { createVendorStaff, StaffRole } from '@/data/Users';
+import { createVendorStaff } from '@/data/Users';
 
 export default function CreateUser() {
   const navigate = useNavigate();
