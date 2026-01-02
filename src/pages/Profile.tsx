@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import type { RootState } from '@/store/store';
-import { updateUser } from '@/data/Users';
-import { setMe } from '@/store/slices/meSlice';
+import type { RootState, AppDispatch } from '@/store/store';
+import { updateMe } from '@/store/slices/meSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Camera, Save } from 'lucide-react';
 
 const Profile = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.me);
 
   const [loading, setLoading] = useState(false);
@@ -105,26 +104,24 @@ const Profile = () => {
     setLoading(true);
     try {
       const updateData = {
-        ...formData,
-        ...(profileImage ? { ProfileImageUrl: profileImage } : {}),
+        FirstName: formData.firstName,
+        LastName: formData.lastName,
+        Email: formData.email,
+        PhoneNumber: formData.phoneNumber,
+        ProfileImageUrl: profileImage || undefined,
       };
 
-      const response = await updateUser(user._id, updateData);
+      const resultAction = await dispatch(updateMe(updateData));
 
-      if (response.error) {
-        toast.error(response.error);
-      } else {
+      if (updateMe.fulfilled.match(resultAction)) {
         toast.success('Profile updated successfully');
-        // Update Redux state with new data
-        // We might need to refetch the user or update the state manually
-        // For now, let's update with what we have + response if it returns the updated user
-        // Assuming response contains the updated user object or we construct it
-        const updatedUser = {
-          ...user,
-          ...formData,
-          profileImageUrl: response.profileImageUrl || previewImage, // Fallback if API doesn't return URL
-        };
-        dispatch(setMe(updatedUser));
+        // Redux state is updated by the reducer
+      } else {
+        if (resultAction.payload) {
+          toast.error(resultAction.payload as string);
+        } else {
+          toast.error('Failed to update profile');
+        }
       }
     } catch (error) {
       toast.error('Failed to update profile');

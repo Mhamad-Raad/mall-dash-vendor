@@ -1,10 +1,13 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { MeType } from '@/interfaces/Auth.interface';
+import { updateMyProfile } from '@/data/Users';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 interface MeState {
   user: MeType | null;
+  loading: boolean;
+  error: string | null;
 }
 
 // Try to load from localStorage on initialization
@@ -20,7 +23,29 @@ const loadUserFromStorage = (): MeType | null => {
 
 const initialState: MeState = {
   user: loadUserFromStorage(),
+  loading: false,
+  error: null,
 };
+
+export const updateMe = createAsyncThunk(
+  'me/update',
+  async (
+    userData: {
+      FirstName: string;
+      LastName: string;
+      Email: string;
+      PhoneNumber: string;
+      ProfileImageUrl?: File;
+    },
+    { rejectWithValue }
+  ) => {
+    const response = await updateMyProfile(userData);
+    if (response.error) {
+      return rejectWithValue(response.error);
+    }
+    return response;
+  }
+);
 
 const meSlice = createSlice({
   name: 'me',
@@ -29,11 +54,33 @@ const meSlice = createSlice({
     setMe: (state, action: PayloadAction<MeType>) => {
       state.user = action.payload;
       localStorage.setItem('me', JSON.stringify(action.payload));
+      state.error = null;
     },
     clearMe: (state) => {
       state.user = null;
       localStorage.removeItem('me');
+      state.error = null;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(updateMe.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateMe.fulfilled, (state, action) => {
+        state.loading = false;
+        // Assuming the API returns the updated user object
+        // We merge it with existing user to be safe, or replace it
+        if (state.user) {
+          state.user = { ...state.user, ...action.payload };
+          localStorage.setItem('me', JSON.stringify(state.user));
+        }
+      })
+      .addCase(updateMe.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
