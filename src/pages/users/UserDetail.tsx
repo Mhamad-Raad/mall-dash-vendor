@@ -20,7 +20,6 @@ import {
 } from '@/store/slices/userSlice';
 import { toast } from 'sonner';
 import { initialUser } from '@/constants/Users';
-import { StaffRole } from '@/data/Users';
 
 import type { UserFormData } from '@/interfaces/Users.interface';
 
@@ -57,20 +56,11 @@ const UserDetail = () => {
     if (formData.imageFile instanceof File) return true;
 
     // Check other fields for changes
-    // Normalize user role for comparison
-    let userRole = user.role;
-    if (typeof user.role === 'string') {
-      if (user.role.toLowerCase() === 'staff') userRole = StaffRole.Staff;
-      else if (user.role.toLowerCase() === 'driver')
-        userRole = StaffRole.Driver;
-    }
-
     return (
       user.firstName !== formData.firstName ||
       user.lastName !== formData.lastName ||
       user.email !== formData.email ||
-      (user.phone || user.phoneNumber) !== formData.phoneNumber ||
-      userRole !== formData.role
+      (user.phone || user.phoneNumber) !== formData.phoneNumber
     );
   }, [user, formData]);
 
@@ -82,7 +72,6 @@ const UserDetail = () => {
       lastName: 'Last Name',
       email: 'Email',
       phoneNumber: 'Phone Number',
-      role: 'Role',
     };
 
     // Check for image change
@@ -95,46 +84,23 @@ const UserDetail = () => {
     }
 
     // Check other fields
-    (
-      ['firstName', 'lastName', 'email', 'phoneNumber', 'role'] as const
-    ).forEach((key) => {
-      let userValue = user[key];
-      if (key === 'phoneNumber') userValue = user.phone || user.phoneNumber;
+    (['firstName', 'lastName', 'email', 'phoneNumber'] as const).forEach(
+      (key) => {
+        let userValue = user[key];
+        if (key === 'phoneNumber') userValue = user.phone || user.phoneNumber;
 
-      // Normalize role for comparison
-      if (key === 'role' && typeof userValue === 'string') {
-        if (userValue.toLowerCase() === 'staff') userValue = StaffRole.Staff;
-        else if (userValue.toLowerCase() === 'driver')
-          userValue = StaffRole.Driver;
-      }
+        if (userValue !== formData[key]) {
+          const oldVal = userValue;
+          const newVal = formData[key];
 
-      if (userValue !== formData[key]) {
-        let oldVal = userValue;
-        let newVal = formData[key];
-
-        // For display purposes, convert role back to string if needed or keep as is
-        if (key === 'role') {
-          oldVal =
-            oldVal === StaffRole.Staff
-              ? 'Staff'
-              : oldVal === StaffRole.Driver
-              ? 'Driver'
-              : oldVal;
-          newVal =
-            newVal === StaffRole.Staff
-              ? 'Staff'
-              : newVal === StaffRole.Driver
-              ? 'Driver'
-              : newVal;
+          changesList.push({
+            field: fieldLabels[key],
+            oldValue: String(oldVal ?? ''),
+            newValue: String(newVal ?? ''),
+          });
         }
-
-        changesList.push({
-          field: fieldLabels[key],
-          oldValue: String(oldVal ?? ''),
-          newValue: String(newVal ?? ''),
-        });
       }
-    });
+    );
     return changesList;
   }, [user, formData]);
 
@@ -159,14 +125,6 @@ const UserDetail = () => {
 
   useEffect(() => {
     if (user) {
-      let roleValue = user.role;
-      // If role is string, try to map it to number if your form expects number
-      if (typeof user.role === 'string') {
-        if (user.role.toLowerCase() === 'staff') roleValue = StaffRole.Staff;
-        else if (user.role.toLowerCase() === 'driver')
-          roleValue = StaffRole.Driver;
-      }
-
       setFormData({
         ...user,
         firstName: user.firstName ?? '',
@@ -175,7 +133,7 @@ const UserDetail = () => {
         phoneNumber: user.phone || user.phoneNumber || '',
         buildingName: user.buildingName ?? '',
         profileImageUrl: user.profileImageUrl ?? '',
-        role: roleValue,
+        role: user.role,
         imageFile: undefined, // Always clear file on user load
       });
     }
@@ -229,7 +187,7 @@ const UserDetail = () => {
           lastName: formData.lastName,
           email: formData.email,
           phoneNumber: formData.phoneNumber || '',
-          role: formData.role,
+          role: 0,
           imageFile: formData.imageFile,
           buildingName: formData.buildingName,
           isActive: formData.isActive,

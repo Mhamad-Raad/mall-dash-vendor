@@ -8,14 +8,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { StaffRole } from '@/data/Users';
 import { Image as ImageIcon, X } from 'lucide-react';
 import type { UserFormData } from '@/interfaces/Users.interface';
 
@@ -26,11 +18,6 @@ interface UserProfileCardProps {
     value: string | number | File
   ) => void;
 }
-
-const staffRoles = [
-  { label: 'Staff', value: StaffRole.Staff },
-  { label: 'Driver', value: StaffRole.Driver },
-];
 
 const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
   const [preview, setPreview] = useState<string>('');
@@ -134,23 +121,14 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
             </div>
             <div className='space-y-2'>
               <Label htmlFor='userRole' className='text-sm font-medium'>
-                User Role <span className='text-destructive'>*</span>
+                User Role
               </Label>
-              <Select
-                value={String(formData.role)}
-                onValueChange={(value) => onInputChange('role', Number(value))}
-              >
-                <SelectTrigger id='userRole' className='h-11'>
-                  <SelectValue placeholder='Select a role' />
-                </SelectTrigger>
-                <SelectContent>
-                  {staffRoles.map((role) => (
-                    <SelectItem key={role.value} value={String(role.value)}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id='userRole'
+                value='Staff'
+                readOnly
+                className='h-11 bg-muted'
+              />
             </div>
             {(formData.userId || formData.id || formData._id) && (
               <p className='text-xs text-muted-foreground'>
