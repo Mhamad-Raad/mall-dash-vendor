@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { MeType } from '@/interfaces/Auth.interface';
 import { updateMyProfile } from '@/data/Users';
+import { fetchMe as fetchMeData } from '@/data/Authorization';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 
@@ -26,6 +27,17 @@ const initialState: MeState = {
   loading: false,
   error: null,
 };
+
+export const fetchMe = createAsyncThunk(
+  'me/fetch',
+  async (_, { rejectWithValue }) => {
+    const response = await fetchMeData();
+    if (response.error) {
+      return rejectWithValue(response.error);
+    }
+    return response.user;
+  }
+);
 
 export const updateMe = createAsyncThunk(
   'me/update',
@@ -64,6 +76,21 @@ const meSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch Me
+      .addCase(fetchMe.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMe.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload ?? null;
+        localStorage.setItem('me', JSON.stringify(action.payload));
+      })
+      .addCase(fetchMe.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Update Me
       .addCase(updateMe.pending, (state) => {
         state.loading = true;
         state.error = null;
