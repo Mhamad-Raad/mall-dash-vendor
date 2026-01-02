@@ -2,20 +2,8 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Mail, Lock, Image as ImageIcon, X } from 'lucide-react';
-import { StaffRole } from '@/data/Users';
 
-const staffRoles = [
-  { label: 'Staff', value: StaffRole.Staff },
-  { label: 'Driver', value: StaffRole.Driver },
-];
+import { Mail, Lock, Image as ImageIcon, X } from 'lucide-react';
 
 type StaffFormProps = {
   formData: {
@@ -115,26 +103,7 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
               className='h-11'
             />
           </div>
-          <div className='space-y-2'>
-            <Label htmlFor='staff-role' className='text-sm font-medium'>
-              User Role <span className='text-destructive'>*</span>
-            </Label>
-            <Select
-              value={formData.role.toString()}
-              onValueChange={(value) => onInputChange('role', parseInt(value))}
-            >
-              <SelectTrigger id='staff-role' className='h-11'>
-                <SelectValue placeholder='Select a role' />
-              </SelectTrigger>
-              <SelectContent>
-                {staffRoles.map((role) => (
-                  <SelectItem key={role.value} value={role.value.toString()}>
-                    {role.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+
           {formData.photo && (
             <p className='text-xs text-muted-foreground'>
               ✓ {formData.photo.name}

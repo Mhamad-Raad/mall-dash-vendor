@@ -24,7 +24,7 @@ export default function CreateUser() {
     password: '',
     confirmPassword: '',
     phoneNumber: '',
-    role: StaffRole.Staff,
+    role: 0, // 0  for staff role always
     photo: null,
   });
 
