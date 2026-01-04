@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/data/axiosInstance';
+import { compressImage } from '@/lib/imageCompression';
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const API_VALUE = import.meta.env.VITE_API_VALUE;
@@ -52,14 +53,17 @@ export const updateProduct = async (
 ) => {
   try {
     const formData = new FormData();
-    Object.entries(productData).forEach(([key, value]) => {
-      if (value === undefined || value === null) return;
-      if (typeof value === 'boolean') {
+    for (const [key, value] of Object.entries(productData)) {
+      if (value === undefined || value === null) continue;
+      if (key === 'ProductImageUrl' && value instanceof File) {
+        const compressedFile = await compressImage(value);
+        formData.append(key, compressedFile);
+      } else if (typeof value === 'boolean') {
         formData.append(key, value ? 'true' : 'false');
       } else {
         formData.append(key, value as any);
       }
-    });
+    }
 
     const response = await axiosInstance.put(`/Product/${id}`, formData, {
       headers: {
@@ -98,14 +102,17 @@ export const createProduct = async (productData: {
 }) => {
   try {
     const formData = new FormData();
-    Object.entries(productData).forEach(([key, value]) => {
-      if (value === undefined || value === null) return;
-      if (typeof value === 'boolean') {
+    for (const [key, value] of Object.entries(productData)) {
+      if (value === undefined || value === null) continue;
+      if (key === 'ProductImageUrl' && value instanceof File) {
+        const compressedFile = await compressImage(value);
+        formData.append(key, compressedFile);
+      } else if (typeof value === 'boolean') {
         formData.append(key, value ? 'true' : 'false');
       } else {
         formData.append(key, value as any);
       }
-    });
+    }
 
     const response = await axiosInstance.post('/Product', formData, {
       headers: {

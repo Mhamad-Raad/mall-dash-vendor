@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/data/axiosInstance';
+import { compressImage } from '@/lib/imageCompression';
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const API_VALUE = import.meta.env.VITE_API_VALUE;
@@ -80,7 +81,8 @@ export const updateVendorStaff = async (
     formData.append('IsActive', String(staffData.IsActive));
 
     if (staffData.ProfileImageUrl instanceof File) {
-      formData.append('ProfileImageUrl', staffData.ProfileImageUrl);
+      const compressedFile = await compressImage(staffData.ProfileImageUrl);
+      formData.append('ProfileImageUrl', compressedFile);
     }
 
     const response = await axiosInstance.put(`/VendorStaff/${id}`, formData, {
@@ -116,7 +118,8 @@ export const updateMyProfile = async (userData: {
     formData.append('PhoneNumber', userData.PhoneNumber);
 
     if (userData.ProfileImageUrl) {
-      formData.append('ProfileImageUrl', userData.ProfileImageUrl);
+      const compressedFile = await compressImage(userData.ProfileImageUrl);
+      formData.append('ProfileImageUrl', compressedFile);
     }
 
     const response = await axiosInstance.put('/Account/me', formData, {
@@ -146,11 +149,16 @@ export const updateUser = async (
 ) => {
   try {
     const formData = new FormData();
-    Object.entries(userData).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(userData)) {
       if (value !== undefined) {
-        formData.append(key, value as any);
+        if (key === 'ProfileImageUrl' && value instanceof File) {
+          const compressedFile = await compressImage(value);
+          formData.append(key, compressedFile);
+        } else {
+          formData.append(key, value as any);
+        }
       }
-    });
+    }
 
     // Create a custom config to override the default Content-Type
     const response = await axiosInstance.put(`/Account/${id}`, formData, {
@@ -212,15 +220,23 @@ export const createUser = async (userData: {
     if (hasFile) {
       // Use FormData for file upload
       const formData = new FormData();
-      Object.entries(userData).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(userData)) {
         if (value !== undefined) {
-          formData.append(key, value as any);
-          console.log(
-            `FormData appended: ${key} =`,
-            value instanceof File ? `File: ${value.name}` : value
-          );
+          if (key === 'ProfileImageUrl' && value instanceof File) {
+            const compressedFile = await compressImage(value);
+            formData.append(key, compressedFile);
+            console.log(
+              `FormData appended: ${key} = File: ${compressedFile.name} (compressed)`
+            );
+          } else {
+            formData.append(key, value as any);
+            console.log(
+              `FormData appended: ${key} =`,
+              value instanceof File ? `File: ${value.name}` : value
+            );
+          }
         }
-      });
+      }
 
       console.log('Creating user with image...');
 
@@ -276,7 +292,12 @@ export const createVendorStaff = async (staffData: {
     formData.append('Role', staffData.Role.toString());
 
     if (staffData.ProfileImageUrl) {
-      formData.append('ProfileImageUrl', staffData.ProfileImageUrl);
+      if (staffData.ProfileImageUrl instanceof File) {
+        const compressedFile = await compressImage(staffData.ProfileImageUrl);
+        formData.append('ProfileImageUrl', compressedFile);
+      } else {
+        formData.append('ProfileImageUrl', staffData.ProfileImageUrl);
+      }
     }
 
     const response = await axiosInstance.post('/VendorStaff', formData, {
