@@ -195,7 +195,7 @@ const Orders = () => {
                   />
                 )}
               </div>
-              <div className='border-t p-2 bg-background'>
+              <div className='border-t px-3 py-2 bg-background'>
                 <CustomTablePagination
                   total={total}
                   suggestions={[10, 20, 30, 40, 50]}

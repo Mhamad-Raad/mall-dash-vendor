@@ -215,7 +215,7 @@ const ProductsTable = () => {
       </ScrollArea>
 
       {/* Pagination */}
-      <div className='border-t px-6 py-4 bg-muted/20'>
+      <div className='border-t px-6 py-3 bg-background'>
         <CustomTablePagination
           total={total}
           suggestions={[10, 20, 40, 50, 100]}
