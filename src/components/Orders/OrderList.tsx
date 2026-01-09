@@ -4,7 +4,6 @@ import type { Order, OrderStatus } from '@/interfaces/Order.interface';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Clock, Package } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface OrderListProps {
   orders: Order[];
@@ -34,9 +33,8 @@ const getStatusColor = (status: OrderStatus | number) => {
 
 const OrderList = ({ orders, selectedOrderId, onSelectOrder }: OrderListProps) => {
   return (
-    <ScrollArea className="h-full">
-      <div className="flex flex-col">
-        {orders.map((order) => {
+    <div className="h-full overflow-y-auto">
+      <div className="flex flex-col">{orders.map((order) => {
           const isSelected = order.id === selectedOrderId;
           return (
             <button
@@ -92,7 +90,7 @@ const OrderList = ({ orders, selectedOrderId, onSelectOrder }: OrderListProps) =
           );
         })}
       </div>
-    </ScrollArea>
+    </div>
   );
 };
 
