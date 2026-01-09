@@ -11,7 +11,7 @@ import OrderDisplay from '@/components/Orders/OrderDisplay';
 import EmptyState from '@/components/Orders/EmptyState';
 import CustomTablePagination from '@/components/CustomTablePagination';
 
-import { Inbox, Search, Filter } from 'lucide-react';
+import { Inbox, Search, Filter, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,6 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
 
 const orderStatuses: (OrderStatus | 'All')[] = [
   'All',
@@ -37,6 +40,7 @@ const Orders = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const dispatch = useDispatch<AppDispatch>();
+  const isMobile = useIsMobile();
 
   const { orders, loading, error, total } = useSelector(
     (state: RootState) => state.orders
@@ -112,10 +116,10 @@ const Orders = () => {
 
   // Auto-select first order when orders load
   useEffect(() => {
-    if (orders.length > 0 && !selectedOrderId && !id) {
+    if (orders.length > 0 && !selectedOrderId && !id && !isMobile) {
       setSelectedOrderId(orders[0].id);
     }
-  }, [orders, selectedOrderId, id]);
+  }, [orders, selectedOrderId, id, isMobile]);
 
   // Sync with URL parameter
   useEffect(() => {
@@ -141,7 +145,13 @@ const Orders = () => {
         ) : (
           <div className='flex h-full w-full'>
             {/* Left Panel - Order List */}
-            <div className='w-[350px] border-r flex flex-col bg-muted/10'>
+            <div
+              className={cn(
+                'flex flex-col bg-muted/10 border-r',
+                isMobile ? 'w-full' : 'w-[350px]',
+                isMobile && selectedOrderId ? 'hidden' : 'flex'
+              )}
+            >
               <div className='p-3 space-y-2 bg-background'>
                 <div className='relative'>
                   <Search className='absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground' />
@@ -204,7 +214,24 @@ const Orders = () => {
             </div>
 
             {/* Right Panel - Order Details */}
-            <div className='flex-1 min-h-0 bg-background'>
+            <div
+              className={cn(
+                'flex-1 min-h-0 bg-background',
+                isMobile && !selectedOrderId ? 'hidden' : 'flex flex-col'
+              )}
+            >
+              {isMobile && selectedOrderId && (
+                <div className='flex items-center p-2 border-b'>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => setSelectedOrderId(null)}
+                  >
+                    <ArrowLeft className='h-4 w-4 mr-2' />
+                    Back to Orders
+                  </Button>
+                </div>
+              )}
               {selectedOrderId ? (
                 <OrderDisplay orderId={selectedOrderId} />
               ) : (
