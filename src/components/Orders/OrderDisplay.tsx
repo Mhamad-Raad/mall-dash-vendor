@@ -16,7 +16,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 import { fetchOrderById } from '@/data/Orders';
@@ -141,7 +140,7 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
   const allowedTransitions = statusTransitions[currentStatusText] || [];
 
   return (
-    <ScrollArea className="h-full">
+    <div className="h-full overflow-y-auto">
       <div className="flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-5 border-b bg-muted/30">
@@ -353,7 +352,7 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
           </div>
         </div>
       </div>
-    </ScrollArea>
+    </div>
   );
 };
 

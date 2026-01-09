@@ -133,9 +133,9 @@ const Orders = () => {
   const hasNoOrders = !loading && orders.length === 0 && !error;
 
   return (
-    <section className='flex-1 flex flex-col overflow-hidden -m-6'>
+    <section className='flex-1 flex flex-col min-h-0 -m-6'>
       {/* Main Content Area */}
-      <div className='flex-1 min-h-0 flex'>
+      <div className='flex-1 flex overflow-hidden'>
         {hasNoOrders && !searchQuery && status === 'All' ? (
           <EmptyState />
         ) : (
