@@ -1,5 +1,5 @@
 // Layout.tsx
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { useSignalR } from '@/hooks/useSignalR';
@@ -10,6 +10,10 @@ import Footer from './Footer';
 
 const Layout = () => {
   useSignalR();
+  const location = useLocation();
+  
+  // Check if we're on the orders page
+  const isOrdersPage = location.pathname.startsWith('/orders');
 
   return (
     <SidebarProvider>
@@ -19,8 +23,8 @@ const Layout = () => {
         <Navbar />
 
         {/* Main content with scroll */}
-        <main className='flex-1 overflow-hidden flex flex-col'>
-          <div className='p-6 flex-1 flex flex-col min-h-0'>
+        <main className={`flex-1 flex flex-col ${isOrdersPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+          <div className={`p-6 flex-1 flex flex-col ${isOrdersPage ? 'min-h-0' : ''}`}>
             <Outlet />
           </div>
         </main>
