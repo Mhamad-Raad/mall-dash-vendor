@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/data/axiosInstance';
+import { compressImage } from '@/lib/imageCompression';
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const API_VALUE = import.meta.env.VITE_API_VALUE;
@@ -44,7 +45,8 @@ export const updateMyVendorProfile = async (vendorData: {
     formData.append('Type', vendorData.Type);
 
     if (vendorData.ProfileImageUrl) {
-      formData.append('ProfileImageUrl', vendorData.ProfileImageUrl);
+      const compressedFile = await compressImage(vendorData.ProfileImageUrl);
+      formData.append('ProfileImageUrl', compressedFile);
     }
 
     const response = await axiosInstance.put('/Vendor/profile', formData, {

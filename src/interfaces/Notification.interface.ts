@@ -1,12 +1,17 @@
-export type NotificationType = 'success' | 'error' | 'warning' | 'info' | 'system';
+export type NotificationType =
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'system';
 
 export interface Notification {
-  id: string;
+  id: number;
   type: NotificationType;
   title: string;
   message: string;
-  timestamp: Date;
-  read: boolean;
+  createdAt: Date | string;
+  isRead: boolean;
   actionUrl?: string;
-  actionLabel?: string;
+  metadata?: Record<string, any>;
 }

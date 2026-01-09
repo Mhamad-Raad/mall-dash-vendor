@@ -1,78 +1,32 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import {
-  Bell,
-  Check,
-  X,
-  Archive,
-} from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Bell, Check, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
-import type { Notification, NotificationType } from '@/interfaces/Notification.interface';
-
-// Mock notifications data - replace with real data from your API
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'success',
-    title: 'New Tenant Registered',
-    message: 'Philip George successfully registered for Apartment 301 in Tower A. Payment confirmed.',
-    timestamp: new Date(Date.now() - 3 * 60000),
-    read: false,
-    actionUrl: '/users',
-    actionLabel: 'View Details',
-  },
-  {
-    id: '2',
-    type: 'warning',
-    title: 'Vendor Approval Pending',
-    message: 'Mini-Markety submitted their vendor registration. Review and approve to activate their account.',
-    timestamp: new Date(Date.now() - 25 * 60000),
-    read: false,
-    actionUrl: '/vendors',
-    actionLabel: 'Review Now',
-  },
-  {
-    id: '3',
-    type: 'info',
-    title: 'New Order Received',
-    message: 'Tiana Curtis placed an order at Aland StakeHouse. Order #ORD-1247 - Total: $45.99',
-    timestamp: new Date(Date.now() - 45 * 60000),
-    read: false,
-    actionUrl: '/orders',
-    actionLabel: 'View Order',
-  },
-  {
-    id: '4',
-    type: 'success',
-    title: 'Monthly Revenue Update',
-    message: 'November revenue increased by 23% compared to last month. Great progress!',
-    timestamp: new Date(Date.now() - 2 * 60 * 60000),
-    read: false,
-  },
-  {
-    id: '5',
-    type: 'error',
-    title: 'Building Access Denied',
-    message: 'Failed to grant access to Tower B due to incomplete tenant verification documents.',
-    timestamp: new Date(Date.now() - 4 * 60 * 60000),
-    read: true,
-    actionUrl: '/buildings',
-    actionLabel: 'Fix Issue',
-  },
-  {
-    id: '6',
-    type: 'system',
-    title: 'System Maintenance Scheduled',
-    message: 'Planned maintenance tonight at 2:00 AM. Expected downtime: 30 minutes.',
-    timestamp: new Date(Date.now() - 6 * 60 * 60000),
-    read: true,
-  },
-];
+import type {
+  Notification,
+  NotificationType,
+} from '@/interfaces/Notification.interface';
+import type { RootState } from '@/store/store';
+import {
+  markAsRead,
+  markAllAsRead,
+  deleteNotification,
+} from '@/store/slices/notificationsSlice';
+import {
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotificationApi,
+} from '@/data/Notifications';
 
 const getNotificationColor = (type: NotificationType) => {
   switch (type) {
@@ -91,9 +45,10 @@ const getNotificationColor = (type: NotificationType) => {
   }
 };
 
-const formatTimestamp = (date: Date) => {
+const formatTimestamp = (date: Date | string) => {
+  const d = new Date(date);
   const now = new Date();
-  const diff = now.getTime() - date.getTime();
+  const diff = now.getTime() - d.getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
@@ -102,7 +57,7 @@ const formatTimestamp = (date: Date) => {
   if (minutes < 60) return `${minutes}m ago`;
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
+  return d.toLocaleDateString();
 };
 
 type NotificationTab = 'all' | 'unread' | 'mentions' | 'system';
@@ -110,21 +65,28 @@ type NotificationTab = 'all' | 'unread' | 'mentions' | 'system';
 export default function NotificationPopover() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const dispatch = useDispatch();
+  const notifications = useSelector(
+    (state: RootState) => state.notifications.notifications
+  );
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<NotificationTab>('all');
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
   const allCount = notifications.length;
-  const mentionsCount = notifications.filter((n) => n.type === 'warning' || n.type === 'error').length;
+  const mentionsCount = notifications.filter(
+    (n) => n.type === 'warning' || n.type === 'error'
+  ).length;
   const systemCount = notifications.filter((n) => n.type === 'system').length;
 
   const getFilteredNotifications = () => {
     switch (activeTab) {
       case 'unread':
-        return notifications.filter((n) => !n.read);
+        return notifications.filter((n) => !n.isRead);
       case 'mentions':
-        return notifications.filter((n) => n.type === 'warning' || n.type === 'error');
+        return notifications.filter(
+          (n) => n.type === 'warning' || n.type === 'error'
+        );
       case 'system':
         return notifications.filter((n) => n.type === 'system');
       default:
@@ -135,25 +97,25 @@ export default function NotificationPopover() {
   const filteredNotifications = getFilteredNotifications();
 
   const handleMarkAllRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    dispatch(markAllAsRead());
+    markAllNotificationsAsRead();
   };
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const handleMarkAsRead = (id: number) => {
+    dispatch(markAsRead(id));
+    markNotificationAsRead(id);
   };
 
-  const handleDelete = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
-  };
-
-  const handleClearAll = () => {
-    setNotifications([]);
+  const handleDelete = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch(deleteNotification(id));
+    deleteNotificationApi(id);
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    handleMarkAsRead(notification.id);
+    if (!notification.isRead) {
+      handleMarkAsRead(notification.id);
+    }
     if (notification.actionUrl) {
       navigate(notification.actionUrl);
       setOpen(false);
@@ -267,10 +229,13 @@ export default function NotificationPopover() {
           <div className='flex flex-col items-center justify-center py-12 px-4'>
             <Bell className='size-8 text-muted-foreground/40 mb-3' />
             <p className='text-sm text-muted-foreground'>
-              {activeTab === 'unread' ? 'No unread notifications' : 
-               activeTab === 'mentions' ? 'No important notifications' :
-               activeTab === 'system' ? 'No system notifications' : 
-               'No notifications'}
+              {activeTab === 'unread'
+                ? 'No unread notifications'
+                : activeTab === 'mentions'
+                ? 'No important notifications'
+                : activeTab === 'system'
+                ? 'No system notifications'
+                : 'No notifications'}
             </p>
           </div>
         ) : (
@@ -280,71 +245,75 @@ export default function NotificationPopover() {
                 <div
                   key={notification.id}
                   className={`group relative px-4 py-3 border-b last:border-b-0 transition-colors cursor-pointer ${
-                    !notification.read ? 'bg-accent/30 hover:bg-accent/50' : 'hover:bg-accent/30'
+                    !notification.isRead
+                      ? 'bg-accent/30 hover:bg-accent/50'
+                      : 'hover:bg-accent/30'
                   }`}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className='flex gap-3'>
-                        {/* Unread Indicator */}
-                        <div className='flex-shrink-0 pt-1.5'>
-                          {!notification.read ? (
-                            <div className='size-2 bg-blue-500 rounded-full' />
-                          ) : (
-                            <div className='size-2' />
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className='flex-1 min-w-0'>
-                          <div className='flex items-start justify-between gap-2 mb-1'>
-                            <p className={`text-sm leading-tight ${
-                              !notification.read ? 'font-medium' : 'font-normal'
-                            } ${getNotificationColor(notification.type)}`}>
-                              {notification.title}
-                            </p>
-                            <span className='text-xs text-muted-foreground whitespace-nowrap flex-shrink-0'>
-                              {formatTimestamp(notification.timestamp)}
-                            </span>
-                          </div>
-                          <p className='text-xs text-muted-foreground leading-relaxed mb-2'>
-                            {notification.message}
-                          </p>
-                          {notification.actionLabel && (
-                            <button className='text-xs text-foreground hover:underline font-medium'>
-                              {notification.actionLabel} →
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Actions */}
-                        <div className='flex-shrink-0 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-6 w-6 hover:bg-accent'
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(notification.id);
-                            }}
-                          >
-                            <X className='size-3' />
-                          </Button>
-                        </div>
-                      </div>
+                    {/* Unread Indicator */}
+                    <div className='flex-shrink-0 pt-1.5'>
+                      {!notification.isRead ? (
+                        <div className='size-2 bg-blue-500 rounded-full' />
+                      ) : (
+                        <div className='size-2' />
+                      )}
                     </div>
-                  ))}
+
+                    {/* Content */}
+                    <div className='flex-1 min-w-0'>
+                      <div className='flex items-start justify-between gap-2 mb-1'>
+                        <p
+                          className={`text-sm leading-tight ${getNotificationColor(
+                            notification.type
+                          )} font-medium`}
+                        >
+                          {notification.title}
+                        </p>
+                        <span className='text-[10px] text-muted-foreground whitespace-nowrap'>
+                          {formatTimestamp(notification.createdAt)}
+                        </span>
+                      </div>
+                      <p
+                        className={`text-xs text-muted-foreground line-clamp-2 ${
+                          !notification.isRead
+                            ? 'font-medium text-foreground/80'
+                            : ''
+                        }`}
+                      >
+                        {notification.message}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Hover Actions */}
+                  <div className='absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-background/80 backdrop-blur-sm rounded p-0.5'>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='size-6 h-6 w-6'
+                      onClick={(e) => handleDelete(notification.id, e)}
+                      title='Delete'
+                    >
+                      <X className='size-3' />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </ScrollArea>
 
             {/* Footer */}
-            <div className='border-t p-2'>
+            <div className='p-2 border-t bg-muted/20'>
               <Button
                 variant='ghost'
-                size='sm'
-                onClick={handleClearAll}
-                className='w-full justify-center text-xs text-muted-foreground hover:bg-accent hover:text-foreground'
+                className='w-full text-xs h-8'
+                onClick={() => {
+                  setOpen(false);
+                  navigate('/notifications');
+                }}
               >
-                <Archive className='size-3 mr-1.5' />
-                Archive all
+                View all notifications
               </Button>
             </div>
           </>
@@ -353,3 +322,4 @@ export default function NotificationPopover() {
     </Popover>
   );
 }
+

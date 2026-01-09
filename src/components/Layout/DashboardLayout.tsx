@@ -2,11 +2,15 @@
 import { Outlet } from 'react-router-dom';
 
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { useSignalR } from '@/hooks/useSignalR';
+
 import { AppSidebar } from './SideBar';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
 const Layout = () => {
+  useSignalR();
+
   return (
     <SidebarProvider>
       <AppSidebar />
