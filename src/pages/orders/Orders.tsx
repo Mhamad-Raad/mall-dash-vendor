@@ -1,22 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSearchParams, useParams } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 
 import type { AppDispatch, RootState } from '@/store/store';
 import { fetchOrders } from '@/store/slices/ordersSlice';
 import type { OrderStatus } from '@/interfaces/Order.interface';
 
-import OrdersFilters from '@/components/Orders/OrdersFilters';
 import OrderList from '@/components/Orders/OrderList';
 import OrderDisplay from '@/components/Orders/OrderDisplay';
 import EmptyState from '@/components/Orders/EmptyState';
 import CustomTablePagination from '@/components/CustomTablePagination';
 
-import { Inbox } from 'lucide-react';
+import { Inbox, Search, Filter } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const orderStatuses: (OrderStatus | 'All')[] = [
+  'All',
+  'Pending',
+  'Confirmed',
+  'Preparing',
+  'OutForDelivery',
+  'Delivered',
+  'Cancelled',
+];
 
 const Orders = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -35,6 +53,7 @@ const Orders = () => {
     | OrderStatus
     | 'All'
     | null;
+  const searchQuery = searchParams.get('search') || '';
 
   const lastFetchParams = useRef<string>('');
 
@@ -43,11 +62,16 @@ const Orders = () => {
       limit: number;
       page: number;
       status?: OrderStatus | 'All' | null;
+      search?: string;
     } = {
       limit,
       page,
       status: status || 'All',
     };
+
+    if (searchQuery) {
+      params.search = searchQuery;
+    }
 
     // Prevent duplicate fetches for same params
     const paramsString = JSON.stringify(params);
@@ -57,14 +81,41 @@ const Orders = () => {
     lastFetchParams.current = paramsString;
 
     dispatch(fetchOrders(params));
-  }, [dispatch, limit, page, status]);
+  }, [dispatch, limit, page, status, searchQuery]);
+
+  const handleStatusChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value && value !== 'All') {
+      params.set('status', value);
+    } else {
+      params.delete('status');
+    }
+    params.set('page', '1');
+    navigate(`${window.location.pathname}?${params.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const params = new URLSearchParams(searchParams);
+    const value = e.target.value;
+    if (value) {
+      params.set('search', value);
+    } else {
+      params.delete('search');
+    }
+    params.set('page', '1');
+    navigate(`${window.location.pathname}?${params.toString()}`, {
+      replace: true,
+    });
+  };
 
   // Auto-select first order when orders load
   useEffect(() => {
-    if (orders.length > 0 && !selectedOrderId) {
+    if (orders.length > 0 && !selectedOrderId && !id) {
       setSelectedOrderId(orders[0].id);
     }
-  }, [orders, selectedOrderId]);
+  }, [orders, selectedOrderId, id]);
 
   // Sync with URL parameter
   useEffect(() => {
@@ -83,66 +134,90 @@ const Orders = () => {
 
   return (
     <section className='flex-1 flex flex-col overflow-hidden -m-6'>
-      {/* Filters Section */}
-      <div className='px-6 py-4 border-b bg-background flex-shrink-0'>
-        <OrdersFilters />
-      </div>
-
       {/* Main Content Area */}
-      <div className='flex-1 min-h-0 flex'>{hasNoOrders ? (
+      <div className='flex-1 min-h-0 flex'>
+        {hasNoOrders && !searchQuery && status === 'All' ? (
           <EmptyState />
         ) : (
           <div className='flex h-full w-full'>
-                {/* Left Panel - Order List */}
-                <div className='w-[350px] border-r flex flex-col'>
-                  <div className='flex items-center px-4 py-3 border-b'>
-                    <h2 className='text-sm font-semibold'>
-                      Orders ({total})
-                    </h2>
-                  </div>
-                  <div className='flex-1 min-h-0'>
-                    {loading ? (
-                      <div className='flex flex-col gap-2 p-4'>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <div key={i} className='flex flex-col gap-2 rounded-lg border p-3'>
-                            <Skeleton className='h-4 w-3/4' />
-                            <Skeleton className='h-3 w-1/2' />
-                            <Skeleton className='h-3 w-full' />
-                          </div>
-                        ))}
+            {/* Left Panel - Order List */}
+            <div className='w-[350px] border-r flex flex-col bg-muted/10'>
+              <div className='p-4 border-b space-y-3 bg-background'>
+                <div className='flex items-center justify-between'>
+                  <h2 className='text-sm font-semibold flex items-center gap-2'>
+                    Orders <span className="text-muted-foreground font-normal">({total})</span>
+                  </h2>
+                  <Select value={status || 'All'} onValueChange={handleStatusChange}>
+                    <SelectTrigger className='w-[130px] h-8 text-xs'>
+                      <div className="flex items-center gap-1.5 truncate">
+                        <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="truncate">{status === 'All' || !status ? 'All Orders' : status}</span>
                       </div>
-                    ) : (
-                      <OrderList
-                        orders={orders}
-                        selectedOrderId={selectedOrderId}
-                        onSelectOrder={handleSelectOrder}
-                      />
-                    )}
-                  </div>
-                  <div className='border-t p-2'>
-                    <CustomTablePagination
-                      total={total}
-                      suggestions={[10, 20, 30, 40, 50]}
-                    />
-                  </div>
+                    </SelectTrigger>
+                    <SelectContent align="end">
+                      {orderStatuses.map((s) => (
+                        <SelectItem key={s} value={s} className="text-xs">
+                          {s === 'All' ? 'All Orders' : s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                {/* Right Panel - Order Details */}
-                <div className='flex-1 min-h-0'>
-                  {selectedOrderId ? (
-                    <OrderDisplay orderId={selectedOrderId} />
-                  ) : (
-                    <div className='flex h-full items-center justify-center'>
-                      <div className='flex flex-col items-center gap-2 text-center'>
-                        <Inbox className='h-12 w-12 text-muted-foreground/50' />
-                        <p className='text-sm text-muted-foreground'>
-                          Select an order to view details
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                <div className='relative'>
+                  <Search className='absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                  <Input
+                    type='text'
+                    placeholder='Search orders...'
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className='pl-9 h-9 text-sm'
+                  />
                 </div>
               </div>
+              
+              <div className='flex-1 min-h-0 bg-background'>
+                {loading ? (
+                  <div className='flex flex-col gap-2 p-4'>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className='flex flex-col gap-2 rounded-lg border p-3'>
+                        <Skeleton className='h-4 w-3/4' />
+                        <Skeleton className='h-3 w-1/2' />
+                        <Skeleton className='h-3 w-full' />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <OrderList
+                    orders={orders}
+                    selectedOrderId={selectedOrderId}
+                    onSelectOrder={handleSelectOrder}
+                  />
+                )}
+              </div>
+              <div className='border-t p-2 bg-background'>
+                <CustomTablePagination
+                  total={total}
+                  suggestions={[10, 20, 30, 40, 50]}
+                />
+              </div>
+            </div>
+
+            {/* Right Panel - Order Details */}
+            <div className='flex-1 min-h-0 bg-background'>
+              {selectedOrderId ? (
+                <OrderDisplay orderId={selectedOrderId} />
+              ) : (
+                <div className='flex h-full items-center justify-center'>
+                  <div className='flex flex-col items-center gap-2 text-center'>
+                    <Inbox className='h-12 w-12 text-muted-foreground/50' />
+                    <p className='text-sm text-muted-foreground'>
+                      Select an order to view details
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </section>
