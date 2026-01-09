@@ -315,9 +315,13 @@ const OrderDetail = () => {
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Address
                       </span>
-                      <span className='text-sm font-medium'>
-                        {order.deliveryAddress}
-                      </span>
+                      <div className='text-sm font-medium flex flex-col'>
+                        <span>{order.deliveryAddress.buildingName}</span>
+                        <span className='text-muted-foreground font-normal'>
+                          Floor {order.deliveryAddress.floorNumber},{' '}
+                          {order.deliveryAddress.apartmentName}
+                        </span>
+                      </div>
                     </div>
                   ) : (
                     <div className='flex flex-col gap-1'>

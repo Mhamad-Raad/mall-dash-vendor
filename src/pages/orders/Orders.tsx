@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
 import type { AppDispatch, RootState } from '@/store/store';
-import { fetchOrders,  } from '@/store/slices/ordersSlice';
+import { fetchOrders } from '@/store/slices/ordersSlice';
 import type { OrderStatus } from '@/interfaces/Order.interface';
 
 import OrdersFilters from '@/components/Orders/OrdersFilters';
@@ -40,7 +40,10 @@ const Orders = () => {
       status: status || 'All',
     };
 
-    dispatch(fetchOrders(params));
+    const promise = dispatch(fetchOrders(params));
+    return () => {
+      promise.abort();
+    };
   }, [dispatch, limit, page, status]);
 
   const hasNoOrders = !loading && orders.length === 0 && !error;

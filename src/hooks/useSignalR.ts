@@ -23,6 +23,7 @@ class SignalRService {
   private connectionStateCallbacks: ((
     state: signalR.HubConnectionState
   ) => void)[] = [];
+  private connectionPromise: Promise<void> | null = null;
 
   public async startConnection(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
@@ -30,75 +31,106 @@ class SignalRService {
       return;
     }
 
-    // The hub URL - adjust this based on your backend configuration
-    // Common patterns: /hubs/notifications, /notificationHub, /signalr/notifications
-    const baseUrl = API_URL.replace('/MalDashApi', '');
-    const hubUrl = `${baseUrl}/hubs/notifications`;
-    console.log('SignalR connecting to:', hubUrl);
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
 
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, {
-        // Use cookies for authentication (HTTP-only cookies sent automatically)
-        withCredentials: true,
-      })
-      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
-      .configureLogging(signalR.LogLevel.Information)
-      .build();
+    this.connectionPromise = (async () => {
+      // The hub URL - adjust this based on your backend configuration
+      // Common patterns: /hubs/notifications, /notificationHub, /signalr/notifications
+      const baseUrl = API_URL.replace('/MalDashApi', '');
+      const hubUrl = `${baseUrl}/hubs/notifications`;
+      console.log('SignalR connecting to:', hubUrl);
 
-    // Set up connection state handlers
-    this.connection.onreconnecting((error) => {
-      console.log('SignalR reconnecting...', error);
-      this.notifyConnectionState(signalR.HubConnectionState.Reconnecting);
-    });
+      this.connection = new signalR.HubConnectionBuilder()
+        .withUrl(hubUrl, {
+          // Use cookies for authentication (HTTP-only cookies sent automatically)
+          withCredentials: true,
+        })
+        .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
 
-    this.connection.onreconnected((connectionId) => {
-      console.log('SignalR reconnected. Connection ID:', connectionId);
-      this.notifyConnectionState(signalR.HubConnectionState.Connected);
-    });
+      // Set up connection state handlers
+      this.connection.onreconnecting((error) => {
+        console.log('SignalR reconnecting...', error);
+        this.notifyConnectionState(signalR.HubConnectionState.Reconnecting);
+      });
 
-    this.connection.onclose((error) => {
-      console.log('SignalR connection closed', error);
-      this.notifyConnectionState(signalR.HubConnectionState.Disconnected);
-    });
+      this.connection.onreconnected((connectionId) => {
+        console.log('SignalR reconnected. Connection ID:', connectionId);
+        this.notifyConnectionState(signalR.HubConnectionState.Connected);
+      });
 
-    // Listen for notifications from backend
-    this.connection.on('ReceiveNotification', (notification: any) => {
-      console.log('Received notification:', notification);
+      this.connection.onclose((error) => {
+        console.log('SignalR connection closed', error);
+        this.notifyConnectionState(signalR.HubConnectionState.Disconnected);
+      });
 
-      const processedNotification: Notification = {
-        id: notification.Id ?? notification.id,
-        title: notification.Title ?? notification.title,
-        message: notification.Message ?? notification.message,
-        type: (notification.Type ?? notification.type ?? 'info').toLowerCase(),
-        isRead: false,
-        createdAt: new Date(notification.CreatedAt ?? notification.createdAt),
-        actionUrl: notification.ActionUrl ?? notification.actionUrl,
-        metadata: notification.Metadata ?? notification.metadata,
-      };
+      // Listen for notifications from backend
+      this.connection.on('ReceiveNotification', (notification: any) => {
+        console.log('Received notification:', notification);
 
-      this.notificationCallbacks.forEach((callback) =>
-        callback(processedNotification)
-      );
-    });
+        const processedNotification: Notification = {
+          id: notification.Id ?? notification.id,
+          title: notification.Title ?? notification.title,
+          message: notification.Message ?? notification.message,
+          type: (
+            notification.Type ??
+            notification.type ??
+            'info'
+          ).toLowerCase(),
+          isRead: false,
+          createdAt: new Date(notification.CreatedAt ?? notification.createdAt),
+          actionUrl: notification.ActionUrl ?? notification.actionUrl,
+          metadata: notification.Metadata ?? notification.metadata,
+        };
+
+        this.notificationCallbacks.forEach((callback) =>
+          callback(processedNotification)
+        );
+      });
+
+      try {
+        await this.connection.start();
+        console.log('✅ SignalR Connected successfully');
+        this.notifyConnectionState(signalR.HubConnectionState.Connected);
+      } catch (error: any) {
+        console.error('❌ SignalR Connection Error:', error?.message || error);
+        this.notifyConnectionState(signalR.HubConnectionState.Disconnected);
+
+        // Don't retry on 404 - the hub URL is wrong
+        if (error?.message?.includes('404')) {
+          console.error(
+            'Hub not found. Please check the SignalR hub URL configuration.'
+          );
+          return;
+        }
+
+        // Retry for other errors
+        // Note: AutomaticReconnect handles most retries, but initial connection needs manual retry
+        setTimeout(() => {
+          this.connectionPromise = null;
+          this.startConnection();
+        }, 5000);
+        throw error; // Re-throw to clear promise
+      }
+    })();
 
     try {
-      await this.connection.start();
-      console.log('✅ SignalR Connected successfully');
-      this.notifyConnectionState(signalR.HubConnectionState.Connected);
-    } catch (error: any) {
-      console.error('❌ SignalR Connection Error:', error?.message || error);
-      this.notifyConnectionState(signalR.HubConnectionState.Disconnected);
-
-      // Don't retry on 404 - the hub URL is wrong
-      if (error?.message?.includes('404')) {
-        console.error(
-          'Hub not found. Please check the SignalR hub URL configuration.'
-        );
-        return;
-      }
-
-      // Retry for other errors
-      setTimeout(() => this.startConnection(), 5000);
+      await this.connectionPromise;
+    } catch (e) {
+      // Error logged inside promise
+      this.connectionPromise = null;
+    } finally {
+      // Don't clear promise on success, to prevent concurrent re-connections if called again
+      // Only clear on error (handled in catch/retry)
+      // Actually, if we succeed, we want subsequent calls to see Connected state and return early.
+      // But if state check fails (e.g. disconnected later), we need a new promise.
+      // So we should probably clear promise after completion?
+      // If we clear it, a concurrent call MIGHT start a new one if state hasn't updated yet?
+      // But we await it.
+      this.connectionPromise = null;
     }
   }
 
@@ -148,93 +180,96 @@ export const useSignalR = () => {
   const isConnected = useRef(false);
 
   useEffect(() => {
-    let unsubscribeNotification: (() => void) | undefined;
-    let unsubscribeConnection: (() => void) | undefined;
+    let isMounted = true;
+
+    // Set up listeners immediately
+    const unsubscribeConnection = signalRService.onConnectionStateChanged(
+      (state) => {
+        const connected = state === signalR.HubConnectionState.Connected;
+        isConnected.current = connected;
+        dispatch(setConnectionStatus(connected));
+      }
+    );
+
+    const unsubscribeNotification = signalRService.onNotificationReceived(
+      async (notification) => {
+        dispatch(addNotification(notification));
+
+        // Handle Order Updates via SignalR
+        try {
+          if (notification.metadata) {
+            const metadata =
+              typeof notification.metadata === 'string'
+                ? JSON.parse(notification.metadata)
+                : notification.metadata;
+
+            if (metadata?.orderId) {
+              // New Order or Status Update
+              if (
+                notification.title.includes('New Order') ||
+                notification.title.includes('Order Created')
+              ) {
+                const newOrder = await fetchOrderById(metadata.orderId);
+                if (!('error' in newOrder)) {
+                  dispatch(addOrder(newOrder));
+                }
+              } else if (metadata.status) {
+                dispatch(
+                  updateOrderStatus({
+                    id: metadata.orderId,
+                    status: metadata.status as OrderStatus,
+                  })
+                );
+              } else if (notification.title.includes('Cancelled')) {
+                dispatch(
+                  updateOrderStatus({
+                    id: metadata.orderId,
+                    status: 'Cancelled',
+                  })
+                );
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error processing real-time order update:', error);
+        }
+
+        // Show toast for new notification
+        toast(notification.title, {
+          description: notification.message,
+          action: notification.actionUrl
+            ? {
+                label: 'View',
+                onClick: () => (window.location.href = notification.actionUrl!),
+              }
+            : undefined,
+        });
+      }
+    );
 
     const initSignalR = async () => {
       // 1. Load initial notifications
       try {
         const notifications = await fetchNotifications();
-        dispatch(setNotifications(notifications));
+        if (isMounted) {
+          dispatch(setNotifications(notifications));
+        }
       } catch (error) {
         console.error('Failed to load notifications:', error);
       }
 
       // 2. Start SignalR connection
-      await signalRService.startConnection();
-
-      // 3. Set up listeners
-      unsubscribeConnection = signalRService.onConnectionStateChanged(
-        (state) => {
-          const connected = state === signalR.HubConnectionState.Connected;
-          isConnected.current = connected;
-          dispatch(setConnectionStatus(connected));
-        }
-      );
-
-      unsubscribeNotification = signalRService.onNotificationReceived(
-        async (notification) => {
-          dispatch(addNotification(notification));
-
-          // Handle Order Updates via SignalR
-          try {
-            if (notification.metadata) {
-              const metadata =
-                typeof notification.metadata === 'string'
-                  ? JSON.parse(notification.metadata)
-                  : notification.metadata;
-
-              if (metadata?.orderId) {
-                // New Order or Status Update
-                if (
-                  notification.title.includes('New Order') ||
-                  notification.title.includes('Order Created')
-                ) {
-                  const newOrder = await fetchOrderById(metadata.orderId);
-                  if (!('error' in newOrder)) {
-                    dispatch(addOrder(newOrder));
-                  }
-                } else if (metadata.status) {
-                  dispatch(
-                    updateOrderStatus({
-                      id: metadata.orderId,
-                      status: metadata.status as OrderStatus,
-                    })
-                  );
-                } else if (notification.title.includes('Cancelled')) {
-                  dispatch(
-                    updateOrderStatus({
-                      id: metadata.orderId,
-                      status: 'Cancelled',
-                    })
-                  );
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Error processing real-time order update:', error);
-          }
-
-          // Show toast for new notification
-          toast(notification.title, {
-            description: notification.message,
-            action: notification.actionUrl
-              ? {
-                  label: 'View',
-                  onClick: () =>
-                    (window.location.href = notification.actionUrl!),
-                }
-              : undefined,
-          });
-        }
-      );
+      if (isMounted) {
+        await signalRService.startConnection();
+      }
     };
 
     initSignalR();
 
     return () => {
-      if (unsubscribeNotification) unsubscribeNotification();
-      if (unsubscribeConnection) unsubscribeConnection();
+      isMounted = false;
+      unsubscribeNotification();
+      unsubscribeConnection();
       signalRService.stopConnection();
     };
   }, [dispatch]);

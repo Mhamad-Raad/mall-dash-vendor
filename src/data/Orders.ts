@@ -15,7 +15,8 @@ interface OrdersResponse {
 }
 
 export const fetchOrders = async (
-  params: FetchOrdersParams = {}
+  params: FetchOrdersParams = {},
+  signal?: AbortSignal
 ): Promise<OrdersResponse | { error: string }> => {
   try {
     const queryParams: Record<string, any> = {
@@ -29,6 +30,7 @@ export const fetchOrders = async (
 
     const response = await axiosInstance.get<OrdersResponse>('/Order', {
       params: queryParams,
+      signal,
     });
 
     return response.data;

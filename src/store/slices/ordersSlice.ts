@@ -25,10 +25,10 @@ export const fetchOrders = createAsyncThunk(
       limit?: number;
       status?: OrderStatus | 'All' | null;
     } = {},
-    { rejectWithValue }
+    { rejectWithValue, signal }
   ) => {
     try {
-      const data = await fetchOrdersAPI(params);
+      const data = await fetchOrdersAPI(params, signal);
 
       if ('error' in data) {
         return rejectWithValue(data.error);
@@ -60,6 +60,11 @@ const ordersSlice = createSlice({
     },
     // Real-time updates
     addOrder: (state, action: PayloadAction<Order>) => {
+      // Prevent duplicates
+      if (state.orders.some((o) => o.id === action.payload.id)) {
+        return;
+      }
+
       // Only add if it matches current filter (or filter is All)
       if (
         state.statusFilter === 'All' ||

@@ -17,6 +17,13 @@ export interface OrderItem {
   totalPrice: number;
 }
 
+export interface DeliveryAddress {
+  id: number;
+  buildingName: string;
+  floorNumber: number;
+  apartmentName: string;
+}
+
 export interface Order {
   id: number;
   orderNumber: string;
@@ -25,7 +32,7 @@ export interface Order {
   userPhone?: string; // Added field
   vendorId: number;
   vendorName?: string; // Added field
-  deliveryAddress?: string | null; // Added field
+  deliveryAddress?: DeliveryAddress | null; // Updated field
   subtotal: number;
   deliveryFee: number;
   totalAmount: number;
