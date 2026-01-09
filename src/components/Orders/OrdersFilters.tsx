@@ -33,7 +33,6 @@ const OrdersFilters = () => {
     'Pending',
     'Confirmed',
     'Preparing',
-    'ReadyForPickup',
     'OutForDelivery',
     'Delivered',
     'Cancelled',

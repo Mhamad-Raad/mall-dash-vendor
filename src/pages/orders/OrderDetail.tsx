@@ -68,7 +68,6 @@ const OrderDetail = () => {
         return 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30';
       case 'Preparing':
         return 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border-indigo-500/30';
-      case 'ReadyForPickup':
       case 'OutForDelivery':
         return 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/30';
       case 'Delivered':
