@@ -61,11 +61,6 @@ const mainNavItems = [
     icon: Users,
   },
   {
-    titleKey: 'account',
-    url: '#',
-    icon: User,
-  },
-  {
     titleKey: 'products',
     url: '/products',
     icon: Package,
@@ -197,69 +192,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className='mt-2'>
               {mainNavItems.map((item) => {
-                if (item.titleKey === 'account') {
-                  return (
-                    <Collapsible
-                      key={item.titleKey}
-                      asChild
-                      defaultOpen={settingsOpen}
-                      className='group/collapsible'
-                    >
-                      <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton
-                            tooltip={t(item.titleKey)}
-                            isActive={settingsOpen}
-                            className={`
-                            transition-all duration-200
-                            ${
-                              settingsOpen
-                                ? 'bg-muted/50 font-semibold'
-                                : 'hover:bg-muted/50'
-                            }
-                          `}
-                          >
-                            <item.icon className='h-4 w-4' />
-                            <span>{t(item.titleKey)}</span>
-                            <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {settingsSubItems.map((subItem) => (
-                              <SidebarMenuSubItem key={subItem.titleKey}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={isSettingsActive(subItem.url)}
-                                  className={`
-                                  transition-all duration-200
-                                  ${
-                                    isSettingsActive(subItem.url)
-                                      ? 'bg-primary/10 text-primary font-medium'
-                                      : 'hover:bg-muted/50'
-                                  }
-                                `}
-                                >
-                                  <a
-                                    href={subItem.url}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      navigate(subItem.url);
-                                    }}
-                                  >
-                                    <subItem.icon className='h-3.5 w-3.5 mr-2 opacity-70' />
-                                    <span>{t(subItem.titleKey)}</span>
-                                  </a>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
-                  );
-                }
-
                 return (
                   <SidebarMenuItem key={item.titleKey}>
                     <SidebarMenuButton
