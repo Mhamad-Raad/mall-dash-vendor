@@ -142,25 +142,25 @@ const Orders = () => {
           <div className='flex h-full w-full'>
             {/* Left Panel - Order List */}
             <div className='w-[350px] border-r flex flex-col bg-muted/10'>
-              <div className='p-4 border-b space-y-3 bg-background'>
+              <div className='p-3 space-y-2 bg-background'>
                 <div className='relative'>
-                  <Search className='absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                  <Search className='absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground' />
                   <Input
                     type='text'
                     placeholder='Search orders...'
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    className='pl-9 h-9 text-sm bg-muted/40 border-none shadow-none focus-visible:ring-1'
+                    className='pl-8 h-8 text-xs bg-muted/40 border-none shadow-none focus-visible:ring-1'
                   />
                 </div>
                 
-                <div className='flex items-center justify-between px-1'>
-                  <h2 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                <div className='flex items-center justify-between'>
+                  <h2 className='text-[11px] font-medium text-muted-foreground uppercase tracking-wider'>
                     {total} Orders
                   </h2>
                   <Select value={status || 'All'} onValueChange={handleStatusChange}>
-                    <SelectTrigger className='w-auto h-auto min-h-0 py-1 pl-2 pr-1 text-xs border-none shadow-none bg-transparent hover:bg-muted/50 rounded-md gap-1'>
-                      <div className="flex items-center gap-1.5 text-foreground/80">
+                    <SelectTrigger className='w-auto h-auto min-h-0 py-0.5 pl-1.5 pr-1 text-[11px] border-none shadow-none bg-transparent hover:bg-muted/50 rounded-md gap-1'>
+                      <div className="flex items-center gap-1 text-foreground/80">
                         <Filter className="h-3 w-3" />
                         <span className="font-medium">{status === 'All' || !status ? 'All Views' : status}</span>
                       </div>

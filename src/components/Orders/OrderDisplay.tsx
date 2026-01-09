@@ -143,7 +143,7 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
     <div className="h-full overflow-y-auto">
       <div className="flex flex-col">
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b bg-muted/30">
+        <div className="flex items-center justify-between px-6 py-5 border-b bg-muted/30">
           <div>
             <h2 className="text-xl font-semibold tracking-tight">Order #{order.orderNumber}</h2>
             <p className="text-xs text-muted-foreground mt-1.5">
