@@ -8,9 +8,12 @@ import {
   setNotifications,
   setConnectionStatus,
 } from '@/store/slices/notificationsSlice';
+import { addOrder, updateOrderStatus } from '@/store/slices/ordersSlice';
 import { fetchNotifications } from '@/data/Notifications';
+import { fetchOrderById } from '@/data/Orders';
 
 import type { Notification } from '@/interfaces/Notification.interface';
+import type { OrderStatus } from '@/interfaces/Order.interface';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -170,8 +173,47 @@ export const useSignalR = () => {
       );
 
       unsubscribeNotification = signalRService.onNotificationReceived(
-        (notification) => {
+        async (notification) => {
           dispatch(addNotification(notification));
+
+          // Handle Order Updates via SignalR
+          try {
+            if (notification.metadata) {
+              const metadata =
+                typeof notification.metadata === 'string'
+                  ? JSON.parse(notification.metadata)
+                  : notification.metadata;
+
+              if (metadata?.orderId) {
+                // New Order or Status Update
+                if (
+                  notification.title.includes('New Order') ||
+                  notification.title.includes('Order Created')
+                ) {
+                  const newOrder = await fetchOrderById(metadata.orderId);
+                  if (!('error' in newOrder)) {
+                    dispatch(addOrder(newOrder));
+                  }
+                } else if (metadata.status) {
+                  dispatch(
+                    updateOrderStatus({
+                      id: metadata.orderId,
+                      status: metadata.status as OrderStatus,
+                    })
+                  );
+                } else if (notification.title.includes('Cancelled')) {
+                  dispatch(
+                    updateOrderStatus({
+                      id: metadata.orderId,
+                      status: 'Cancelled',
+                    })
+                  );
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error processing real-time order update:', error);
+          }
 
           // Show toast for new notification
           toast(notification.title, {

@@ -72,7 +72,7 @@ const mainNavItems = [
   },
   {
     titleKey: 'orders',
-    url: '#',
+    url: '/orders',
     icon: ShoppingCart,
   },
 ];
