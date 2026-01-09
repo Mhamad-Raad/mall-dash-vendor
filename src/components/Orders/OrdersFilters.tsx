@@ -6,7 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ShoppingCart, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ShoppingCart, SlidersHorizontal, Search } from 'lucide-react';
 import type { OrderStatus } from '@/interfaces/Order.interface';
 
 const OrdersFilters = () => {
@@ -14,6 +15,7 @@ const OrdersFilters = () => {
   const [searchParams] = useSearchParams();
 
   const currentStatus = searchParams.get('status') || 'All';
+  const searchQuery = searchParams.get('search') || '';
 
   const handleStatusChange = (value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -21,6 +23,20 @@ const OrdersFilters = () => {
       params.set('status', value);
     } else {
       params.delete('status');
+    }
+    params.set('page', '1'); // Reset to first page
+    navigate(`${window.location.pathname}?${params.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const params = new URLSearchParams(searchParams);
+    const value = e.target.value;
+    if (value) {
+      params.set('search', value);
+    } else {
+      params.delete('search');
     }
     params.set('page', '1'); // Reset to first page
     navigate(`${window.location.pathname}?${params.toString()}`, {
@@ -39,50 +55,51 @@ const OrdersFilters = () => {
   ];
 
   return (
-    <div className='flex flex-col gap-5'>
+    <div className='flex items-center justify-between gap-4'>
       {/* Header Section */}
-      <div className='flex flex-col lg:flex-row lg:items-center justify-between gap-4'>
-        <div className='flex items-center gap-4'>
-          <div className='relative'>
-            <div className='absolute inset-0 bg-gradient-to-br from-primary to-primary/50 rounded-2xl blur-lg opacity-40' />
-            <div className='relative p-3.5 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg'>
-              <ShoppingCart className='size-7' />
-            </div>
+      <div className='flex items-center gap-3'>
+        <div className='relative'>
+          <div className='absolute inset-0 bg-gradient-to-br from-primary to-primary/50 rounded-xl blur-lg opacity-40' />
+          <div className='relative p-2.5 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg'>
+            <ShoppingCart className='h-5 w-5' />
           </div>
-          <div>
-            <div className='flex items-center gap-2'>
-              <h1 className='text-3xl font-bold tracking-tight'>Orders</h1>
-              <Sparkles className='size-5 text-amber-500' />
-            </div>
-            <p className='text-muted-foreground mt-0.5'>
-              Manage and track your customer orders
-            </p>
-          </div>
+        </div>
+        <div>
+          <h1 className='text-2xl font-bold tracking-tight'>Orders</h1>
+          <p className='text-sm text-muted-foreground'>
+            Manage and track your customer orders
+          </p>
         </div>
       </div>
 
-      {/* Filters Bar */}
-      <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-2xl border bg-card/50 backdrop-blur-sm shadow-sm'>
+      {/* Filters */}
+      <div className='flex items-center gap-3'>
+        <div className='relative'>
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+          <Input
+            type='text'
+            placeholder='Search orders...'
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className='pl-9 w-[250px]'
+          />
+        </div>
         <div className='flex items-center gap-2 text-muted-foreground'>
-          <SlidersHorizontal className='size-4' />
-          <span className='text-sm font-medium'>Filters</span>
+          <SlidersHorizontal className='h-4 w-4' />
+          <span className='text-sm font-medium'>Filter</span>
         </div>
-
-        <div className='flex flex-col sm:flex-row flex-1 items-start sm:items-center gap-3 w-full'>
-          {/* Status Filter */}
-          <Select value={currentStatus} onValueChange={handleStatusChange}>
-            <SelectTrigger className='w-full sm:w-[200px] h-10 bg-background/80 border-border/50 rounded-xl'>
-              <SelectValue placeholder='Filter by Status' />
-            </SelectTrigger>
-            <SelectContent>
-              {orderStatuses.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status === 'All' ? 'All Orders' : status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={currentStatus} onValueChange={handleStatusChange}>
+          <SelectTrigger className='w-[180px] h-9'>
+            <SelectValue placeholder='Filter by Status' />
+          </SelectTrigger>
+          <SelectContent>
+            {orderStatuses.map((status) => (
+              <SelectItem key={status} value={status}>
+                {status === 'All' ? 'All Orders' : status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

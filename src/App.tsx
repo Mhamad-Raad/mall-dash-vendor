@@ -17,7 +17,6 @@ import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import VendorProfile from './pages/VendorProfile';
 import Orders from './pages/orders/Orders';
-import OrderDetail from './pages/orders/OrderDetail';
 
 import NotFound from './pages/NotFound';
 import ErrorPage from './pages/ErrorPage';
@@ -65,7 +64,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/orders/:id',
-        element: <OrderDetail />,
+        element: <Orders />,
       },
       {
         path: '/settings',
