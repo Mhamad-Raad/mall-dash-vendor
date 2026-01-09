@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   ArrowLeft,
   Clock,
@@ -23,16 +24,21 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { fetchOrderById } from '@/data/Orders';
+import { changeOrderStatus } from '@/store/slices/ordersSlice';
+import type { AppDispatch } from '@/store/store';
 import type { Order, OrderStatus } from '@/interfaces/Order.interface';
 import { getStatusText } from '@/utils/orderUtils';
+import { toast } from 'sonner';
 
 import { formatDate } from '@/utils/dateUtils';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,6 +83,79 @@ const OrderDetail = () => {
       default:
         return 'bg-gray-500/15 text-gray-700 dark:text-gray-400 border-gray-500/30';
     }
+  };
+
+  const handleStatusChange = async (newStatus: number) => {
+    if (!order) return;
+    setUpdating(true);
+    try {
+      const result = await dispatch(
+        changeOrderStatus({ id: order.id, status: newStatus })
+      ).unwrap();
+
+      // Update local state
+      setOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+      toast.success('Order status updated successfully');
+    } catch (err) {
+      toast.error('Failed to update order status');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const renderActionButtons = () => {
+    if (!order) return null;
+    const statusText = getStatusText(order.status);
+
+    if (statusText === 'Pending') {
+      return (
+        <>
+          <Button
+            variant='destructive'
+            size='sm'
+            onClick={() => handleStatusChange(6)} // Cancelled
+            disabled={updating}
+          >
+            {updating ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              'Cancel Order'
+            )}
+          </Button>
+          <Button
+            size='sm'
+            onClick={() => handleStatusChange(2)} // Confirmed
+            disabled={updating}
+            className='bg-blue-600 hover:bg-blue-700'
+          >
+            {updating ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              'Confirm Order'
+            )}
+          </Button>
+        </>
+      );
+    }
+
+    if (statusText === 'Confirmed') {
+      return (
+        <Button
+          size='sm'
+          onClick={() => handleStatusChange(3)} // Preparing
+          disabled={updating}
+          className='bg-indigo-600 hover:bg-indigo-700'
+        >
+          {updating ? (
+            <Loader2 className='h-4 w-4 animate-spin' />
+          ) : (
+            'Start Preparing'
+          )}
+        </Button>
+      );
+    }
+
+    return null;
   };
 
   if (loading) {
@@ -143,6 +222,7 @@ const OrderDetail = () => {
         </div>
 
         <div className='flex items-center gap-3'>
+          {renderActionButtons()}
           <Badge
             variant='secondary'
             className={`text-sm px-3 py-1 ${getStatusColor(order.status)}`}

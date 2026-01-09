@@ -62,3 +62,49 @@ export const fetchOrderById = async (
   }
 };
 
+export const updateOrderStatus = async (
+  id: number,
+  status: number
+): Promise<boolean | { error: string }> => {
+  try {
+    // Try sending as object if primitive fails
+    const response = await axiosInstance.put(
+      `/Order/${id}/status`,
+      status, // Try primitive first as per spec
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return true;
+  } catch (error: any) {
+    console.error(`Error updating order ${id} status:`, error);
+
+    // Fallback: Try sending as object wrapper if 400
+    if (error.response?.status === 400) {
+      try {
+        await axiosInstance.put(
+          `/Order/${id}/status`,
+          { status },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        return true;
+      } catch (retryError) {
+        // Ignore retry error and return original
+      }
+    }
+
+    return {
+      error:
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to update order status',
+    };
+  }
+};
+

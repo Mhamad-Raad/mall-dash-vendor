@@ -26,9 +26,22 @@ class SignalRService {
   private connectionPromise: Promise<void> | null = null;
 
   public async startConnection(): Promise<void> {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      console.log('SignalR already connected');
-      return;
+    // If we have an existing connection, check its state
+    if (this.connection) {
+      // If already connected, we're good
+      if (this.connection.state === signalR.HubConnectionState.Connected) {
+        console.log('SignalR already connected');
+        return;
+      }
+
+      // If in any other state (Connecting, Reconnecting, Disconnected),
+      // stop it cleanly before creating a new one to prevent orphans.
+      // This handles Strict Mode where cleanup (stop) might race with next start.
+      try {
+        await this.stopConnection();
+      } catch (e) {
+        console.error('Error stopping existing connection:', e);
+      }
     }
 
     if (this.connectionPromise) {

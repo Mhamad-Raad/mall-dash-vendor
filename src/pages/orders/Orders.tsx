@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
@@ -29,6 +29,8 @@ const Orders = () => {
     | 'All'
     | null;
 
+  const lastFetchParams = useRef<string>('');
+
   useEffect(() => {
     const params: {
       limit: number;
@@ -40,10 +42,14 @@ const Orders = () => {
       status: status || 'All',
     };
 
-    const promise = dispatch(fetchOrders(params));
-    return () => {
-      promise.abort();
-    };
+    // Prevent duplicate fetches for same params
+    const paramsString = JSON.stringify(params);
+    if (lastFetchParams.current === paramsString && !loading) {
+      return;
+    }
+    lastFetchParams.current = paramsString;
+
+    dispatch(fetchOrders(params));
   }, [dispatch, limit, page, status]);
 
   const hasNoOrders = !loading && orders.length === 0 && !error;
