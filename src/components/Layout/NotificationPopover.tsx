@@ -21,7 +21,6 @@ import {
   markAsRead,
   markAllAsRead,
   deleteNotification,
-  clearAllNotifications,
 } from '@/store/slices/notificationsSlice';
 import {
   markNotificationAsRead,
