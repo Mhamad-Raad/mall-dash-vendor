@@ -45,8 +45,8 @@ const OrderList = ({ orders, selectedOrderId, onSelectOrder }: OrderListProps) =
                 isSelected && 'bg-muted'
               )}
             >
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-muted">
-                <Package className="h-4 w-4 text-muted-foreground" />
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Package className="h-4 w-4 text-primary" />
               </div>
               
               <div className="flex-1 min-w-0 space-y-1">
@@ -54,22 +54,24 @@ const OrderList = ({ orders, selectedOrderId, onSelectOrder }: OrderListProps) =
                   <span className="font-semibold text-sm truncate">
                     #{order.orderNumber}
                   </span>
-                  <Badge
-                    variant="secondary"
-                    className={cn(
-                      'border text-[10px] font-medium px-1.5 py-0 h-5 flex-shrink-0',
-                      getStatusColor(order.status)
-                    )}
-                  >
-                    {getStatusText(order.status)}
-                  </Badge>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        'border text-[10px] font-medium px-1.5 py-0 h-5',
+                        getStatusColor(order.status)
+                      )}
+                    >
+                      {getStatusText(order.status)}
+                    </Badge>
+                  </div>
                 </div>
                 
                 <div className="flex items-center justify-between gap-2 text-xs">
                   <span className="font-medium text-muted-foreground truncate">
                     {order.userName || order.customerName || 'Guest Customer'}
                   </span>
-                  <span className="font-semibold text-foreground flex-shrink-0">
+                  <span className="font-semibold text-foreground flex-shrink-0 ml-2">
                     ${order.totalAmount.toFixed(2)}
                   </span>
                 </div>
