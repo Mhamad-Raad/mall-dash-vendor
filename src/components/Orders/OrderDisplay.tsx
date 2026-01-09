@@ -185,73 +185,78 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
           </div>
         )}
 
-        {/* Customer Information */}
+        {/* Customer & Delivery Information */}
         <div className="px-6 py-5 border-b">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Customer</p>
-          <div className="flex items-start gap-3">
-            <Avatar className="h-11 w-11">
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {(order.userName || order.customerName || 'G')[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-2 flex-1">
-              <p className="font-semibold text-base">
-                {order.userName || order.customerName || 'Guest Customer'}
-              </p>
-              {order.userEmail && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">{order.userEmail}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Customer Information */}
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Customer</p>
+              <div className="flex items-start gap-3">
+                <Avatar className="h-11 w-11">
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {(order.userName || order.customerName || 'G')[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-2 flex-1">
+                  <p className="font-semibold text-base">
+                    {order.userName || order.customerName || 'Guest Customer'}
+                  </p>
+                  {order.userEmail && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">{order.userEmail}</span>
+                    </div>
+                  )}
+                  {order.userPhone && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Phone className="h-3.5 w-3.5 flex-shrink-0" />
+                      {order.userPhone}
+                    </div>
+                  )}
                 </div>
-              )}
-              {order.userPhone && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="h-3.5 w-3.5 flex-shrink-0" />
-                  {order.userPhone}
-                </div>
-              )}
+              </div>
             </div>
+
+            {/* Delivery Address */}
+            {order.deliveryAddress && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Delivery Address
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3 text-sm">
+                    <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Building</p>
+                      <p className="font-medium text-base">
+                        {order.deliveryAddress.buildingName}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 text-sm">
+                    <Layers className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Floor</p>
+                      <p className="font-medium text-base">
+                        Floor {order.deliveryAddress.floorNumber}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 text-sm">
+                    <Home className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Apartment</p>
+                      <p className="font-medium text-base">
+                        {order.deliveryAddress.apartmentName}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Delivery Address */}
-        {order.deliveryAddress && (
-          <div className="px-6 py-5 border-b bg-muted/10">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-              <MapPin className="h-3.5 w-3.5" />
-              Delivery Address
-            </p>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 text-sm">
-                <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Building</p>
-                  <p className="font-medium text-base">
-                    {order.deliveryAddress.buildingName}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 text-sm">
-                <Layers className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Floor</p>
-                  <p className="font-medium text-base">
-                    Floor {order.deliveryAddress.floorNumber}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 text-sm">
-                <Home className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Apartment</p>
-                  <p className="font-medium text-base">
-                    {order.deliveryAddress.apartmentName}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Order Items */}
         {order.items && order.items.length > 0 && (
