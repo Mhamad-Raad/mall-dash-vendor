@@ -141,10 +141,6 @@ export function AppSidebar() {
     return location.pathname.startsWith(url);
   };
 
-  const isSettingsActive = (url: string) => {
-    return location.pathname.startsWith(url);
-  };
-
   const handleUserLogout = async () => {
     await logoutUser();
   };

@@ -89,7 +89,7 @@ const OrderDetail = () => {
     if (!order) return;
     setUpdating(true);
     try {
-      const result = await dispatch(
+      await dispatch(
         changeOrderStatus({ id: order.id, status: newStatus })
       ).unwrap();
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Bell, Check, X, Archive } from 'lucide-react';
+import { Bell, Check, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -111,11 +111,6 @@ export default function NotificationPopover() {
     e.stopPropagation();
     dispatch(deleteNotification(id));
     deleteNotificationApi(id);
-  };
-
-  const handleClearAll = () => {
-    dispatch(clearAllNotifications());
-    // Note: No backend API for clear all currently, but could be added
   };
 
   const handleNotificationClick = (notification: Notification) => {

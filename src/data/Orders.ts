@@ -68,7 +68,7 @@ export const updateOrderStatus = async (
 ): Promise<boolean | { error: string }> => {
   try {
     // Try sending as object if primitive fails
-    const response = await axiosInstance.put(
+    await axiosInstance.put(
       `/Order/${id}/status`,
       status, // Try primitive first as per spec
       {
