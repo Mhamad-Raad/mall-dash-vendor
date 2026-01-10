@@ -21,33 +21,39 @@ export const OrderDisplaySkeleton = () => {
 
         {/* Customer & Delivery Skeleton */}
         <div className='px-6 py-5 border-b'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x'>
             {/* Customer Skeleton */}
-            <div className='space-y-4'>
-              <Skeleton className='h-3 w-16' />
-              <div className='flex items-center gap-3'>
-                <Skeleton className='h-11 w-11 rounded-full' />
-                <div className='space-y-2 flex-1'>
-                  <Skeleton className='h-5 w-32' />
-                  <Skeleton className='h-4 w-40' />
-                  <Skeleton className='h-4 w-24' />
+            <div className='pb-6 md:pb-0 md:pr-6'>
+              <Skeleton className='h-3 w-16 mb-3' />
+              <div className='flex gap-4'>
+                <Skeleton className='h-16 w-16 rounded-full flex-shrink-0' />
+                <div className='space-y-2.5 flex-1'>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className='flex items-start gap-3'>
+                      <Skeleton className='h-4 w-4 rounded mt-0.5 flex-shrink-0' />
+                      <div className='space-y-1 flex-1'>
+                        <Skeleton className='h-3 w-12' />
+                        <Skeleton className='h-4 w-full max-w-[200px]' />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Delivery Skeleton */}
-            <div className='space-y-4'>
-              <div className='flex items-center gap-2'>
-                <Skeleton className='h-3 w-3 rounded-full' />
-                <Skeleton className='h-3 w-24' />
+            <div className='pt-6 md:pt-0 md:pl-6'>
+              <div className='flex items-center gap-2 mb-3'>
+                <Skeleton className='h-3.5 w-3.5 rounded' />
+                <Skeleton className='h-3 w-28' />
               </div>
-              <div className='space-y-3'>
+              <div className='space-y-2.5'>
                 {[1, 2, 3].map((i) => (
                   <div key={i} className='flex items-start gap-3'>
-                    <Skeleton className='h-4 w-4 rounded' />
+                    <Skeleton className='h-4 w-4 rounded mt-0.5 flex-shrink-0' />
                     <div className='space-y-1'>
-                      <Skeleton className='h-3 w-12' />
-                      <Skeleton className='h-4 w-24' />
+                      <Skeleton className='h-3 w-16' />
+                      <Skeleton className='h-4 w-32' />
                     </div>
                   </div>
                 ))}
