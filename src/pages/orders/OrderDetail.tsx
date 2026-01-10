@@ -31,6 +31,7 @@ import { getStatusText } from '@/utils/orderUtils';
 import { toast } from 'sonner';
 
 import { formatDate } from '@/utils/dateUtils';
+import { OrderDetailSkeleton } from '@/components/Orders/OrderDetailSkeleton';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -159,11 +160,7 @@ const OrderDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className='flex h-full w-full items-center justify-center'>
-        <Loader2 className='h-8 w-8 animate-spin text-primary' />
-      </div>
-    );
+    return <OrderDetailSkeleton />;
   }
 
   if (error || !order) {

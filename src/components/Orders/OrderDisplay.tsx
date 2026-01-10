@@ -26,6 +26,7 @@ import { getStatusText } from '@/utils/orderUtils';
 import { toast } from 'sonner';
 import { formatDate } from '@/utils/dateUtils';
 import { cn } from '@/lib/utils';
+import { OrderDisplaySkeleton } from './OrderDisplaySkeleton';
 
 interface OrderDisplayProps {
   orderId: number;
@@ -116,14 +117,7 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading order...</p>
-        </div>
-      </div>
-    );
+    return <OrderDisplaySkeleton />;
   }
 
   if (error || !order) {
