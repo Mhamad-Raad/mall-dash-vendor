@@ -11,6 +11,7 @@ import {
   Building2,
   Layers,
   Home,
+  User,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -180,30 +181,42 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
 
         {/* Customer & Delivery Information */}
         <div className="px-6 py-5 border-b">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x">
             {/* Customer Information */}
-            <div>
+            <div className="pb-6 md:pb-0 md:pr-6">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Customer</p>
-              <div className="flex items-start gap-3">
-                <Avatar className="h-11 w-11">
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+              <div className="flex gap-4">
+                <Avatar className="h-16 w-16 flex-shrink-0">
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xl">
                     {(order.userName || order.customerName || 'G')[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="space-y-2 flex-1">
-                  <p className="font-semibold text-base">
-                    {order.userName || order.customerName || 'Guest Customer'}
-                  </p>
+                <div className="space-y-2.5 flex-1 min-w-0">
+                  <div className="flex items-start gap-3">
+                    <User className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="font-medium text-base">
+                        {order.userName || order.customerName || 'Guest Customer'}
+                      </p>
+                    </div>
+                  </div>
                   {order.userEmail && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Mail className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="truncate">{order.userEmail}</span>
+                    <div className="flex items-start gap-3">
+                      <Mail className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="font-medium text-base truncate">{order.userEmail}</p>
+                      </div>
                     </div>
                   )}
                   {order.userPhone && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Phone className="h-3.5 w-3.5 flex-shrink-0" />
-                      {order.userPhone}
+                    <div className="flex items-start gap-3">
+                      <Phone className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Phone</p>
+                        <p className="font-medium text-base">{order.userPhone}</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -212,13 +225,13 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
 
             {/* Delivery Address */}
             {order.deliveryAddress && (
-              <div>
+              <div className="pt-6 md:pt-0 md:pl-6">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                   <MapPin className="h-3.5 w-3.5" />
                   Delivery Address
                 </p>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-3 text-sm">
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-3">
                     <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-muted-foreground">Building</p>
@@ -227,7 +240,7 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 text-sm">
+                  <div className="flex items-start gap-3">
                     <Layers className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-muted-foreground">Floor</p>
@@ -236,7 +249,7 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 text-sm">
+                  <div className="flex items-start gap-3">
                     <Home className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-muted-foreground">Apartment</p>
