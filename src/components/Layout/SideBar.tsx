@@ -89,15 +89,16 @@ export function AppSidebar() {
     return location.pathname.startsWith('/settings');
   });
 
+  const firstName = me?.firstName?.trim() || '';
+  const lastName = me?.lastName?.trim() || '';
+  const fullName = `${firstName} ${lastName}`.trim();
+
   const user = {
-    name:
-      vendorProfile?.name || me
-        ? `${me?.firstName} ${me?.lastName}`
-        : 'Guest User',
+    name: vendorProfile?.name || fullName || me?.email || 'Guest User',
     email: me?.email || '',
     avatar: vendorProfile?.profileImageUrl || me?.profileImageUrl || '',
-    initials: me
-      ? `${me.firstName?.[0] || ''}${me.lastName?.[0] || ''}`.toUpperCase()
+    initials: fullName
+      ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'GU'
       : 'GU',
   };
 
