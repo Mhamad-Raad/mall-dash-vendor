@@ -5,14 +5,10 @@ import {
   Home,
   Users,
   Package,
-  BarChart3,
   Settings,
-  FileText,
   ShoppingCart,
   ChevronRight,
-  User,
   Palette,
-  Store,
 } from 'lucide-react';
 
 import { useSelector } from 'react-redux';
@@ -72,32 +68,8 @@ const mainNavItems = [
   },
 ];
 
-// Management items
-const managementItems = [
-  {
-    titleKey: 'analytics',
-    url: '#',
-    icon: BarChart3,
-  },
-  {
-    titleKey: 'reports',
-    url: '/reports',
-    icon: FileText,
-  },
-];
-
 // Settings sub-items
 const settingsSubItems = [
-  {
-    titleKey: 'profile',
-    url: '/profile',
-    icon: User,
-  },
-  {
-    titleKey: 'Vendor Profile',
-    url: '/vendor-profile',
-    icon: Store,
-  },
   {
     titleKey: 'themes',
     url: '/settings/themes',
@@ -111,15 +83,10 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { user: me } = useSelector((state: RootState) => state.me);
   const { profile: vendorProfile } = useSelector(
-    (state: RootState) => state.vendor
+    (state: RootState) => state.vendor,
   );
   const [settingsOpen, setSettingsOpen] = useState(() => {
-    // Open settings menu by default if we're on a settings page
-    return (
-      location.pathname.startsWith('/profile') ||
-      location.pathname.startsWith('/vendor-profile') ||
-      location.pathname.startsWith('/settings')
-    );
+    return location.pathname.startsWith('/settings');
   });
 
   const user = {
@@ -225,50 +192,6 @@ export function AppSidebar() {
 
         <SidebarSeparator className='my-2' />
 
-        {/* Management Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className='text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider'>
-            {t('management')}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className='mt-2'>
-              {managementItems.map((item) => (
-                <SidebarMenuItem key={item.titleKey}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={t(item.titleKey)}
-                    isActive={isActive(item.url)}
-                    className={`
-                      transition-all duration-200
-                      ${
-                        isActive(item.url)
-                          ? 'bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm'
-                          : 'hover:bg-muted/50'
-                      }
-                    `}
-                  >
-                    <a
-                      href={item.url}
-                      onClick={(e) => {
-                        if (item.url !== '#') {
-                          e.preventDefault();
-                          navigate(item.url);
-                        }
-                      }}
-                      className='cursor-pointer'
-                    >
-                      <item.icon className='size-5 shrink-0' />
-                      <span>{t(item.titleKey)}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator className='my-2' />
-
         {/* Settings Section */}
         <SidebarGroup>
           <SidebarGroupLabel className='text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider'>
@@ -324,7 +247,9 @@ export function AppSidebar() {
         <NavUser
           user={user}
           onLogOut={handleUserLogout}
-          onAccountClick={() => navigate('/profile')}
+          onProfileClick={() => navigate('/profile')}
+          onVendorProfileClick={() => navigate('/vendor-profile')}
+          currentPath={location.pathname}
         />
       </SidebarFooter>
     </Sidebar>

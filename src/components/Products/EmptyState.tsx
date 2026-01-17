@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { Package, Plus, SearchX, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 const EmptyState = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className='flex flex-col items-center justify-center h-full text-center p-8 rounded-2xl border-2 border-dashed border-muted-foreground/20 bg-gradient-to-b from-muted/30 to-transparent'>
@@ -17,10 +19,9 @@ const EmptyState = () => {
         </div>
       </div>
 
-      <h2 className='text-2xl font-bold mb-2'>No products found</h2>
+      <h2 className='text-2xl font-bold mb-2'>{t('products.emptyTitle')}</h2>
       <p className='text-muted-foreground max-w-sm mb-6'>
-        We couldn't find any products matching your criteria. Try adjusting your
-        filters or add your first product to get started.
+        {t('products.emptyDescription')}
       </p>
 
       <div className='flex flex-col sm:flex-row items-center gap-3'>
@@ -30,14 +31,14 @@ const EmptyState = () => {
           size='lg'
         >
           <Plus className='size-5' />
-          Add Your First Product
+          {t('products.emptyAddFirst')}
         </Button>
         <Button
           variant='ghost'
           className='gap-2 text-muted-foreground'
           onClick={() => window.history.back()}
         >
-          Clear Filters
+          {t('products.emptyClearFilters')}
           <ArrowRight className='size-4' />
         </Button>
       </div>

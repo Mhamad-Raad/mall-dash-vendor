@@ -2,6 +2,7 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { TrendingUp, TrendingDown, ShoppingCart, DollarSign, Receipt, Wallet } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import {
   Card,
@@ -35,6 +36,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 function OrdersProfitChart({ data }: OrdersProfitChartProps) {
+  const { t } = useTranslation()
   const totalOrders = data.reduce((sum, item) => sum + item.orders, 0);
   const totalProfit = data.reduce((sum, item) => sum + item.profit, 0);
   const serviceFee = totalProfit * 0.03;
@@ -50,8 +52,8 @@ function OrdersProfitChart({ data }: OrdersProfitChartProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle className="text-lg">Profit Overview</CardTitle>
-          <p className="text-sm text-muted-foreground">December 2025</p>
+          <CardTitle className="text-lg">{t('home.profitOverviewTitle')}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t('home.profitOverviewSubtitle')}</p>
         </div>
         <div className={`flex items-center gap-1 text-sm font-medium ${isTrendingUp ? 'text-primary' : 'text-destructive'}`}>
           {isTrendingUp ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
@@ -119,7 +121,7 @@ function OrdersProfitChart({ data }: OrdersProfitChartProps) {
                   <ShoppingCart className="h-4 w-4 text-chart-1" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Orders</p>
+                  <p className="text-xs text-muted-foreground">{t('home.totalOrders')}</p>
                   <p className="text-xl font-bold tabular-nums">{totalOrders}</p>
                 </div>
               </div>
@@ -128,7 +130,7 @@ function OrdersProfitChart({ data }: OrdersProfitChartProps) {
                   <DollarSign className="h-4 w-4 text-chart-2" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Gross Profit</p>
+                  <p className="text-xs text-muted-foreground">{t('home.grossProfit')}</p>
                   <p className="text-xl font-bold tabular-nums">{formatPrice(totalProfit)}</p>
                 </div>
               </div>
@@ -137,7 +139,7 @@ function OrdersProfitChart({ data }: OrdersProfitChartProps) {
                   <Receipt className="h-4 w-4 text-destructive" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Service Fee (3%)</p>
+                  <p className="text-xs text-muted-foreground">{t('home.serviceFee')}</p>
                   <p className="text-xl font-bold tabular-nums text-destructive">-{formatPrice(serviceFee)}</p>
                 </div>
               </div>
@@ -146,7 +148,7 @@ function OrdersProfitChart({ data }: OrdersProfitChartProps) {
                   <Wallet className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Net Profit</p>
+                  <p className="text-xs text-muted-foreground">{t('home.netProfit')}</p>
                   <p className="text-xl font-bold tabular-nums text-primary">{formatPrice(netProfit)}</p>
                 </div>
               </div>

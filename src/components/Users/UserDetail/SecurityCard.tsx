@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from 'react-i18next';
 
 interface SecurityCardProps {
   password: string;
@@ -18,20 +19,19 @@ const SecurityCard = ({
   onConfirmPasswordChange,
 }: SecurityCardProps) => {
   const passwordsMatch = !password || !confirmPassword || password === confirmPassword;
+  const { t } = useTranslation();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-lg'>Security</CardTitle>
-        <CardDescription>
-          Update user password (Optional)
-        </CardDescription>
+        <CardTitle className='text-lg'>{t('users.securityTitle')}</CardTitle>
+        <CardDescription>{t('users.securityDescription')}</CardDescription>
       </CardHeader>
       <CardContent className='space-y-6'>
         <div className='space-y-2'>
           <Label htmlFor='password' className='text-sm font-medium flex items-center gap-2'>
             <Lock className='size-4 text-primary' />
-            New Password
+            {t('users.newPasswordLabel')}
           </Label>
           <Input
             id='password'
@@ -46,7 +46,7 @@ const SecurityCard = ({
         <div className='space-y-2'>
           <Label htmlFor='confirmPassword' className='text-sm font-medium flex items-center gap-2'>
             <Lock className='size-4 text-primary' />
-            Confirm New Password
+            {t('users.confirmNewPasswordLabel')}
           </Label>
           <Input
             id='confirmPassword'
@@ -58,12 +58,12 @@ const SecurityCard = ({
           />
           {!passwordsMatch && (
             <p className='text-xs text-destructive'>
-              Passwords do not match
+              {t('users.passwordsDoNotMatch')}
             </p>
           )}
         </div>
         <p className='text-xs text-muted-foreground'>
-          Leave blank to keep the current password. Password must be at least 8 characters long.
+          {t('users.securityHelp')}
         </p>
       </CardContent>
     </Card>

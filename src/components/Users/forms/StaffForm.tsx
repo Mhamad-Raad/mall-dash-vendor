@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-
 import { Mail, Lock, Image as ImageIcon, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type StaffFormProps = {
   formData: {
@@ -21,6 +21,7 @@ type StaffFormProps = {
 
 export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
   const [preview, setPreview] = useState<string>('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (formData.photo instanceof File) {
@@ -60,7 +61,7 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
               <div className='flex flex-col items-center gap-2'>
                 <ImageIcon className='size-12 text-muted-foreground/50 group-hover:text-primary/70 transition-colors' />
                 <span className='text-xs text-muted-foreground'>
-                  Upload Photo
+                  {t('users.uploadPhoto')}
                 </span>
               </div>
             )}
@@ -81,7 +82,7 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
         <div className='flex-1 space-y-4 w-full'>
           <div className='space-y-2'>
             <Label htmlFor='admin-firstname' className='text-sm font-medium'>
-              First Name <span className='text-destructive'>*</span>
+              {t('profile.firstName')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='admin-firstname'
@@ -93,7 +94,7 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
           </div>
           <div className='space-y-2'>
             <Label htmlFor='admin-lastname' className='text-sm font-medium'>
-              Last Name <span className='text-destructive'>*</span>
+              {t('profile.lastName')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='admin-lastname'
@@ -118,17 +119,17 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
       <div className='space-y-4'>
         <div className='flex items-center gap-2 pb-2'>
           <Mail className='size-5 text-primary' />
-          <h3 className='text-base font-semibold'>Contact Information</h3>
+          <h3 className='text-base font-semibold'>{t('users.contactTitle')}</h3>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='space-y-2'>
             <Label htmlFor='admin-email' className='text-sm font-medium'>
-              Email Address <span className='text-destructive'>*</span>
+              {t('users.emailLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='admin-email'
               type='email'
-              placeholder='john.doe@example.com'
+              placeholder={t('users.emailPlaceholder')}
               value={formData.email}
               onChange={(e) => onInputChange('email', e.target.value)}
               className='h-11'
@@ -136,12 +137,12 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
           </div>
           <div className='space-y-2'>
             <Label htmlFor='admin-phone' className='text-sm font-medium'>
-              Phone Number <span className='text-destructive'>*</span>
+              {t('users.phoneLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='admin-phone'
               type='tel'
-              placeholder='+1 (555) 000-0000'
+              placeholder={t('users.phonePlaceholder')}
               value={formData.phoneNumber}
               onChange={(e) => onInputChange('phoneNumber', e.target.value)}
               className='h-11'
@@ -156,17 +157,17 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
       <div className='space-y-4'>
         <div className='flex items-center gap-2 pb-2'>
           <Lock className='size-5 text-primary' />
-          <h3 className='text-base font-semibold'>Security</h3>
+          <h3 className='text-base font-semibold'>{t('users.securityTitle')}</h3>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='space-y-2'>
             <Label htmlFor='admin-password' className='text-sm font-medium'>
-              Password <span className='text-destructive'>*</span>
+              {t('login.passwordLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='admin-password'
               type='password'
-              placeholder='••••••••'
+              placeholder={t('login.passwordPlaceholder')}
               value={formData.password}
               onChange={(e) => onInputChange('password', e.target.value)}
               className='h-11'
@@ -177,12 +178,12 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
               htmlFor='admin-confirm-password'
               className='text-sm font-medium'
             >
-              Confirm Password <span className='text-destructive'>*</span>
+              {t('users.confirmPasswordLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='admin-confirm-password'
               type='password'
-              placeholder='••••••••'
+              placeholder={t('login.passwordPlaceholder')}
               value={formData.confirmPassword}
               onChange={(e) => onInputChange('confirmPassword', e.target.value)}
               className='h-11'
@@ -190,7 +191,7 @@ export default function StaffForm({ formData, onInputChange }: StaffFormProps) {
           </div>
         </div>
         <p className='text-xs text-muted-foreground'>
-          Password must be at least 8 characters long
+          {t('users.passwordRequirements')}
         </p>
       </div>
     </div>

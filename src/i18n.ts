@@ -6,7 +6,12 @@ import ar from './locales/ar.json';
 import ku from './locales/ku.json';
 
 import sidebarEn from './locales/Sidebar/en.json';
+import sidebarAr from './locales/Sidebar/ar.json';
+import sidebarKu from './locales/Sidebar/ku.json';
+
 import navbarEn from './locales/navbar/en.json';
+import navbarAr from './locales/navbar/ar.json';
+import navbarKu from './locales/navbar/ku.json';
 
 import themesEn from './locales/Themes/en.json';
 import themesAr from './locales/Themes/ar.json';
@@ -22,14 +27,14 @@ i18n.use(initReactI18next).init({
     },
     ar: {
       translation: ar,
-      sidebar: sidebarEn, // Fallback to EN for now
-      navbar: navbarEn, // Fallback to EN for now
+      sidebar: sidebarAr,
+      navbar: navbarAr,
       themes: themesAr,
     },
     ku: {
       translation: ku,
-      sidebar: sidebarEn, // Fallback to EN for now
-      navbar: navbarEn, // Fallback to EN for now
+      sidebar: sidebarKu,
+      navbar: navbarKu,
       themes: themesKu,
     },
   },

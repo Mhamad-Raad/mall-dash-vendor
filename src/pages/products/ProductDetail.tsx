@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ProductDetailHeader from '@/components/Products/ProductDetail/ProductDetailHeader';
 import ProductDetailFooter from '@/components/Products/ProductDetail/ProductDetailFooter';
 import ProductInfoCard from '@/components/Products/ProductDetail/ProductInfoCard';
@@ -25,6 +26,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+   const { t } = useTranslation();
 
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -83,21 +85,23 @@ const ProductDetail = () => {
     if (!product) return [];
     const changesList: ChangeDetail[] = [];
     const fieldLabels: Record<string, string> = {
-      name: 'Product Name',
-      description: 'Description',
-      price: 'Price',
-      discountPrice: 'Discount Price',
-      inStock: 'In Stock',
-      isWeightable: 'Weightable',
-      categoryId: 'Category',
-      productImageUrl: 'Image URL',
+      name: t('products.detailNameLabel'),
+      description: t('products.detailDescriptionLabel'),
+      price: t('products.detailRegularPriceLabel'),
+      discountPrice: t('products.detailDiscountPriceLabel'),
+      inStock: t('products.detailInStockLabel'),
+      isWeightable: t('products.detailWeightableLabel'),
+      categoryId: t('products.detailCategoryLabel'),
+      productImageUrl: t('products.detailProductImageTitle'),
     };
 
     // Check for image change
     if (formData.imageFile instanceof File) {
       changesList.push({
-        field: 'Product Image',
-        oldValue: product.productImageUrl ? 'Current image' : 'No image',
+        field: t('products.detailProductImageTitle'),
+        oldValue: product.productImageUrl
+          ? t('products.detailImageCurrent')
+          : t('products.detailImageNone'),
         newValue: formData.imageFile.name,
       });
     }
@@ -141,8 +145,8 @@ const ProductDetail = () => {
           oldVal = oldNum == null ? '—' : `$${oldNum.toFixed(2)}`;
           newVal = newNum == null ? '—' : `$${newNum.toFixed(2)}`;
         } else if (key === 'inStock' || key === 'isWeightable') {
-          oldVal = Boolean(oldVal) ? 'Yes' : 'No';
-          newVal = Boolean(newVal) ? 'Yes' : 'No';
+          oldVal = Boolean(oldVal) ? t('common.yes') : t('common.no');
+          newVal = Boolean(newVal) ? t('common.yes') : t('common.no');
         } else if (key === 'categoryId') {
           oldVal = product.categoryName ?? String(oldVal ?? '');
           newVal = String(newVal ?? '');
@@ -180,7 +184,7 @@ const ProductDetail = () => {
     const run = async () => {
       const res = await fetchCategories();
       if ((res as any)?.error) {
-        toast.error('Failed to load categories');
+        toast.error(t('products.detailCategoriesLoadFailed'));
       } else {
         setCategories(res as CategoryDTO[]);
       }
@@ -220,7 +224,7 @@ const ProductDetail = () => {
     }
     if (!deleting && showDeleteModal && !deletingError) {
       setShowDeleteModal(false);
-      toast.success('Product deleted!');
+      toast.success(t('products.detailDeleteSuccess'));
       navigate('/products');
     }
   }, [deleting, deletingError, navigate]);
@@ -255,10 +259,10 @@ const ProductDetail = () => {
         updateProduct({ id: id || String(product.id), update: updatePayload })
       ).unwrap();
       setShowUpdateModal(false);
-      toast.success('Product updated successfully!');
+      toast.success(t('products.detailUpdateSuccess'));
       navigate('/products');
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to update product');
+      toast.error(err?.message || t('products.detailUpdateFailed'));
     }
   };
 
@@ -287,25 +291,25 @@ const ProductDetail = () => {
       />
       <ConfirmModal
         open={showUpdateModal}
-        title='Update Product'
-        description='Are you sure you want to update this product?'
+        title={t('products.detailUpdateTitle')}
+        description={t('products.detailUpdateDescription')}
         userName={product.name}
         confirmType='warning'
-        confirmLabel='Update'
-        cancelLabel='Cancel'
+        confirmLabel={t('common.saveChanges')}
+        cancelLabel={t('common.cancel')}
         onCancel={handletoggleUpdateModal}
         onConfirm={handleUpdateProduct}
         changes={changes}
       />
       <ConfirmModal
         open={showDeleteModal}
-        title='Delete Product'
-        description='Are you sure you want to delete this product?'
+        title={t('products.detailDeleteTitle')}
+        description={t('products.detailDeleteDescription')}
         userName={product.name}
-        warning='WARNING! This action cannot be undone.'
+        warning={t('products.detailDeleteWarning')}
         confirmType='danger'
-        confirmLabel='Delete'
-        cancelLabel='Cancel'
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         onCancel={handletoggleDeleteModal}
         onConfirm={handleDeleteProduct}
       />

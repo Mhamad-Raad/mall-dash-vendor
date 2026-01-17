@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Clock,
@@ -36,6 +37,7 @@ const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -56,14 +58,14 @@ const OrderDetail = () => {
           setOrder(result);
         }
       } catch (err) {
-        setError('Failed to load order details');
+        setError(t('orders.detailErrorLoading'));
       } finally {
         setLoading(false);
       }
     };
 
     loadOrder();
-  }, [id]);
+  }, [id, t]);
 
   const getStatusColor = (status: OrderStatus | number) => {
     const statusText = getStatusText(status);
@@ -90,14 +92,13 @@ const OrderDetail = () => {
     setUpdating(true);
     try {
       await dispatch(
-        changeOrderStatus({ id: order.id, status: newStatus })
+        changeOrderStatus({ id: order.id, status: newStatus }),
       ).unwrap();
 
-      // Update local state
       setOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
-      toast.success('Order status updated successfully');
+      toast.success(t('orders.detailStatusUpdated'));
     } catch (err) {
-      toast.error('Failed to update order status');
+      toast.error(t('orders.detailStatusUpdateFailed'));
     } finally {
       setUpdating(false);
     }
@@ -109,53 +110,68 @@ const OrderDetail = () => {
 
     if (statusText === 'Pending') {
       return (
-        <>
+        <div className='flex flex-col gap-3 md:flex-row'>
           <Button
-            variant='destructive'
-            size='sm'
-            onClick={() => handleStatusChange(6)} // Cancelled
+            size='lg'
+            className='flex-1 h-11 text-sm md:text-base font-semibold bg-blue-600 hover:bg-blue-700'
+            onClick={() => handleStatusChange(2)}
             disabled={updating}
           >
             {updating ? (
-              <Loader2 className='h-4 w-4 animate-spin' />
+              <Loader2 className='h-5 w-5 animate-spin' />
             ) : (
-              'Cancel Order'
+              <>
+                <CheckCircle className='h-4 w-4 mr-2' />
+                {t('orders.detailConfirmOrder')}
+              </>
             )}
           </Button>
           <Button
-            size='sm'
-            onClick={() => handleStatusChange(2)} // Confirmed
+            variant='outline'
+            size='lg'
+            className='flex-1 h-11 text-sm md:text-base font-semibold border-destructive text-destructive hover:bg-destructive/10'
+            onClick={() => handleStatusChange(6)}
             disabled={updating}
-            className='bg-blue-600 hover:bg-blue-700'
           >
             {updating ? (
-              <Loader2 className='h-4 w-4 animate-spin' />
+              <Loader2 className='h-5 w-5 animate-spin' />
             ) : (
-              'Confirm Order'
+              <>
+                {t('orders.detailCancelOrder')}
+              </>
             )}
           </Button>
-        </>
+        </div>
       );
     }
 
     if (statusText === 'Confirmed') {
       return (
-        <Button
-          size='sm'
-          onClick={() => handleStatusChange(3)} // Preparing
-          disabled={updating}
-          className='bg-indigo-600 hover:bg-indigo-700'
-        >
-          {updating ? (
-            <Loader2 className='h-4 w-4 animate-spin' />
-          ) : (
-            'Start Preparing'
-          )}
-        </Button>
+        <div className='flex flex-col gap-3 md:flex-row'>
+          <Button
+            size='lg'
+            className='flex-1 h-11 text-sm md:text-base font-semibold bg-indigo-600 hover:bg-indigo-700'
+            onClick={() => handleStatusChange(3)}
+            disabled={updating}
+          >
+            {updating ? (
+              <Loader2 className='h-5 w-5 animate-spin' />
+            ) : (
+              <>
+                <CheckCircle className='h-4 w-4 mr-2' />
+                {t('orders.detailStartPreparing')}
+              </>
+            )}
+          </Button>
+        </div>
       );
     }
 
-    return null;
+    return (
+      <div className='text-sm text-muted-foreground'>
+        {t('orders.detailNoFurtherActions')}
+      </div>
+    );
   };
 
   if (loading) {
@@ -171,12 +187,14 @@ const OrderDetail = () => {
       <div className='flex h-full w-full flex-col items-center justify-center gap-4 p-8'>
         <Alert variant='destructive' className='max-w-md'>
           <AlertCircle className='h-4 w-4' />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error || 'Order not found'}</AlertDescription>
+          <AlertTitle>{t('common.errorTitle')}</AlertTitle>
+          <AlertDescription>
+            {error || t('orders.detailNotFound')}
+          </AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/orders')}>
           <ArrowLeft className='mr-2 h-4 w-4' />
-          Back to Orders
+          {t('orders.backToOrders')}
         </Button>
       </div>
     );
@@ -185,52 +203,58 @@ const OrderDetail = () => {
   return (
     <div className='flex flex-col gap-6 h-full overflow-hidden'>
       {/* Header */}
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-4'>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={() => navigate('/orders')}
-            className='h-8 w-8 rounded-full'
-          >
-            <ArrowLeft className='h-4 w-4' />
-          </Button>
-          <div>
-            <h1 className='text-2xl font-bold tracking-tight'>
-              Order #{order.orderNumber}
-            </h1>
-            <div className='flex items-center gap-2 text-muted-foreground text-sm mt-1'>
-              <Calendar className='h-3.5 w-3.5' />
-              <span>
-                {formatDate(new Date(order.createdAt), 'MMM dd, yyyy')}
-              </span>
-              <span>•</span>
-              <Clock className='h-3.5 w-3.5' />
-              <span>{formatDate(new Date(order.createdAt), 'hh:mm a')}</span>
-              {order.completedAt && (
-                <>
-                  <span>•</span>
-                  <CheckCircle className='h-3.5 w-3.5 text-emerald-500' />
-                  <span className='text-emerald-600 font-medium'>
-                    Completed:{' '}
-                    {formatDate(new Date(order.completedAt), 'MMM dd, hh:mm a')}
-                  </span>
-                </>
-              )}
-            </div>
+      <div className='flex items-center gap-4'>
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() => navigate('/orders')}
+          className='h-8 w-8 rounded-full'
+        >
+          <ArrowLeft className='h-4 w-4' />
+        </Button>
+        <div>
+          <h1 className='text-2xl font-bold tracking-tight'>
+            {t('orders.detailOrderLabel')} #{order.orderNumber}
+          </h1>
+          <div className='flex items-center gap-2 text-muted-foreground text-sm mt-1'>
+            <Calendar className='h-3.5 w-3.5' />
+            <span>{formatDate(new Date(order.createdAt), 'MMM dd, yyyy')}</span>
+            <span>•</span>
+            <Clock className='h-3.5 w-3.5' />
+            <span>{formatDate(new Date(order.createdAt), 'hh:mm a')}</span>
+            {order.completedAt && (
+              <>
+                <span>•</span>
+                <CheckCircle className='h-3.5 w-3.5 text-emerald-500' />
+                <span className='text-emerald-600 font-medium'>
+                  {t('orders.detailCompletedPrefix')}{' '}
+                  {formatDate(new Date(order.completedAt), 'MMM dd, hh:mm a')}
+                </span>
+              </>
+            )}
           </div>
         </div>
+      </div>
 
-        <div className='flex items-center gap-3'>
-          {renderActionButtons()}
+      <Card>
+        <CardHeader className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
+          <div>
+            <CardTitle className='text-lg'>
+              {t('orders.detailStatusTitle')}
+            </CardTitle>
+            <p className='text-sm text-muted-foreground'>
+              {t('orders.detailStatusSubtitle')}
+            </p>
+          </div>
           <Badge
-            variant='secondary'
+            variant='outline'
             className={`text-sm px-3 py-1 ${getStatusColor(order.status)}`}
           >
             {getStatusText(order.status)}
           </Badge>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>{renderActionButtons()}</CardContent>
+      </Card>
 
       <ScrollArea className='flex-1 -mx-6 px-6'>
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 pb-6'>
@@ -241,7 +265,7 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <Package className='h-5 w-5 text-primary' />
-                  Order Items
+                  {t('orders.detailItemsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent className='p-0'>
@@ -266,7 +290,7 @@ const OrderDetail = () => {
                         <div>
                           <p className='font-medium'>{item.productName}</p>
                           <p className='text-sm text-muted-foreground'>
-                            ${item.unitPrice.toFixed(2)} per unit
+                            ${item.unitPrice.toFixed(2)} {t('orders.detailPerUnit')}
                             {item.productImageUrl && (
                               <span className='ml-2 text-xs bg-muted px-1.5 py-0.5 rounded'>
                                 x{item.quantity}
@@ -282,7 +306,7 @@ const OrderDetail = () => {
                   ))}
                   {!order.items?.length && (
                     <div className='p-8 text-center text-muted-foreground'>
-                      No items found for this order.
+                      {t('orders.detailNoItems')}
                     </div>
                   )}
                 </div>
@@ -294,21 +318,25 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <DollarSign className='h-5 w-5 text-primary' />
-                  Payment Summary
+                  {t('orders.detailPaymentTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-muted-foreground'>Subtotal</span>
+                  <span className='text-muted-foreground'>
+                    {t('orders.detailSubtotal')}
+                  </span>
                   <span>${order.subtotal.toFixed(2)}</span>
                 </div>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-muted-foreground'>Delivery Fee</span>
+                  <span className='text-muted-foreground'>
+                    {t('orders.detailDeliveryFee')}
+                  </span>
                   <span>${order.deliveryFee.toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className='flex justify-between font-bold text-lg'>
-                  <span>Total</span>
+                  <span>{t('orders.detailTotal')}</span>
                   <span>${order.totalAmount.toFixed(2)}</span>
                 </div>
               </CardContent>
@@ -322,7 +350,7 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <User className='h-5 w-5 text-primary' />
-                  Customer
+                  {t('orders.detailCustomerTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-4'>
@@ -332,10 +360,9 @@ const OrderDetail = () => {
                   </div>
                   <div>
                     <p className='font-medium'>
-                      {order.userName || order.customerName || 'Guest Customer'}
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      ID: {order.userId.substring(0, 8)}...
+                      {order.userName ||
+                        order.customerName ||
+                        t('orders.guestCustomer')}
                     </p>
                   </div>
                 </div>
@@ -360,7 +387,7 @@ const OrderDetail = () => {
                     <Separator />
                     <div className='space-y-1.5'>
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                        Notes
+                        {t('orders.detailNotesTitle')}
                       </span>
                       <p className='text-sm bg-muted/50 p-3 rounded-lg border'>
                         "{order.notes}"
@@ -376,29 +403,30 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <MapPin className='h-5 w-5 text-primary' />
-                  Delivery Details
+                  {t('orders.detailDeliveryTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className='space-y-3'>
                   <div className='flex flex-col gap-1'>
                     <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                      Method
+                      {t('orders.detailMethodLabel')}
                     </span>
                     <span className='text-sm font-medium'>
-                      Standard Delivery
+                      {t('orders.detailMethodStandard')}
                     </span>
                   </div>
 
                   {order.deliveryAddress ? (
                     <div className='flex flex-col gap-1'>
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                        Address
+                        {t('orders.detailAddressLabel')}
                       </span>
                       <div className='text-sm font-medium flex flex-col'>
                         <span>{order.deliveryAddress.buildingName}</span>
                         <span className='text-muted-foreground font-normal'>
-                          Floor {order.deliveryAddress.floorNumber},{' '}
+                          {t('orders.detailFloorLabel')}{' '}
+                          {order.deliveryAddress.floorNumber},{' '}
                           {order.deliveryAddress.apartmentName}
                         </span>
                       </div>
@@ -406,10 +434,10 @@ const OrderDetail = () => {
                   ) : (
                     <div className='flex flex-col gap-1'>
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                        Address
+                        {t('orders.detailAddressLabel')}
                       </span>
                       <span className='text-sm text-muted-foreground italic'>
-                        No delivery address provided
+                        {t('orders.detailNoAddress')}
                       </span>
                     </div>
                   )}
@@ -424,4 +452,3 @@ const OrderDetail = () => {
 };
 
 export default OrderDetail;
-

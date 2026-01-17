@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { AppDispatch, RootState } from '@/store/store';
 
@@ -16,6 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Package, PackageCheck, PackageX } from 'lucide-react';
 
 const Products = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
@@ -54,19 +56,19 @@ const Products = () => {
 
   const statsCards = [
     {
-      title: 'Total Products',
+      title: t('products.statsTotalProducts'),
       value: total || products.length,
       icon: Package,
       iconColor: 'text-blue-600 dark:text-blue-400',
     },
     {
-      title: 'In Stock',
+      title: t('products.statsInStock'),
       value: inStockCount,
       icon: PackageCheck,
       iconColor: 'text-emerald-600 dark:text-emerald-400',
     },
     {
-      title: 'Out of Stock',
+      title: t('products.statsOutOfStock'),
       value: outOfStockCount,
       icon: PackageX,
       iconColor: 'text-rose-600 dark:text-rose-400',

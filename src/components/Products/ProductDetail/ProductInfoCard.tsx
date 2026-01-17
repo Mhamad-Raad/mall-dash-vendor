@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ export default function ProductInfoCard({
   categories = [],
   onInputChange,
 }: ProductInfoCardProps) {
+  const { t } = useTranslation();
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -70,7 +72,7 @@ export default function ProductInfoCard({
           <div className='space-y-4'>
             <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
               <ImageIcon className='size-4' />
-              Product Image
+              {t('products.detailProductImageTitle')}
             </div>
 
             {/* Image Preview */}
@@ -79,7 +81,7 @@ export default function ProductInfoCard({
                 <>
                   <img
                     src={previewUrl}
-                    alt={formData.name || 'Product'}
+                    alt={formData.name || t('products.detailProductImageAlt')}
                     className='size-full object-cover'
                   />
                   <Button
@@ -95,7 +97,9 @@ export default function ProductInfoCard({
               ) : (
                 <div className='flex size-full flex-col items-center justify-center gap-2 text-muted-foreground'>
                   <Package className='size-12' />
-                  <span className='text-sm'>No image</span>
+                  <span className='text-sm'>
+                    {t('products.detailImageNone')}
+                  </span>
                 </div>
               )}
             </div>
@@ -110,7 +114,7 @@ export default function ProductInfoCard({
               }
             >
               <Upload className='size-4 mr-2' />
-              Upload Image
+              {t('products.detailUploadImage')}
             </Button>
             <input
               id='photo-upload-edit'
@@ -123,7 +127,7 @@ export default function ProductInfoCard({
             {/* Image URL */}
             <div className='space-y-2'>
               <Label htmlFor='productImageUrl' className='text-xs'>
-                Or paste image URL
+                {t('products.detailOrPasteImageUrl')}
               </Label>
               <Input
                 id='productImageUrl'
@@ -139,7 +143,9 @@ export default function ProductInfoCard({
             {/* Quick Stats */}
             <div className='pt-4 border-t space-y-3'>
               <div className='flex items-center justify-between text-sm'>
-                <span className='text-muted-foreground'>Status</span>
+                <span className='text-muted-foreground'>
+                  {t('products.detailStatusLabel')}
+                </span>
                 <Badge
                   variant={formData.inStock ? 'default' : 'secondary'}
                   className={
@@ -148,11 +154,15 @@ export default function ProductInfoCard({
                       : ''
                   }
                 >
-                  {formData.inStock ? 'In Stock' : 'Out of Stock'}
+                  {formData.inStock
+                    ? t('products.statusInStock')
+                    : t('products.statusOutOfStock')}
                 </Badge>
               </div>
               <div className='flex items-center justify-between text-sm'>
-                <span className='text-muted-foreground'>Weightable</span>
+                <span className='text-muted-foreground'>
+                  {t('products.detailWeightableLabel')}
+                </span>
                 <Badge
                   variant={formData.isWeightable ? 'default' : 'secondary'}
                   className={
@@ -161,11 +171,15 @@ export default function ProductInfoCard({
                       : ''
                   }
                 >
-                  {formData.isWeightable ? 'Yes' : 'No'}
+                  {formData.isWeightable
+                    ? t('common.yes')
+                    : t('common.no')}
                 </Badge>
               </div>
               <div className='flex items-center justify-between text-sm'>
-                <span className='text-muted-foreground'>Discount</span>
+                <span className='text-muted-foreground'>
+                  {t('products.detailDiscountLabel')}
+                </span>
                 <Badge
                   className={
                     hasDiscount
@@ -174,12 +188,14 @@ export default function ProductInfoCard({
                   }
                 >
                   {hasDiscount
-                    ? `${Math.round(
-                        ((formData.price - (formData.discountPrice || 0)) /
-                          formData.price) *
-                          100
-                      )}% OFF`
-                    : 'No Discount'}
+                    ? t('products.detailDiscountBadge', {
+                        percent: Math.round(
+                          ((formData.price - (formData.discountPrice || 0)) /
+                            formData.price) *
+                            100,
+                        ),
+                      })
+                    : t('products.detailNoDiscount')}
                 </Badge>
               </div>
             </div>
@@ -194,29 +210,33 @@ export default function ProductInfoCard({
           <div className='space-y-4'>
             <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
               <Tag className='size-4' />
-              Basic Information
+              {t('products.detailBasicInformation')}
             </div>
 
             <div className='grid gap-4'>
               {/* Product Name */}
               <div className='space-y-2'>
-                <Label htmlFor='name'>Product Name</Label>
+                <Label htmlFor='name'>
+                  {t('products.detailNameLabel')}
+                </Label>
                 <Input
                   id='name'
                   value={formData.name}
                   onChange={(e) => onInputChange('name', e.target.value)}
-                  placeholder='Enter product name'
+                  placeholder={t('products.detailNamePlaceholder')}
                 />
               </div>
 
               {/* Description */}
               <div className='space-y-2'>
-                <Label htmlFor='description'>Description</Label>
+                <Label htmlFor='description'>
+                  {t('products.detailDescriptionLabel')}
+                </Label>
                 <Textarea
                   id='description'
                   value={formData.description || ''}
                   onChange={(e) => onInputChange('description', e.target.value)}
-                  placeholder='Enter product description'
+                  placeholder={t('products.detailDescriptionPlaceholder')}
                   rows={4}
                   className='resize-none'
                 />
@@ -226,7 +246,7 @@ export default function ProductInfoCard({
               <div className='space-y-2'>
                 <Label className='flex items-center gap-2'>
                   <FolderOpen className='size-3.5' />
-                  Category
+                  {t('products.detailCategoryLabel')}
                 </Label>
                 <Select
                   value={String(formData.categoryId ?? '')}
@@ -235,7 +255,9 @@ export default function ProductInfoCard({
                   }
                 >
                   <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Select category' />
+                    <SelectValue
+                      placeholder={t('products.detailCategoryPlaceholder')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (
@@ -253,16 +275,18 @@ export default function ProductInfoCard({
           <div className='space-y-4 pt-4 border-t'>
             <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
               <DollarSign className='size-4' />
-              Pricing
+              {t('products.detailPricingTitle')}
             </div>
 
             <div className='grid sm:grid-cols-2 gap-4'>
               {/* Price */}
               <div className='space-y-2'>
-                <Label htmlFor='price'>Regular Price</Label>
+                <Label htmlFor='price'>
+                  {t('products.detailRegularPriceLabel')}
+                </Label>
                 <div className='relative'>
                   <span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
-                    $
+                    {t('products.detailCurrencyPrefix')}
                   </span>
                   <Input
                     id='price'
@@ -273,18 +297,20 @@ export default function ProductInfoCard({
                     onChange={(e) =>
                       onInputChange('price', parseFloat(e.target.value) || 0)
                     }
-                    placeholder='0.00'
+                    placeholder={t('products.detailPricePlaceholder')}
                     className='pl-7'
                   />
                 </div>
                 <p className='text-xs text-muted-foreground'>
-                  The original price of your product before any discount. When a discount is active, this price will appear crossed out next to the discounted price.
+                  {t('products.detailRegularPriceHelp')}
                 </p>
               </div>
 
               {/* Discount Price */}
               <div className='space-y-2'>
-                <Label htmlFor='discountPrice'>Discount Price</Label>
+                <Label htmlFor='discountPrice'>
+                  {t('products.detailDiscountPriceLabel')}
+                </Label>
                 <div className='relative'>
                   <span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
                     $
@@ -301,12 +327,12 @@ export default function ProductInfoCard({
                         e.target.value ? parseFloat(e.target.value) : 0
                       )
                     }
-                    placeholder='0.00'
+                    placeholder={t('products.detailPricePlaceholder')}
                     className='pl-7'
                   />
                 </div>
                 <p className='text-xs text-muted-foreground'>
-                  The actual price customers will pay when on sale. This is NOT a deduction — enter the final sale price directly (e.g., if regular price is $100 and you want to sell at $80, enter $80 here). A "SALE" badge will appear on the product.
+                  {t('products.detailDiscountPriceHelp')}
                 </p>
               </div>
             </div>
@@ -316,7 +342,7 @@ export default function ProductInfoCard({
           <div className='space-y-4 pt-4 border-t'>
             <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
               <Store className='size-4' />
-              Product Options
+              {t('products.detailOptionsTitle')}
             </div>
 
             <div className='grid sm:grid-cols-2 gap-4'>
@@ -327,9 +353,11 @@ export default function ProductInfoCard({
                     <PackageCheck className='size-4 text-emerald-600' />
                   </div>
                   <div>
-                    <Label className='text-sm font-medium'>In Stock</Label>
+                    <Label className='text-sm font-medium'>
+                      {t('products.detailInStockLabel')}
+                    </Label>
                     <p className='text-xs text-muted-foreground'>
-                      Product is available
+                      {t('products.detailInStockHelp')}
                     </p>
                   </div>
                 </div>
@@ -348,9 +376,11 @@ export default function ProductInfoCard({
                     <Scale className='size-4 text-blue-600' />
                   </div>
                   <div>
-                    <Label className='text-sm font-medium'>Weightable</Label>
+                    <Label className='text-sm font-medium'>
+                      {t('products.detailWeightableLabel')}
+                    </Label>
                     <p className='text-xs text-muted-foreground'>
-                      Sold by weight
+                      {t('products.detailWeightableHelp')}
                     </p>
                   </div>
                 </div>

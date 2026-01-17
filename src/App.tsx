@@ -13,7 +13,6 @@ import ProductDetail from './pages/products/ProductDetail';
 
 import Settings from './pages/Settings';
 import Themes from './pages/settings/Themes';
-import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import VendorProfile from './pages/VendorProfile';
 import Orders from './pages/orders/Orders';
@@ -74,10 +73,6 @@ const router = createBrowserRouter([
       {
         path: '/settings/themes',
         element: <Themes />,
-      },
-      {
-        path: '/reports',
-        element: <Reports />,
       },
       {
         path: '/profile',

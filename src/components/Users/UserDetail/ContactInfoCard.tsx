@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from 'react-i18next';
 import type { UserFormData } from '@/interfaces/Users.interface';
 
 interface ContactInfoCardProps {
@@ -11,24 +12,26 @@ interface ContactInfoCardProps {
 }
 
 const ContactInfoCard = ({ formData, onInputChange }: ContactInfoCardProps) => {
+  const { t } = useTranslation();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-lg'>Contact Information</CardTitle>
+        <CardTitle className='text-lg'>{t('users.contactTitle')}</CardTitle>
         <CardDescription>
-          Email and phone details
+          {t('users.contactDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent className='space-y-6'>
         <div className='space-y-2'>
           <Label htmlFor='email' className='text-sm font-medium flex items-center gap-2'>
             <Mail className='size-4 text-primary' />
-            Email Address <span className='text-destructive'>*</span>
+            {t('users.emailLabel')} <span className='text-destructive'>*</span>
           </Label>
           <Input
             id='email'
             type='email'
-            placeholder='john.doe@example.com'
+            placeholder={t('users.emailPlaceholder')}
             value={formData.email}
             onChange={(e) => onInputChange('email', e.target.value)}
             className='h-11'
@@ -38,12 +41,12 @@ const ContactInfoCard = ({ formData, onInputChange }: ContactInfoCardProps) => {
         <div className='space-y-2'>
           <Label htmlFor='phone' className='text-sm font-medium flex items-center gap-2'>
             <Phone className='size-4 text-primary' />
-            Phone Number <span className='text-destructive'>*</span>
+            {t('users.phoneLabel')} <span className='text-destructive'>*</span>
           </Label>
           <Input
             id='phone'
             type='tel'
-            placeholder='+1 (555) 000-0000'
+            placeholder={t('users.phonePlaceholder')}
             value={formData.phoneNumber}
             onChange={(e) => onInputChange('phoneNumber', e.target.value)}
             className='h-11'
