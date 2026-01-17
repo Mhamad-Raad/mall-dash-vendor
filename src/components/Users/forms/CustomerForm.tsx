@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Mail, Lock, Building2, Image as ImageIcon, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const buildings = ['Sky Tower', 'Rose Heights', 'Emerald Plaza'];
 const floors = ['1', '2', '3', '4', '5'];
@@ -36,6 +37,7 @@ export default function CustomerForm({
   onInputChange,
 }: CustomerFormProps) {
   const [preview, setPreview] = useState<string>('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (formData.photo instanceof File) {
@@ -75,7 +77,7 @@ export default function CustomerForm({
               <div className='flex flex-col items-center gap-2'>
                 <ImageIcon className='size-12 text-muted-foreground/50 group-hover:text-primary/70 transition-colors' />
                 <span className='text-xs text-muted-foreground'>
-                  Upload Photo
+                  {t('users.uploadPhoto')}
                 </span>
               </div>
             )}
@@ -96,7 +98,7 @@ export default function CustomerForm({
         <div className='flex-1 space-y-4 w-full'>
           <div className='space-y-2'>
             <Label htmlFor='customer-firstname' className='text-sm font-medium'>
-              First Name <span className='text-destructive'>*</span>
+              {t('profile.firstName')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='customer-firstname'
@@ -108,7 +110,7 @@ export default function CustomerForm({
           </div>
           <div className='space-y-2'>
             <Label htmlFor='customer-lastname' className='text-sm font-medium'>
-              Last Name <span className='text-destructive'>*</span>
+              {t('profile.lastName')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='customer-lastname'
@@ -132,17 +134,17 @@ export default function CustomerForm({
       <div className='space-y-4'>
         <div className='flex items-center gap-2 pb-2'>
           <Mail className='size-5 text-primary' />
-          <h3 className='text-base font-semibold'>Contact Information</h3>
+          <h3 className='text-base font-semibold'>{t('users.contactTitle')}</h3>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='space-y-2'>
             <Label htmlFor='customer-phone' className='text-sm font-medium'>
-              Phone Number <span className='text-destructive'>*</span>
+              {t('users.phoneLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='customer-phone'
               type='tel'
-              placeholder='+1 (555) 000-0000'
+              placeholder={t('users.phonePlaceholder')}
               value={formData.phoneNumber}
               onChange={(e) => onInputChange('phoneNumber', e.target.value)}
               className='h-11'
@@ -150,12 +152,12 @@ export default function CustomerForm({
           </div>
           <div className='space-y-2'>
             <Label htmlFor='customer-email' className='text-sm font-medium'>
-              Email Address <span className='text-destructive'>*</span>
+              {t('users.emailLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='customer-email'
               type='email'
-              placeholder='customer@example.com'
+              placeholder={t('users.emailPlaceholder')}
               value={formData.email}
               onChange={(e) => onInputChange('email', e.target.value)}
               className='h-11'
@@ -170,17 +172,17 @@ export default function CustomerForm({
       <div className='space-y-4'>
         <div className='flex items-center gap-2 pb-2'>
           <Lock className='size-5 text-primary' />
-          <h3 className='text-base font-semibold'>Security</h3>
+          <h3 className='text-base font-semibold'>{t('users.securityTitle')}</h3>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='space-y-2'>
             <Label htmlFor='customer-password' className='text-sm font-medium'>
-              Password <span className='text-destructive'>*</span>
+              {t('login.passwordLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='customer-password'
               type='password'
-              placeholder='••••••••'
+              placeholder={t('login.passwordPlaceholder')}
               value={formData.password}
               onChange={(e) => onInputChange('password', e.target.value)}
               className='h-11'
@@ -188,12 +190,12 @@ export default function CustomerForm({
           </div>
           <div className='space-y-2'>
             <Label htmlFor='customer-confirm' className='text-sm font-medium'>
-              Confirm Password <span className='text-destructive'>*</span>
+              {t('users.confirmPasswordLabel')} <span className='text-destructive'>*</span>
             </Label>
             <Input
               id='customer-confirm'
               type='password'
-              placeholder='••••••••'
+              placeholder={t('login.passwordPlaceholder')}
               value={formData.confirmPassword}
               onChange={(e) => onInputChange('confirmPassword', e.target.value)}
               className='h-11'
@@ -201,7 +203,7 @@ export default function CustomerForm({
           </div>
         </div>
         <p className='text-xs text-muted-foreground'>
-          Password must be at least 8 characters long
+          {t('users.passwordRequirements')}
         </p>
       </div>
 
@@ -211,22 +213,22 @@ export default function CustomerForm({
       <div className='space-y-4'>
         <div className='flex items-center gap-2 pb-2'>
           <Building2 className='size-5 text-primary' />
-          <h3 className='text-base font-semibold'>Address Information</h3>
+          <h3 className='text-base font-semibold'>{t('users.addressTitle')}</h3>
           <span className='text-xs text-muted-foreground font-normal ml-auto'>
-            (Optional)
+            {t('users.optionalLabel')}
           </span>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <div className='space-y-2'>
             <Label htmlFor='customer-building' className='text-sm font-medium'>
-              Building
+              {t('users.buildingLabel')}
             </Label>
             <Select
               value={formData.buildingId}
               onValueChange={(value) => onInputChange('buildingId', value)}
             >
               <SelectTrigger id='customer-building' className='h-11'>
-                <SelectValue placeholder='Select building' />
+                <SelectValue placeholder={t('users.selectBuildingPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {buildings.map((b, index) => (
@@ -239,19 +241,19 @@ export default function CustomerForm({
           </div>
           <div className='space-y-2'>
             <Label htmlFor='customer-floor' className='text-sm font-medium'>
-              Floor
+              {t('users.floorLabel')}
             </Label>
             <Select
               value={formData.floorId}
               onValueChange={(value) => onInputChange('floorId', value)}
             >
               <SelectTrigger id='customer-floor' className='h-11'>
-                <SelectValue placeholder='Select floor' />
+                <SelectValue placeholder={t('users.selectFloorPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {floors.map((f, index) => (
                   <SelectItem key={index} value={index.toString()}>
-                    Floor {f}
+                    {t('users.floorOptionLabel', { number: f })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -259,14 +261,14 @@ export default function CustomerForm({
           </div>
           <div className='space-y-2'>
             <Label htmlFor='customer-apartment' className='text-sm font-medium'>
-              Apartment
+              {t('users.apartmentLabel')}
             </Label>
             <Select
               value={formData.apartmentId}
               onValueChange={(value) => onInputChange('apartmentId', value)}
             >
               <SelectTrigger id='customer-apartment' className='h-11'>
-                <SelectValue placeholder='Select apt' />
+                <SelectValue placeholder={t('users.selectApartmentPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {apartments.map((a, index) => (

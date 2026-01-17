@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Select,
   SelectContent,
@@ -20,6 +21,7 @@ import {
 const UsersFilters = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   // Use index, -1 means "All"
   const [search, setSearch] = useState(
@@ -93,10 +95,10 @@ const UsersFilters = () => {
           </div>
           <div>
             <h2 className='text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text'>
-              Staff Management
+              {t('users.pageHeaderTitle')}
             </h2>
             <p className='text-sm text-muted-foreground mt-0.5'>
-              Manage your vendor staff and drivers
+              {t('users.pageHeaderSubtitle')}
             </p>
           </div>
         </div>
@@ -107,7 +109,7 @@ const UsersFilters = () => {
           onClick={handleOnCreate}
         >
           <Plus className='size-4' />
-          <span className='font-semibold'>Add Staff</span>
+          <span className='font-semibold'>{t('users.addStaff')}</span>
         </Button>
       </div>
 
@@ -119,7 +121,7 @@ const UsersFilters = () => {
               <Filter className='size-4 text-primary' />
             </div>
             <span className='text-sm font-semibold text-foreground'>
-              Filter Staff
+              {t('users.filtersTitle')}
             </span>
           </div>
           <div className='w-full grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
@@ -130,7 +132,7 @@ const UsersFilters = () => {
               </div>
               <Input
                 type='text'
-                placeholder='Search staff...'
+                placeholder={t('users.searchPlaceholder')}
                 className='pl-10 bg-background w-full shadow-sm border-muted-foreground/20 focus-visible:border-primary/50 transition-colors h-11'
                 value={typedSearch}
                 onChange={(e) => setTypedSearch(e.target.value)}
@@ -147,12 +149,12 @@ const UsersFilters = () => {
                 onValueChange={(val) => setIsActive(val)}
               >
                 <SelectTrigger className='w-full bg-background shadow-sm border-muted-foreground/20 focus:border-primary/50 transition-colors pl-10 [&>span]:pl-0 !h-11'>
-                  <SelectValue placeholder='Select status' />
+                  <SelectValue placeholder={t('users.statusPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='all'>All Status</SelectItem>
-                  <SelectItem value='true'>Active</SelectItem>
-                  <SelectItem value='false'>Inactive</SelectItem>
+                  <SelectItem value='all'>{t('users.statusAll')}</SelectItem>
+                  <SelectItem value='true'>{t('users.statusActive')}</SelectItem>
+                  <SelectItem value='false'>{t('users.statusInactive')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

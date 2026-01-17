@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Package } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ProductDetailHeaderProps {
   onBack: () => void;
@@ -10,6 +11,8 @@ export default function ProductDetailHeader({
   onBack,
   productName,
 }: ProductDetailHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div className='flex items-center gap-3'>
       <Button
@@ -26,10 +29,10 @@ export default function ProductDetailHeader({
         </div>
         <div>
           <h1 className='text-xl font-semibold'>
-            {productName || 'Product Details'}
+            {productName || t('products.detailTitle')}
           </h1>
           <p className='text-sm text-muted-foreground'>
-            View and edit product information
+            {t('products.detailSubtitle')}
           </p>
         </div>
       </div>

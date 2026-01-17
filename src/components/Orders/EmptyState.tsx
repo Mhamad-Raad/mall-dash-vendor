@@ -1,7 +1,9 @@
 import { ShoppingCart, SearchX, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 const EmptyState = () => {
+  const { t } = useTranslation();
   return (
     <div className='flex flex-col items-center justify-center h-full text-center p-8 rounded-2xl border-2 border-dashed border-muted-foreground/20 bg-gradient-to-b from-muted/30 to-transparent'>
       <div className='relative mb-6'>
@@ -14,9 +16,9 @@ const EmptyState = () => {
         </div>
       </div>
 
-      <h2 className='text-2xl font-bold mb-2'>No orders found</h2>
+      <h2 className='text-2xl font-bold mb-2'>{t('orders.emptyTitle')}</h2>
       <p className='text-muted-foreground max-w-sm mb-6'>
-        We couldn't find any orders matching your criteria.
+        {t('orders.emptyDescription')}
       </p>
 
       <div className='flex flex-col sm:flex-row items-center gap-3'>
@@ -26,7 +28,7 @@ const EmptyState = () => {
           className='gap-2'
         >
           <RefreshCcw className='size-4' />
-          Refresh Page
+          {t('orders.emptyRefresh')}
         </Button>
       </div>
     </div>

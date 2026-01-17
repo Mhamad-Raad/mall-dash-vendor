@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function NavUser({
   user,
@@ -32,6 +33,7 @@ export function NavUser({
   currentPath?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation('sidebar');
   const initials = user.initials || user.name.slice(0, 2).toUpperCase();
   const containerRef = useRef<HTMLDivElement>(null);
   const { setOpen, state } = useSidebar();
@@ -119,9 +121,11 @@ export function NavUser({
                       <User className='h-3.5 w-3.5 text-primary' />
                     </div>
                     <div className='flex flex-col'>
-                      <span className='font-medium text-sm'>Profile</span>
+                      <span className='font-medium text-sm'>
+                        {t('profile')}
+                      </span>
                       <span className='text-xs text-muted-foreground'>
-                        Manage your account
+                        {t('profileDescription')}
                       </span>
                     </div>
                   </button>
@@ -139,10 +143,10 @@ export function NavUser({
                     </div>
                     <div className='flex flex-col'>
                       <span className='font-medium text-sm'>
-                        Vendor Profile
+                        {t('vendorProfile')}
                       </span>
                       <span className='text-xs text-muted-foreground'>
-                        Manage your shop details
+                        {t('vendorProfileDescription')}
                       </span>
                     </div>
                   </button>
@@ -158,7 +162,7 @@ export function NavUser({
                     <LogOut className='h-3.5 w-3.5 text-destructive' />
                   </div>
                   <span className='font-medium text-sm text-destructive'>
-                    Log out
+                    {t('logout')}
                   </span>
                 </button>
               </div>

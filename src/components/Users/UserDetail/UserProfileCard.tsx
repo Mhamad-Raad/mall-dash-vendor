@@ -9,6 +9,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Image as ImageIcon, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { UserFormData } from '@/interfaces/Users.interface';
 
 interface UserProfileCardProps {
@@ -21,6 +22,7 @@ interface UserProfileCardProps {
 
 const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
   const [preview, setPreview] = useState<string>('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (formData.imageFile instanceof File) {
@@ -48,8 +50,12 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-lg'>User Information</CardTitle>
-        <CardDescription>View and update user profile details</CardDescription>
+        <CardTitle className='text-lg'>
+          {t('users.profileCardTitle')}
+        </CardTitle>
+        <CardDescription>
+          {t('users.profileCardDescription')}
+        </CardDescription>
       </CardHeader>
       <CardContent className='space-y-8'>
         {/* Profile Picture & Name Section */}
@@ -76,7 +82,7 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
                 <div className='flex flex-col items-center gap-2'>
                   <ImageIcon className='size-12 text-muted-foreground/50 group-hover:text-primary/70 transition-colors' />
                   <span className='text-xs text-muted-foreground'>
-                    Upload Photo
+                    {t('users.uploadPhoto')}
                   </span>
                 </div>
               )}
@@ -97,7 +103,7 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
           <div className='flex-1 space-y-4 w-full'>
             <div className='space-y-2'>
               <Label htmlFor='firstName' className='text-sm font-medium'>
-                First Name <span className='text-destructive'>*</span>
+                {t('profile.firstName')} <span className='text-destructive'>*</span>
               </Label>
               <Input
                 id='firstName'
@@ -109,7 +115,7 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
             </div>
             <div className='space-y-2'>
               <Label htmlFor='lastName' className='text-sm font-medium'>
-                Last Name <span className='text-destructive'>*</span>
+                {t('profile.lastName')} <span className='text-destructive'>*</span>
               </Label>
               <Input
                 id='lastName'
@@ -121,7 +127,7 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
             </div>
             <div className='space-y-2'>
               <Label htmlFor='userRole' className='text-sm font-medium'>
-                User Role
+                {t('users.userRoleLabel')}
               </Label>
               <Input
                 id='userRole'
@@ -132,7 +138,7 @@ const UserProfileCard = ({ formData, onInputChange }: UserProfileCardProps) => {
             </div>
             {(formData.userId || formData.id || formData._id) && (
               <p className='text-xs text-muted-foreground'>
-                User ID: {formData.userId || formData.id || formData._id}
+                {t('profile.userIdLabel')}: {formData.userId || formData.id || formData._id}
               </p>
             )}
           </div>

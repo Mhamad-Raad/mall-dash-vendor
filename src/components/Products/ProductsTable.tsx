@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   Package as PackageIcon,
@@ -24,6 +25,7 @@ import CustomTablePagination from '../CustomTablePagination';
 import type { RootState } from '@/store/store';
 
 const ProductsTable = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const {
@@ -40,7 +42,9 @@ const ProductsTable = () => {
   if (error) {
     return (
       <div className='rounded-2xl border bg-card shadow-sm p-8'>
-        <div className='text-center text-destructive'>Error: {error}</div>
+        <div className='text-center text-destructive'>
+          {t('common.errorTitle')}: {error}
+        </div>
       </div>
     );
   }
@@ -53,16 +57,16 @@ const ProductsTable = () => {
           <TableHeader>
             <TableRow className='hover:bg-transparent border-b bg-muted/50'>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Product
+                {t('products.tableProduct')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Category
+                {t('products.tableCategory')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Status
+                {t('products.tableStatus')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Price
+                {t('products.tablePrice')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 w-12 bg-muted/50 backdrop-blur-sm border-b h-12'></TableHead>
             </TableRow>
@@ -150,7 +154,9 @@ const ProductsTable = () => {
                               : 'bg-red-500/10 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-500/30 dark:border-red-500/40'
                           }`}
                         >
-                          {isInStock ? 'In Stock' : 'Out of Stock'}
+                          {isInStock
+                            ? t('products.statusInStock')
+                            : t('products.statusOutOfStock')}
                         </Badge>
                       </TableCell>
 

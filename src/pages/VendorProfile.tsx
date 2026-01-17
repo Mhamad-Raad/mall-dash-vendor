@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { RootState, AppDispatch } from '@/store/store';
 import { updateVendor, getVendorProfile } from '@/store/slices/vendorSlice';
@@ -19,8 +20,9 @@ import { Loader2, Camera, Save } from 'lucide-react';
 
 const VendorProfile = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const { profile, loading: vendorLoading } = useSelector(
-    (state: RootState) => state.vendor
+    (state: RootState) => state.vendor,
   );
 
   const [loading, setLoading] = useState(false);
@@ -54,7 +56,7 @@ const VendorProfile = () => {
   }, [profile]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -86,16 +88,16 @@ const VendorProfile = () => {
       const resultAction = await dispatch(updateVendor(updateData));
 
       if (updateVendor.fulfilled.match(resultAction)) {
-        toast.success('Vendor profile updated successfully');
+        toast.success(t('vendorProfile.updateSuccess'));
       } else {
         if (resultAction.payload) {
           toast.error(resultAction.payload as string);
         } else {
-          toast.error('Failed to update vendor profile');
+          toast.error(t('vendorProfile.updateFailed'));
         }
       }
     } catch (error) {
-      toast.error('Failed to update vendor profile');
+      toast.error(t('vendorProfile.updateFailed'));
       console.error(error);
     } finally {
       setLoading(false);
@@ -114,10 +116,10 @@ const VendorProfile = () => {
     <div className='container mx-auto py-8 max-w-3xl'>
       <Card className='mb-8'>
         <CardHeader>
-          <CardTitle className='text-2xl font-bold'>Vendor Profile</CardTitle>
-          <CardDescription>
-            Manage your shop's information and settings.
-          </CardDescription>
+          <CardTitle className='text-2xl font-bold'>
+            {t('vendorProfile.pageTitle')}
+          </CardTitle>
+          <CardDescription>{t('vendorProfile.pageSubtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className='space-y-8'>
@@ -148,14 +150,14 @@ const VendorProfile = () => {
                 />
               </div>
               <p className='text-sm text-muted-foreground'>
-                Click to upload a new shop logo
+                {t('vendorProfile.uploadHint')}
               </p>
             </div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {/* Name */}
               <div className='space-y-2'>
-                <Label htmlFor='Name'>Shop Name</Label>
+                <Label htmlFor='Name'>{t('vendorProfile.shopName')}</Label>
                 <Input
                   id='Name'
                   name='Name'
@@ -167,7 +169,7 @@ const VendorProfile = () => {
 
               {/* Type */}
               <div className='space-y-2'>
-                <Label htmlFor='Type'>Shop Type</Label>
+                <Label htmlFor='Type'>{t('vendorProfile.shopType')}</Label>
                 <Input
                   id='Type'
                   name='Type'
@@ -179,7 +181,9 @@ const VendorProfile = () => {
 
               {/* Opening Time */}
               <div className='space-y-2'>
-                <Label htmlFor='OpeningTime'>Opening Time</Label>
+                <Label htmlFor='OpeningTime'>
+                  {t('vendorProfile.openingTime')}
+                </Label>
                 <Input
                   id='OpeningTime'
                   name='OpeningTime'
@@ -193,7 +197,9 @@ const VendorProfile = () => {
 
               {/* Close Time */}
               <div className='space-y-2'>
-                <Label htmlFor='CloseTime'>Closing Time</Label>
+                <Label htmlFor='CloseTime'>
+                  {t('vendorProfile.closingTime')}
+                </Label>
                 <Input
                   id='CloseTime'
                   name='CloseTime'
@@ -207,7 +213,9 @@ const VendorProfile = () => {
 
               {/* Description */}
               <div className='space-y-2 md:col-span-2'>
-                <Label htmlFor='Description'>Description</Label>
+                <Label htmlFor='Description'>
+                  {t('vendorProfile.description')}
+                </Label>
                 <Textarea
                   id='Description'
                   name='Description'
@@ -224,12 +232,12 @@ const VendorProfile = () => {
                 {loading ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Saving...
+                    {t('vendorProfile.saving')}
                   </>
                 ) : (
                   <>
                     <Save className='mr-2 h-4 w-4' />
-                    Save Changes
+                    {t('vendorProfile.saveChanges')}
                   </>
                 )}
               </Button>
@@ -242,3 +250,4 @@ const VendorProfile = () => {
 };
 
 export default VendorProfile;
+

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,6 +33,7 @@ const ProductsFilters = ({
 }: ProductsFiltersProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const [search, setSearch] = useState(
     () => searchParams.get('searchName') || ''
@@ -113,11 +115,13 @@ const ProductsFilters = ({
           </div>
           <div>
             <div className='flex items-center gap-2'>
-              <h1 className='text-3xl font-bold tracking-tight'>Products</h1>
+              <h1 className='text-3xl font-bold tracking-tight'>
+                {t('products.pageTitle')}
+              </h1>
               <Sparkles className='size-5 text-amber-500' />
             </div>
             <p className='text-muted-foreground mt-0.5'>
-              Manage your product catalog with ease
+              {t('products.pageSubtitle')}
             </p>
           </div>
         </div>
@@ -129,7 +133,7 @@ const ProductsFilters = ({
           size='default'
         >
           <Plus className='size-4' />
-          Add Product
+          {t('products.addProduct')}
         </Button>
       </div>
 
@@ -137,7 +141,7 @@ const ProductsFilters = ({
       <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-2xl border bg-card/50 backdrop-blur-sm shadow-sm'>
         <div className='flex items-center gap-2 text-muted-foreground'>
           <SlidersHorizontal className='size-4' />
-          <span className='text-sm font-medium'>Filters</span>
+          <span className='text-sm font-medium'>{t('products.filtersLabel')}</span>
         </div>
 
         <div className='flex flex-col sm:flex-row flex-1 items-start sm:items-center gap-3 w-full'>
@@ -146,7 +150,7 @@ const ProductsFilters = ({
             <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
             <Input
               type='text'
-              placeholder='Search by name...'
+              placeholder={t('products.searchByNamePlaceholder')}
               className='pl-10 pr-10 h-10 bg-background/80 border-border/50 focus-visible:border-primary/50 focus-visible:ring-primary/20 transition-all rounded-xl'
               value={typedSearch}
               onChange={(e) => setTypedSearch(e.target.value)}
@@ -164,12 +168,12 @@ const ProductsFilters = ({
           {/* Stock Filter */}
           <Select value={stockFilter} onValueChange={setStockFilter}>
             <SelectTrigger className='w-full sm:w-[160px] h-10 bg-background/80 border-border/50 rounded-xl'>
-              <SelectValue placeholder='Stock Status' />
+              <SelectValue placeholder={t('products.stockStatusPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value='all'>All Products</SelectItem>
-              <SelectItem value='true'>In Stock</SelectItem>
-              <SelectItem value='false'>Out of Stock</SelectItem>
+              <SelectItem value='all'>{t('products.stockAll')}</SelectItem>
+              <SelectItem value='true'>{t('products.stockIn')}</SelectItem>
+              <SelectItem value='false'>{t('products.stockOut')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -188,7 +192,7 @@ const ProductsFilters = ({
             >
               <Table className='size-4' />
               <span className='ml-1.5 hidden sm:inline text-xs font-medium'>
-                Table
+                {t('products.viewTable')}
               </span>
             </Button>
             <Button
@@ -204,7 +208,7 @@ const ProductsFilters = ({
             >
               <LayoutGrid className='size-4' />
               <span className='ml-1.5 hidden sm:inline text-xs font-medium'>
-                Grid
+                {t('products.viewGrid')}
               </span>
             </Button>
           </div>
@@ -214,7 +218,7 @@ const ProductsFilters = ({
         {hasActiveFilters && (
           <Badge variant='secondary' className='gap-1.5 py-1'>
             <span className='size-1.5 rounded-full bg-primary animate-pulse' />
-            Filtered
+            {t('products.filteredBadge')}
           </Badge>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Select,
   SelectContent,
@@ -13,6 +14,7 @@ import type { OrderStatus } from '@/interfaces/Order.interface';
 const OrdersFilters = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const currentStatus = searchParams.get('status') || 'All';
   const searchQuery = searchParams.get('search') || '';
@@ -65,9 +67,11 @@ const OrdersFilters = () => {
           </div>
         </div>
         <div>
-          <h1 className='text-2xl font-bold tracking-tight'>Orders</h1>
+          <h1 className='text-2xl font-bold tracking-tight'>
+            {t('orders.pageTitle')}
+          </h1>
           <p className='text-sm text-muted-foreground'>
-            Manage and track your customer orders
+            {t('orders.pageSubtitle')}
           </p>
         </div>
       </div>
@@ -78,7 +82,7 @@ const OrdersFilters = () => {
           <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
           <Input
             type='text'
-            placeholder='Search orders...'
+            placeholder={t('orders.searchPlaceholder')}
             value={searchQuery}
             onChange={handleSearchChange}
             className='pl-9 w-[250px]'
@@ -86,16 +90,16 @@ const OrdersFilters = () => {
         </div>
         <div className='flex items-center gap-2 text-muted-foreground'>
           <SlidersHorizontal className='h-4 w-4' />
-          <span className='text-sm font-medium'>Filter</span>
+          <span className='text-sm font-medium'>{t('orders.filterLabel')}</span>
         </div>
         <Select value={currentStatus} onValueChange={handleStatusChange}>
           <SelectTrigger className='w-[180px] h-9'>
-            <SelectValue placeholder='Filter by Status' />
+            <SelectValue placeholder={t('orders.filterByStatusPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
             {orderStatuses.map((status) => (
               <SelectItem key={status} value={status}>
-                {status === 'All' ? 'All Orders' : status}
+                {status === 'All' ? t('orders.filterAll') : status}
               </SelectItem>
             ))}
           </SelectContent>
@@ -106,4 +110,3 @@ const OrdersFilters = () => {
 };
 
 export default OrdersFilters;
-

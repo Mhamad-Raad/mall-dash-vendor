@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableBody,
@@ -40,6 +41,7 @@ const getStatusColor = (status: OrderStatus | number) => {
 };
 
 const OrdersTable = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { orders, loading, total } = useSelector(
     (state: RootState) => state.orders
@@ -76,19 +78,19 @@ const OrdersTable = () => {
           <TableHeader className='bg-muted/50'>
             <TableRow className='hover:bg-transparent border-b border-border/50'>
               <TableHead className='w-[140px] pl-6 h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
-                Order #
+                {t('orders.tableOrderNumber')}
               </TableHead>
               <TableHead className='h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
-                Customer
+                {t('orders.tableCustomer')}
               </TableHead>
               <TableHead className='h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
-                Status
+                {t('orders.tableStatus')}
               </TableHead>
               <TableHead className='h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
-                Date & Time
+                {t('orders.tableDateTime')}
               </TableHead>
               <TableHead className='h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
-                Total
+                {t('orders.tableTotal')}
               </TableHead>
               <TableHead className='w-[60px] h-12' />
             </TableRow>
@@ -117,7 +119,7 @@ const OrdersTable = () => {
                         <span className='font-medium text-sm'>
                           {order.userName ||
                             order.customerName ||
-                            'Guest Customer'}
+                            t('orders.guestCustomer')}
                         </span>
                       </div>
                     </TableCell>
@@ -173,4 +175,3 @@ const OrdersTable = () => {
 };
 
 export default OrdersTable;
-

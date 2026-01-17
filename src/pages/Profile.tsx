@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { RootState, AppDispatch } from '@/store/store';
 import { updateMe } from '@/store/slices/meSlice';
@@ -18,6 +19,7 @@ import { Loader2, Camera, Save } from 'lucide-react';
 
 const Profile = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const { user } = useSelector((state: RootState) => state.me);
 
   const [loading, setLoading] = useState(false);
@@ -114,17 +116,16 @@ const Profile = () => {
       const resultAction = await dispatch(updateMe(updateData));
 
       if (updateMe.fulfilled.match(resultAction)) {
-        toast.success('Profile updated successfully');
-        // Redux state is updated by the reducer
+        toast.success(t('profile.updateSuccess'));
       } else {
         if (resultAction.payload) {
           toast.error(resultAction.payload as string);
         } else {
-          toast.error('Failed to update profile');
+          toast.error(t('profile.updateFailed'));
         }
       }
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error(t('profile.updateFailed'));
       console.error(error);
     } finally {
       setLoading(false);
@@ -143,10 +144,10 @@ const Profile = () => {
     <div className='container mx-auto py-8 max-w-3xl'>
       <Card className='mb-8'>
         <CardHeader>
-          <CardTitle className='text-2xl font-bold'>My Profile</CardTitle>
-          <CardDescription>
-            Manage your account settings and preferences.
-          </CardDescription>
+          <CardTitle className='text-2xl font-bold'>
+            {t('profile.pageTitle')}
+          </CardTitle>
+          <CardDescription>{t('profile.pageSubtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className='space-y-8'>
@@ -178,14 +179,14 @@ const Profile = () => {
                 />
               </div>
               <p className='text-sm text-muted-foreground'>
-                Click to upload a new profile picture
+                {t('profile.uploadHint')}
               </p>
             </div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {/* First Name */}
               <div className='space-y-2'>
-                <Label htmlFor='firstName'>First Name</Label>
+                <Label htmlFor='firstName'>{t('profile.firstName')}</Label>
                 <Input
                   id='firstName'
                   name='firstName'
@@ -197,7 +198,7 @@ const Profile = () => {
 
               {/* Last Name */}
               <div className='space-y-2'>
-                <Label htmlFor='lastName'>Last Name</Label>
+                <Label htmlFor='lastName'>{t('profile.lastName')}</Label>
                 <Input
                   id='lastName'
                   name='lastName'
@@ -209,7 +210,7 @@ const Profile = () => {
 
               {/* Email */}
               <div className='space-y-2'>
-                <Label htmlFor='email'>Email</Label>
+                <Label htmlFor='email'>{t('profile.email')}</Label>
                 <Input
                   id='email'
                   name='email'
@@ -222,7 +223,7 @@ const Profile = () => {
 
               {/* Phone Number */}
               <div className='space-y-2'>
-                <Label htmlFor='phoneNumber'>Phone Number</Label>
+                <Label htmlFor='phoneNumber'>{t('profile.phoneNumber')}</Label>
                 <Input
                   id='phoneNumber'
                   name='phoneNumber'
@@ -234,21 +235,20 @@ const Profile = () => {
 
               {/* Role (Read Only) */}
               <div className='space-y-2'>
-                <Label htmlFor='role'>Role</Label>
+                <Label htmlFor='role'>{t('profile.role')}</Label>
                 <div className='flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-muted-foreground'>
                   {formData.role === 0
-                    ? 'Admin'
+                    ? t('profile.roleAdmin')
                     : formData.role === 1
-                    ? 'Vendor'
-                    : 'User'}
-                  {/* Adjust role mapping as needed based on system constants */}
+                      ? t('profile.roleVendor')
+                      : t('profile.roleUser')}
                 </div>
               </div>
 
               {/* ID (Hidden/Read Only) */}
               <div className='space-y-2 md:col-span-2'>
                 <Label htmlFor='id' className='text-xs text-muted-foreground'>
-                  User ID
+                  {t('profile.userIdLabel')}
                 </Label>
                 <div className='text-xs font-mono text-muted-foreground'>
                   {user._id}
@@ -265,12 +265,12 @@ const Profile = () => {
                 {loading ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Saving...
+                    {t('profile.saving')}
                   </>
                 ) : (
                   <>
                     <Save className='mr-2 h-4 w-4' />
-                    Save Changes
+                    {t('profile.saveChanges')}
                   </>
                 )}
               </Button>

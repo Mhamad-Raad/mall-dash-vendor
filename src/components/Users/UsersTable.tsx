@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   Mail,
@@ -26,8 +27,6 @@ import CustomTablePagination from '../CustomTablePagination';
 
 import type { RootState } from '@/store/store';
 
-const staffRoles = ['Staff', 'Driver'];
-
 const getUserTypeColor = (type: string) => {
   const typeLower = type.toLowerCase();
   if (typeLower === 'staff')
@@ -39,6 +38,7 @@ const getUserTypeColor = (type: string) => {
 
 const UsersTable = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const {
     users,
@@ -54,7 +54,9 @@ const UsersTable = () => {
   if (error) {
     return (
       <div className='rounded-lg border bg-card shadow-sm p-8'>
-        <div className='text-center text-destructive'>Error: {error}</div>
+        <div className='text-center text-destructive'>
+          {t('common.errorTitle')}: {error}
+        </div>
       </div>
     );
   }
@@ -67,16 +69,16 @@ const UsersTable = () => {
           <TableHeader>
             <TableRow className='hover:bg-transparent border-b bg-muted/50'>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Staff Member
+                {t('users.tableStaffMember')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Contact
+                {t('users.tableContact')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Role
+                {t('users.tableRole')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 font-semibold text-foreground/80 bg-muted/50 backdrop-blur-sm border-b h-12'>
-                Location
+                {t('users.tableLocation')}
               </TableHead>
               <TableHead className='sticky top-0 z-10 w-12 bg-muted/50 backdrop-blur-sm border-b h-12'></TableHead>
             </TableRow>
@@ -88,10 +90,20 @@ const UsersTable = () => {
                 ))
               : users.map((user, index) => {
                   const fullName = `${user.firstName} ${user.lastName}`;
-                  const userRole =
+                  const roleType =
                     typeof user.role === 'number'
-                      ? staffRoles[user.role]
-                      : user.role || 'Unknown';
+                      ? user.role === 0
+                        ? 'staff'
+                        : 'driver'
+                      : user.role?.toString().toLowerCase() || 'unknown';
+                  const roleLabel =
+                    roleType === 'staff'
+                      ? t('users.roleStaff')
+                      : roleType === 'driver'
+                        ? t('users.roleDriver')
+                        : roleType === 'unknown'
+                          ? t('users.roleUnknown')
+                          : user.role?.toString() || t('users.roleUnknown');
                   // Generate initials for fallback
                   const initials = `${user.firstName?.[0] || ''}${
                     user.lastName?.[0] || ''
@@ -160,10 +172,10 @@ const UsersTable = () => {
                         <Badge
                           variant='outline'
                           className={`${getUserTypeColor(
-                            userRole
+                            roleType,
                           )} font-semibold text-xs px-3 py-1`}
                         >
-                          {userRole}
+                          {roleLabel}
                         </Badge>
                       </TableCell>
                       {/* Building/Location */}
@@ -173,7 +185,7 @@ const UsersTable = () => {
                             <Building2 className='h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors' />
                           </div>
                           <span className='text-sm font-medium text-foreground/90'>
-                            {user.buildingName || 'N/A'}
+                            {user.buildingName || t('users.locationNA')}
                           </span>
                         </div>
                       </TableCell>

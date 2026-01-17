@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {
   Clock,
   MapPin,
@@ -77,6 +78,7 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -91,14 +93,14 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
           setOrder(result);
         }
       } catch (err) {
-        setError('Failed to load order details');
+        setError(t('orders.detailErrorLoading'));
       } finally {
         setLoading(false);
       }
     };
 
     loadOrder();
-  }, [orderId]);
+  }, [orderId, t]);
 
   const handleStatusChange = async (newStatus: number) => {
     if (!order) return;
@@ -109,9 +111,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
       ).unwrap();
 
       setOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
-      toast.success('Order status updated successfully');
+      toast.success(t('orders.detailStatusUpdated'));
     } catch (err) {
-      toast.error('Failed to update order status');
+      toast.error(t('orders.detailStatusUpdateFailed'));
     } finally {
       setUpdating(false);
     }
@@ -125,7 +127,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground">{error || 'Order not found'}</p>
+          <p className="text-sm text-muted-foreground">
+            {error || t('orders.detailNotFound')}
+          </p>
         </div>
       </div>
     );
@@ -140,7 +144,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b bg-muted/30">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight">Order #{order.orderNumber}</h2>
+            <h2 className="text-xl font-semibold tracking-tight">
+              {t('orders.detailOrderLabel')} #{order.orderNumber}
+            </h2>
             <p className="text-xs text-muted-foreground mt-1.5">
               {formatDate(order.createdAt, 'MMMM dd, yyyy · hh:mm a')}
             </p>
@@ -159,7 +165,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
         {/* Status Actions */}
         {allowedTransitions.length > 0 && (
           <div className="px-6 py-5 border-b bg-muted/10">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Quick Actions</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              {t('orders.detailQuickActions')}
+            </p>
             <div className="flex flex-wrap gap-2">
               {allowedTransitions.map((statusNum) => (
                 <Button
@@ -172,7 +180,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                 >
                   {updating && <Loader2 className="h-3 w-3 animate-spin" />}
                   {!updating && <CheckCircle className="h-3 w-3" />}
-                  Mark as {numberToStatus[statusNum]}
+                  {t('orders.detailMarkAs', {
+                    status: numberToStatus[statusNum],
+                  })}
                 </Button>
               ))}
             </div>
@@ -184,7 +194,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x">
             {/* Customer Information */}
             <div className="pb-6 md:pb-0 md:pr-6">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Customer</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                {t('orders.detailCustomerTitle')}
+              </p>
               <div className="flex gap-4">
                 <Avatar className="h-16 w-16 flex-shrink-0">
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xl">
@@ -195,9 +207,13 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                   <div className="flex items-start gap-3">
                     <User className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('orders.detailNameLabel')}
+                      </p>
                       <p className="font-medium text-base">
-                        {order.userName || order.customerName || 'Guest Customer'}
+                        {order.userName ||
+                          order.customerName ||
+                          t('orders.guestCustomer')}
                       </p>
                     </div>
                   </div>
@@ -205,7 +221,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                     <div className="flex items-start gap-3">
                       <Mail className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('orders.detailEmailLabel')}
+                        </p>
                         <p className="font-medium text-base truncate">{order.userEmail}</p>
                       </div>
                     </div>
@@ -214,7 +232,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                     <div className="flex items-start gap-3">
                       <Phone className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground">Phone</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('orders.detailPhoneLabel')}
+                        </p>
                         <p className="font-medium text-base">{order.userPhone}</p>
                       </div>
                     </div>
@@ -228,13 +248,15 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
               <div className="pt-6 md:pt-0 md:pl-6">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                   <MapPin className="h-3.5 w-3.5" />
-                  Delivery Address
+                  {t('orders.detailDeliveryAddressTitle')}
                 </p>
                 <div className="space-y-2.5">
                   <div className="flex items-start gap-3">
                     <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Building</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('users.buildingLabel')}
+                      </p>
                       <p className="font-medium text-base">
                         {order.deliveryAddress.buildingName}
                       </p>
@@ -243,16 +265,21 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                   <div className="flex items-start gap-3">
                     <Layers className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Floor</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('orders.detailFloorLabel')}
+                      </p>
                       <p className="font-medium text-base">
-                        Floor {order.deliveryAddress.floorNumber}
+                        {t('orders.detailFloorLabel')}{' '}
+                        {order.deliveryAddress.floorNumber}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Home className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Apartment</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('users.apartmentLabel')}
+                      </p>
                       <p className="font-medium text-base">
                         {order.deliveryAddress.apartmentName}
                       </p>
@@ -267,7 +294,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
         {/* Order Items */}
         {order.items && order.items.length > 0 && (
           <div className="px-6 py-5 border-b">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Items ({order.items.length})</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">
+              {t('orders.detailItemsCount', { count: order.items.length })}
+            </p>
             <div className="space-y-4">
               {order.items.map((item) => (
                 <div
@@ -288,7 +317,8 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm mb-1 truncate">{item.productName}</p>
                     <p className="text-xs text-muted-foreground">
-                      Qty: {item.quantity} × ${item.unitPrice.toFixed(2)}
+                      {t('orders.detailQuantityLabel')}{' '}
+                      {item.quantity} × ${item.unitPrice.toFixed(2)}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
@@ -302,19 +332,27 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
 
         {/* Order Summary */}
         <div className="px-6 py-5 border-b bg-muted/10">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Summary</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">
+            {t('orders.detailSummaryTitle')}
+          </p>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Subtotal</span>
+              <span className="text-sm text-muted-foreground">
+                {t('orders.detailSubtotal')}
+              </span>
               <span className="font-medium text-sm">${order.subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Delivery Fee</span>
+              <span className="text-sm text-muted-foreground">
+                {t('orders.detailDeliveryFee')}
+              </span>
               <span className="font-medium text-sm">${order.deliveryFee.toFixed(2)}</span>
             </div>
             <Separator className="my-3" />
             <div className="flex justify-between items-center pt-1">
-              <span className="font-semibold text-base">Total</span>
+              <span className="font-semibold text-base">
+                {t('orders.detailTotal')}
+              </span>
               <span className="text-xl font-bold">${order.totalAmount.toFixed(2)}</span>
             </div>
           </div>
@@ -323,21 +361,27 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
         {/* Notes */}
         {order.notes && (
           <div className="px-6 py-5 border-b">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Notes</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              {t('orders.detailNotesTitle')}
+            </p>
             <p className="text-sm leading-relaxed">{order.notes}</p>
           </div>
         )}
 
         {/* Timeline */}
         <div className="px-6 py-5">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Activity</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">
+            {t('orders.detailActivityTitle')}
+          </p>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
                 <Clock className="h-4 w-4 text-primary" />
               </div>
               <div className="pt-1.5">
-                <p className="font-medium text-sm">Order Created</p>
+                <p className="font-medium text-sm">
+                  {t('orders.detailOrderCreated')}
+                </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {formatDate(order.createdAt, 'MMMM dd, yyyy · hh:mm a')}
                 </p>
@@ -349,7 +393,9 @@ const OrderDisplay = ({ orderId }: OrderDisplayProps) => {
                   <CheckCircle className="h-4 w-4 text-green-600" />
                 </div>
                 <div className="pt-1.5">
-                  <p className="font-medium text-sm">Order Completed</p>
+                  <p className="font-medium text-sm">
+                    {t('orders.detailOrderCompleted')}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {formatDate(order.completedAt, 'MMMM dd, yyyy · hh:mm a')}
                   </p>

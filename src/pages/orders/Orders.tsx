@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { AppDispatch, RootState } from '@/store/store';
 import { fetchOrders } from '@/store/slices/ordersSlice';
@@ -14,6 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingCart } from 'lucide-react';
 
 const Orders = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -68,8 +70,8 @@ const Orders = () => {
                 <div className='space-y-1'>
                   <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                     {status === 'All' || !status
-                      ? 'Total Orders'
-                      : `${status} Orders`}
+                      ? t('orders.totalOrdersStats')
+                      : t('orders.ordersStats', { status })}
                   </p>
                   <p className='text-2xl font-bold tracking-tight'>{total}</p>
                 </div>

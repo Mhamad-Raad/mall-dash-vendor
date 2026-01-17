@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   Package as PackageIcon,
@@ -17,6 +18,7 @@ import CustomTablePagination from '../CustomTablePagination';
 import type { RootState } from '@/store/store';
 
 const ProductsCards = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const {
@@ -33,7 +35,9 @@ const ProductsCards = () => {
   if (error) {
     return (
       <div className='rounded-2xl border bg-card shadow-sm p-8'>
-        <div className='text-center text-destructive'>Error: {error}</div>
+        <div className='text-center text-destructive'>
+          {t('common.errorTitle')}: {error}
+        </div>
       </div>
     );
   }
@@ -92,12 +96,16 @@ const ProductsCards = () => {
                         {isInStock ? (
                           <div className='flex items-center gap-1 bg-emerald-500/90 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-md shadow-sm'>
                             <CheckCircle2 className='size-2.5' />
-                            <span className='hidden sm:inline'>In Stock</span>
+                            <span className='hidden sm:inline'>
+                              {t('products.statusInStock')}
+                            </span>
                           </div>
                         ) : (
                           <div className='flex items-center gap-1 bg-destructive/90 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-md shadow-sm'>
                             <XCircle className='size-2.5' />
-                            <span className='hidden sm:inline'>Out of Stock</span>
+                            <span className='hidden sm:inline'>
+                              {t('products.statusOutOfStock')}
+                            </span>
                           </div>
                         )}
                       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Clock,
@@ -36,6 +37,7 @@ const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -56,14 +58,14 @@ const OrderDetail = () => {
           setOrder(result);
         }
       } catch (err) {
-        setError('Failed to load order details');
+        setError(t('orders.detailErrorLoading'));
       } finally {
         setLoading(false);
       }
     };
 
     loadOrder();
-  }, [id]);
+  }, [id, t]);
 
   const getStatusColor = (status: OrderStatus | number) => {
     const statusText = getStatusText(status);
@@ -93,11 +95,10 @@ const OrderDetail = () => {
         changeOrderStatus({ id: order.id, status: newStatus }),
       ).unwrap();
 
-      // Update local state
       setOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
-      toast.success('Order status updated successfully');
+      toast.success(t('orders.detailStatusUpdated'));
     } catch (err) {
-      toast.error('Failed to update order status');
+      toast.error(t('orders.detailStatusUpdateFailed'));
     } finally {
       setUpdating(false);
     }
@@ -121,7 +122,7 @@ const OrderDetail = () => {
             ) : (
               <>
                 <CheckCircle className='h-4 w-4 mr-2' />
-                Confirm Order
+                {t('orders.detailConfirmOrder')}
               </>
             )}
           </Button>
@@ -135,7 +136,9 @@ const OrderDetail = () => {
             {updating ? (
               <Loader2 className='h-5 w-5 animate-spin' />
             ) : (
-              'Cancel Order'
+              <>
+                {t('orders.detailCancelOrder')}
+              </>
             )}
           </Button>
         </div>
@@ -154,7 +157,10 @@ const OrderDetail = () => {
             {updating ? (
               <Loader2 className='h-5 w-5 animate-spin' />
             ) : (
-              'Start Preparing'
+              <>
+                <CheckCircle className='h-4 w-4 mr-2' />
+                {t('orders.detailStartPreparing')}
+              </>
             )}
           </Button>
         </div>
@@ -163,7 +169,7 @@ const OrderDetail = () => {
 
     return (
       <div className='text-sm text-muted-foreground'>
-        No further actions available for this order.
+        {t('orders.detailNoFurtherActions')}
       </div>
     );
   };
@@ -181,12 +187,14 @@ const OrderDetail = () => {
       <div className='flex h-full w-full flex-col items-center justify-center gap-4 p-8'>
         <Alert variant='destructive' className='max-w-md'>
           <AlertCircle className='h-4 w-4' />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error || 'Order not found'}</AlertDescription>
+          <AlertTitle>{t('common.errorTitle')}</AlertTitle>
+          <AlertDescription>
+            {error || t('orders.detailNotFound')}
+          </AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/orders')}>
           <ArrowLeft className='mr-2 h-4 w-4' />
-          Back to Orders
+          {t('orders.backToOrders')}
         </Button>
       </div>
     );
@@ -206,7 +214,7 @@ const OrderDetail = () => {
         </Button>
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>
-            Order #{order.orderNumber}
+            {t('orders.detailOrderLabel')} #{order.orderNumber}
           </h1>
           <div className='flex items-center gap-2 text-muted-foreground text-sm mt-1'>
             <Calendar className='h-3.5 w-3.5' />
@@ -219,7 +227,7 @@ const OrderDetail = () => {
                 <span>•</span>
                 <CheckCircle className='h-3.5 w-3.5 text-emerald-500' />
                 <span className='text-emerald-600 font-medium'>
-                  Completed:{' '}
+                  {t('orders.detailCompletedPrefix')}{' '}
                   {formatDate(new Date(order.completedAt), 'MMM dd, hh:mm a')}
                 </span>
               </>
@@ -231,9 +239,11 @@ const OrderDetail = () => {
       <Card>
         <CardHeader className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
           <div>
-            <CardTitle className='text-lg'>Order Status</CardTitle>
+            <CardTitle className='text-lg'>
+              {t('orders.detailStatusTitle')}
+            </CardTitle>
             <p className='text-sm text-muted-foreground'>
-              Update the status of this order.
+              {t('orders.detailStatusSubtitle')}
             </p>
           </div>
           <Badge
@@ -255,7 +265,7 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <Package className='h-5 w-5 text-primary' />
-                  Order Items
+                  {t('orders.detailItemsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent className='p-0'>
@@ -280,7 +290,7 @@ const OrderDetail = () => {
                         <div>
                           <p className='font-medium'>{item.productName}</p>
                           <p className='text-sm text-muted-foreground'>
-                            ${item.unitPrice.toFixed(2)} per unit
+                            ${item.unitPrice.toFixed(2)} {t('orders.detailPerUnit')}
                             {item.productImageUrl && (
                               <span className='ml-2 text-xs bg-muted px-1.5 py-0.5 rounded'>
                                 x{item.quantity}
@@ -296,7 +306,7 @@ const OrderDetail = () => {
                   ))}
                   {!order.items?.length && (
                     <div className='p-8 text-center text-muted-foreground'>
-                      No items found for this order.
+                      {t('orders.detailNoItems')}
                     </div>
                   )}
                 </div>
@@ -308,21 +318,25 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <DollarSign className='h-5 w-5 text-primary' />
-                  Payment Summary
+                  {t('orders.detailPaymentTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-muted-foreground'>Subtotal</span>
+                  <span className='text-muted-foreground'>
+                    {t('orders.detailSubtotal')}
+                  </span>
                   <span>${order.subtotal.toFixed(2)}</span>
                 </div>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-muted-foreground'>Delivery Fee</span>
+                  <span className='text-muted-foreground'>
+                    {t('orders.detailDeliveryFee')}
+                  </span>
                   <span>${order.deliveryFee.toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className='flex justify-between font-bold text-lg'>
-                  <span>Total</span>
+                  <span>{t('orders.detailTotal')}</span>
                   <span>${order.totalAmount.toFixed(2)}</span>
                 </div>
               </CardContent>
@@ -336,7 +350,7 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <User className='h-5 w-5 text-primary' />
-                  Customer
+                  {t('orders.detailCustomerTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-4'>
@@ -346,7 +360,9 @@ const OrderDetail = () => {
                   </div>
                   <div>
                     <p className='font-medium'>
-                      {order.userName || order.customerName || 'Guest Customer'}
+                      {order.userName ||
+                        order.customerName ||
+                        t('orders.guestCustomer')}
                     </p>
                   </div>
                 </div>
@@ -371,7 +387,7 @@ const OrderDetail = () => {
                     <Separator />
                     <div className='space-y-1.5'>
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                        Notes
+                        {t('orders.detailNotesTitle')}
                       </span>
                       <p className='text-sm bg-muted/50 p-3 rounded-lg border'>
                         "{order.notes}"
@@ -387,29 +403,30 @@ const OrderDetail = () => {
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-lg'>
                   <MapPin className='h-5 w-5 text-primary' />
-                  Delivery Details
+                  {t('orders.detailDeliveryTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className='space-y-3'>
                   <div className='flex flex-col gap-1'>
                     <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                      Method
+                      {t('orders.detailMethodLabel')}
                     </span>
                     <span className='text-sm font-medium'>
-                      Standard Delivery
+                      {t('orders.detailMethodStandard')}
                     </span>
                   </div>
 
                   {order.deliveryAddress ? (
                     <div className='flex flex-col gap-1'>
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                        Address
+                        {t('orders.detailAddressLabel')}
                       </span>
                       <div className='text-sm font-medium flex flex-col'>
                         <span>{order.deliveryAddress.buildingName}</span>
                         <span className='text-muted-foreground font-normal'>
-                          Floor {order.deliveryAddress.floorNumber},{' '}
+                          {t('orders.detailFloorLabel')}{' '}
+                          {order.deliveryAddress.floorNumber},{' '}
                           {order.deliveryAddress.apartmentName}
                         </span>
                       </div>
@@ -417,10 +434,10 @@ const OrderDetail = () => {
                   ) : (
                     <div className='flex flex-col gap-1'>
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                        Address
+                        {t('orders.detailAddressLabel')}
                       </span>
                       <span className='text-sm text-muted-foreground italic'>
-                        No delivery address provided
+                        {t('orders.detailNoAddress')}
                       </span>
                     </div>
                   )}
