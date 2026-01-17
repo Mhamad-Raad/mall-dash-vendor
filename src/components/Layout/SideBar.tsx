@@ -249,8 +249,10 @@ export function AppSidebar() {
           onLogOut={handleUserLogout}
           onProfileClick={() => navigate('/profile')}
           onVendorProfileClick={() => navigate('/vendor-profile')}
+          currentPath={location.pathname}
         />
       </SidebarFooter>
     </Sidebar>
   );
 }
+
