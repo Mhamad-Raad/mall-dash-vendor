@@ -16,7 +16,7 @@ interface OrdersResponse {
 
 export const fetchOrders = async (
   params: FetchOrdersParams = {},
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<OrdersResponse | { error: string }> => {
   try {
     const queryParams: Record<string, any> = {
@@ -46,7 +46,7 @@ export const fetchOrders = async (
 };
 
 export const fetchOrderById = async (
-  id: number
+  id: number,
 ): Promise<Order | { error: string }> => {
   try {
     const response = await axiosInstance.get<Order>(`/Order/${id}`);
@@ -64,41 +64,21 @@ export const fetchOrderById = async (
 
 export const updateOrderStatus = async (
   id: number,
-  status: number
+  status: number,
 ): Promise<boolean | { error: string }> => {
   try {
-    // Try sending as object if primitive fails
     await axiosInstance.put(
       `/Order/${id}/status`,
-      status, // Try primitive first as per spec
+      { status },
       {
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
     return true;
   } catch (error: any) {
     console.error(`Error updating order ${id} status:`, error);
-
-    // Fallback: Try sending as object wrapper if 400
-    if (error.response?.status === 400) {
-      try {
-        await axiosInstance.put(
-          `/Order/${id}/status`,
-          { status },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        return true;
-      } catch (retryError) {
-        // Ignore retry error and return original
-      }
-    }
-
     return {
       error:
         error.response?.data?.message ||

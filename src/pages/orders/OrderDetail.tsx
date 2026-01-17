@@ -31,7 +31,6 @@ import { getStatusText } from '@/utils/orderUtils';
 import { toast } from 'sonner';
 
 import { formatDate } from '@/utils/dateUtils';
-import { OrderDetailSkeleton } from '@/components/Orders/OrderDetailSkeleton';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -91,7 +90,7 @@ const OrderDetail = () => {
     setUpdating(true);
     try {
       await dispatch(
-        changeOrderStatus({ id: order.id, status: newStatus })
+        changeOrderStatus({ id: order.id, status: newStatus }),
       ).unwrap();
 
       // Update local state
@@ -110,57 +109,71 @@ const OrderDetail = () => {
 
     if (statusText === 'Pending') {
       return (
-        <>
+        <div className='flex flex-col gap-3 md:flex-row'>
           <Button
-            variant='destructive'
-            size='sm'
-            onClick={() => handleStatusChange(6)} // Cancelled
+            size='lg'
+            className='flex-1 h-11 text-sm md:text-base font-semibold bg-blue-600 hover:bg-blue-700'
+            onClick={() => handleStatusChange(2)}
             disabled={updating}
           >
             {updating ? (
-              <Loader2 className='h-4 w-4 animate-spin' />
+              <Loader2 className='h-5 w-5 animate-spin' />
+            ) : (
+              <>
+                <CheckCircle className='h-4 w-4 mr-2' />
+                Confirm Order
+              </>
+            )}
+          </Button>
+          <Button
+            variant='outline'
+            size='lg'
+            className='flex-1 h-11 text-sm md:text-base font-semibold border-destructive text-destructive hover:bg-destructive/10'
+            onClick={() => handleStatusChange(6)}
+            disabled={updating}
+          >
+            {updating ? (
+              <Loader2 className='h-5 w-5 animate-spin' />
             ) : (
               'Cancel Order'
             )}
           </Button>
-          <Button
-            size='sm'
-            onClick={() => handleStatusChange(2)} // Confirmed
-            disabled={updating}
-            className='bg-blue-600 hover:bg-blue-700'
-          >
-            {updating ? (
-              <Loader2 className='h-4 w-4 animate-spin' />
-            ) : (
-              'Confirm Order'
-            )}
-          </Button>
-        </>
+        </div>
       );
     }
 
     if (statusText === 'Confirmed') {
       return (
-        <Button
-          size='sm'
-          onClick={() => handleStatusChange(3)} // Preparing
-          disabled={updating}
-          className='bg-indigo-600 hover:bg-indigo-700'
-        >
-          {updating ? (
-            <Loader2 className='h-4 w-4 animate-spin' />
-          ) : (
-            'Start Preparing'
-          )}
-        </Button>
+        <div className='flex flex-col gap-3 md:flex-row'>
+          <Button
+            size='lg'
+            className='flex-1 h-11 text-sm md:text-base font-semibold bg-indigo-600 hover:bg-indigo-700'
+            onClick={() => handleStatusChange(3)}
+            disabled={updating}
+          >
+            {updating ? (
+              <Loader2 className='h-5 w-5 animate-spin' />
+            ) : (
+              'Start Preparing'
+            )}
+          </Button>
+        </div>
       );
     }
 
-    return null;
+    return (
+      <div className='text-sm text-muted-foreground'>
+        No further actions available for this order.
+      </div>
+    );
   };
 
   if (loading) {
-    return <OrderDetailSkeleton />;
+    return (
+      <div className='flex h-full w-full items-center justify-center'>
+        <Loader2 className='h-8 w-8 animate-spin text-primary' />
+      </div>
+    );
   }
 
   if (error || !order) {
@@ -182,52 +195,56 @@ const OrderDetail = () => {
   return (
     <div className='flex flex-col gap-6 h-full overflow-hidden'>
       {/* Header */}
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-4'>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={() => navigate('/orders')}
-            className='h-8 w-8 rounded-full'
-          >
-            <ArrowLeft className='h-4 w-4' />
-          </Button>
-          <div>
-            <h1 className='text-2xl font-bold tracking-tight'>
-              Order #{order.orderNumber}
-            </h1>
-            <div className='flex items-center gap-2 text-muted-foreground text-sm mt-1'>
-              <Calendar className='h-3.5 w-3.5' />
-              <span>
-                {formatDate(new Date(order.createdAt), 'MMM dd, yyyy')}
-              </span>
-              <span>•</span>
-              <Clock className='h-3.5 w-3.5' />
-              <span>{formatDate(new Date(order.createdAt), 'hh:mm a')}</span>
-              {order.completedAt && (
-                <>
-                  <span>•</span>
-                  <CheckCircle className='h-3.5 w-3.5 text-emerald-500' />
-                  <span className='text-emerald-600 font-medium'>
-                    Completed:{' '}
-                    {formatDate(new Date(order.completedAt), 'MMM dd, hh:mm a')}
-                  </span>
-                </>
-              )}
-            </div>
+      <div className='flex items-center gap-4'>
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() => navigate('/orders')}
+          className='h-8 w-8 rounded-full'
+        >
+          <ArrowLeft className='h-4 w-4' />
+        </Button>
+        <div>
+          <h1 className='text-2xl font-bold tracking-tight'>
+            Order #{order.orderNumber}
+          </h1>
+          <div className='flex items-center gap-2 text-muted-foreground text-sm mt-1'>
+            <Calendar className='h-3.5 w-3.5' />
+            <span>{formatDate(new Date(order.createdAt), 'MMM dd, yyyy')}</span>
+            <span>•</span>
+            <Clock className='h-3.5 w-3.5' />
+            <span>{formatDate(new Date(order.createdAt), 'hh:mm a')}</span>
+            {order.completedAt && (
+              <>
+                <span>•</span>
+                <CheckCircle className='h-3.5 w-3.5 text-emerald-500' />
+                <span className='text-emerald-600 font-medium'>
+                  Completed:{' '}
+                  {formatDate(new Date(order.completedAt), 'MMM dd, hh:mm a')}
+                </span>
+              </>
+            )}
           </div>
         </div>
+      </div>
 
-        <div className='flex items-center gap-3'>
-          {renderActionButtons()}
+      <Card>
+        <CardHeader className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
+          <div>
+            <CardTitle className='text-lg'>Order Status</CardTitle>
+            <p className='text-sm text-muted-foreground'>
+              Update the status of this order.
+            </p>
+          </div>
           <Badge
-            variant='secondary'
+            variant='outline'
             className={`text-sm px-3 py-1 ${getStatusColor(order.status)}`}
           >
             {getStatusText(order.status)}
           </Badge>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>{renderActionButtons()}</CardContent>
+      </Card>
 
       <ScrollArea className='flex-1 -mx-6 px-6'>
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 pb-6'>
@@ -331,9 +348,6 @@ const OrderDetail = () => {
                     <p className='font-medium'>
                       {order.userName || order.customerName || 'Guest Customer'}
                     </p>
-                    <p className='text-xs text-muted-foreground'>
-                      ID: {order.userId.substring(0, 8)}...
-                    </p>
                   </div>
                 </div>
 
@@ -421,4 +435,3 @@ const OrderDetail = () => {
 };
 
 export default OrderDetail;
-
