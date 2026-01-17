@@ -8,9 +8,7 @@ import {
   Settings,
   ShoppingCart,
   ChevronRight,
-  User,
   Palette,
-  Store,
 } from 'lucide-react';
 
 import { useSelector } from 'react-redux';
@@ -73,16 +71,6 @@ const mainNavItems = [
 // Settings sub-items
 const settingsSubItems = [
   {
-    titleKey: 'profile',
-    url: '/profile',
-    icon: User,
-  },
-  {
-    titleKey: 'Vendor Profile',
-    url: '/vendor-profile',
-    icon: Store,
-  },
-  {
     titleKey: 'themes',
     url: '/settings/themes',
     icon: Palette,
@@ -98,12 +86,7 @@ export function AppSidebar() {
     (state: RootState) => state.vendor,
   );
   const [settingsOpen, setSettingsOpen] = useState(() => {
-    // Open settings menu by default if we're on a settings page
-    return (
-      location.pathname.startsWith('/profile') ||
-      location.pathname.startsWith('/vendor-profile') ||
-      location.pathname.startsWith('/settings')
-    );
+    return location.pathname.startsWith('/settings');
   });
 
   const user = {
@@ -264,10 +247,10 @@ export function AppSidebar() {
         <NavUser
           user={user}
           onLogOut={handleUserLogout}
-          onAccountClick={() => navigate('/profile')}
+          onProfileClick={() => navigate('/profile')}
+          onVendorProfileClick={() => navigate('/vendor-profile')}
         />
       </SidebarFooter>
     </Sidebar>
   );
 }
-

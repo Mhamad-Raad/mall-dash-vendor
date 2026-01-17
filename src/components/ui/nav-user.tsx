@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, LogOut, ChevronDown } from 'lucide-react';
+import { User, LogOut, ChevronDown, Store } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -16,7 +16,8 @@ import { useState, useRef, useEffect } from 'react';
 export function NavUser({
   user,
   onLogOut,
-  onAccountClick,
+  onProfileClick,
+  onVendorProfileClick,
 }: {
   user: {
     name: string;
@@ -25,7 +26,8 @@ export function NavUser({
     initials?: string;
   };
   onLogOut: () => void;
-  onAccountClick?: () => void;
+  onProfileClick?: () => void;
+  onVendorProfileClick?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const initials = user.initials || user.name.slice(0, 2).toUpperCase();
@@ -91,24 +93,38 @@ export function NavUser({
           
           <CollapsibleContent className='overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down'>
             <div className='space-y-0.5 py-1 px-1'>
-              {/* Account */}
-              <button
-                onClick={onAccountClick}
-                className='flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors duration-150 hover:bg-accent'
-              >
-                <div className='flex h-7 w-7 items-center justify-center rounded-md bg-primary/10'>
-                  <User className='h-3.5 w-3.5 text-primary' />
-                </div>
-                <div className='flex flex-col'>
-                  <span className='font-medium text-sm'>Account</span>
-                  <span className='text-xs text-muted-foreground'>Manage your profile</span>
-                </div>
-              </button>
+              {onProfileClick && (
+                <button
+                  onClick={onProfileClick}
+                  className='flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors duration-150 hover:bg-accent'
+                >
+                  <div className='flex h-7 w-7 items-center justify-center rounded-md bg-primary/10'>
+                    <User className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <div className='flex flex-col'>
+                    <span className='font-medium text-sm'>Profile</span>
+                    <span className='text-xs text-muted-foreground'>Manage your account</span>
+                  </div>
+                </button>
+              )}
 
-              {/* Divider */}
+              {onVendorProfileClick && (
+                <button
+                  onClick={onVendorProfileClick}
+                  className='flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors duration-150 hover:bg-accent'
+                >
+                  <div className='flex h-7 w-7 items-center justify-center rounded-md bg-primary/10'>
+                    <Store className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <div className='flex flex-col'>
+                    <span className='font-medium text-sm'>Vendor Profile</span>
+                    <span className='text-xs text-muted-foreground'>Manage your shop details</span>
+                  </div>
+                </button>
+              )}
+
               <div className='my-1 h-px bg-border/50' />
 
-              {/* Logout */}
               <button
                 onClick={onLogOut}
                 className='flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors duration-150 hover:bg-destructive/10 group'
