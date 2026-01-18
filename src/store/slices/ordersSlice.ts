@@ -41,6 +41,13 @@ export const fetchOrders = createAsyncThunk(
     } catch (error) {
       return rejectWithValue('Failed to fetch orders');
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const { orders } = getState() as { orders: OrdersState };
+      // Prevent duplicate fetches if already loading
+      return !orders.loading;
+    },
   }
 );
 
