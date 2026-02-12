@@ -42,10 +42,11 @@ function OrdersProfitChart({ data }: OrdersProfitChartProps) {
   const serviceFee = totalProfit * 0.03;
   const netProfit = totalProfit - serviceFee;
 
-  // Calculate trend (compare last 8 days to first 8 days)
-  const firstHalf = data.slice(0, 8).reduce((sum, item) => sum + item.profit, 0);
-  const secondHalf = data.slice(8).reduce((sum, item) => sum + item.profit, 0);
-  const trendPercentage = firstHalf > 0 ? ((secondHalf - firstHalf) / firstHalf * 100).toFixed(1) : 0;
+  // Calculate trend - compare first half to second half of available data
+  const midPoint = Math.ceil(data.length / 2);
+  const firstHalf = data.slice(0, midPoint).reduce((sum, item) => sum + item.profit, 0);
+  const secondHalf = data.slice(midPoint).reduce((sum, item) => sum + item.profit, 0);
+  const trendPercentage = firstHalf > 0 ? ((secondHalf - firstHalf) / firstHalf * 100).toFixed(1) : secondHalf > 0 ? '100.0' : '0.0';
   const isTrendingUp = secondHalf >= firstHalf;
 
   return (
