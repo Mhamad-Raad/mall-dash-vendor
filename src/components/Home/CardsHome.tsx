@@ -17,6 +17,7 @@ const cardIcons = {
   'In Stock': PackageCheck,
   'Out of Stock': PackageX,
   'Order Revenue': DollarSign,
+  'Total Orders': Package,
   'Employees': Users,
   'Staff': UserCheck,
   'Drivers': Truck,
@@ -27,6 +28,7 @@ const cardIconColors = {
   'In Stock': 'bg-chart-2/10 text-chart-2 dark:bg-chart-2/20',
   'Out of Stock': 'bg-destructive/10 text-destructive dark:bg-destructive/20',
   'Order Revenue': 'bg-chart-1/10 text-chart-1 dark:bg-chart-1/20',
+  'Total Orders': 'bg-chart-1/10 text-chart-1 dark:bg-chart-1/20',
   'Employees': 'bg-accent/10 text-accent-foreground dark:bg-accent/20',
   'Staff': 'bg-chart-2/10 text-chart-2 dark:bg-chart-2/20',
   'Drivers': 'bg-chart-1/10 text-chart-1 dark:bg-chart-1/20',
@@ -34,7 +36,7 @@ const cardIconColors = {
 
 const HomeCards = ({ cards }: HomeCardsProps) => {
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 gap-6 w-full'>
       {cards.map((card, index: number) => {
         const Icon = cardIcons[card.title as keyof typeof cardIcons] || Package;
         const iconColorClass = cardIconColors[card.title as keyof typeof cardIconColors] || cardIconColors['Total Products'];
